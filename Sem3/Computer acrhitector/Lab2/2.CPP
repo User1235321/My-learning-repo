@@ -12,7 +12,6 @@ void main(void)
   {
     printf("A[%d]: %d; B[%d]: %d\n", i, A[i], i, B[i]);
   }
-
   asm {
     lea si, A
     lea bx, B

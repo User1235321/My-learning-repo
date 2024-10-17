@@ -5,34 +5,31 @@
 #include <stdlib.h>
 void main(void)
 {
-  long long between = 0xB9000000 - 0xB8000000;
-  between /= sizeof(int);
-  printf("There are %lld ints between 0xB9000 and 0xB8000\n", between);
+  printf("There are %lld ints between 0xB9000 and 0xB8000\n", (0xB9000000 - 0xB8000000) / sizeof(int));
   FILE * out = fopen("output.txt", "w");
   int * A = (int *)0xB8000000;
   int * B = (int *)0xB9000000;
   fprintf(out, "Array's before assembler replace:\n");
-  for (int i = 0; i < 1000; ++i)
+  const long long arrSize = 1000;
+  for (long long i = 0; i < arrSize; ++i)
   {
-    A[i] = rand();
     fprintf(out, "A[%d]: %d; B[%d]: %d\n", i, A[i], i, B[i]);
   }
-
   asm {
     push es
     push ds
     cld
     lds si, A
     les di, B
-    mov cx, 1000
+    mov cx, arrSize
     rep movsw
     pop ds
     pop es
   }
   fprintf(out, "Array's after assembler replace:\n");
-  for (i = 0; i < 1000; ++i)
+  for (i = 0; i < arrSize; ++i)
   {
-    fprintf(out, "B[%d]: %d\n", 1000, B[i]);
+    fprintf(out, "B[%d]: %d\n", i, B[i]);
   }
   printf("Programm is finished suceses\n");
   getch();
