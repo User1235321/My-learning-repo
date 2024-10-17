@@ -1,10 +1,9 @@
 global _start
 section .data
-  arr db 70, 71, 72, 73, 74, 75, 76, 77, 78, 79
-  arr2 db 10 dup(80)
+  arr db 170, 171, 172, 173, 174, 175, 176, 177, 178, 179
+  arr2 db 10 dup(180)
 section .text
   print:
-    mov [toPrint], ax
     mov eax, 4
     mov ebx, 1
     mov ecx, toPrint
@@ -12,6 +11,16 @@ section .text
     int 0x80
     ret
 
+  prePrint:
+    mov bl, 10
+    div bl
+    mov [toPrint], ah
+    push ax
+    call print
+    pop ax
+    cmp ax, 0
+    jnz prePrint
+    ret
   printTemplate:
     mov rcx, 10
     fullPrint:
@@ -19,13 +28,15 @@ section .text
       add rbx, 1
       push rcx
       push rbx
-      call print
+      call prePrint
       mov ax, 32
+      mov [toPrint], ax
       call print
       pop rbx
       pop rcx
       loop fullPrint
     mov ax, 10
+    mov [toPrint], ax
     call print
     ret
 
