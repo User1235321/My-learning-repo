@@ -1,0 +1,13 @@
+firstTask.sh:1:echo "firstVariable: ${firstVariable} | secondVariable: ${secondVariable}"
+firstTask.sh:4:echo "Конкатенация: ${concatenation}"
+firstTask.sh:6:substring=$(echo $concatenation | cut -c 1-5)
+firstTask.sh:7:echo "Подстрока: ${substring}"
+firstTask.sh:10:echo "Изменёная строка: ${substring}"
+secondTask.sh:2:echo "Сумма: ${sum}"
+secondTask.sh:5:echo "Разница: ${diff}"
+secondTask.sh:8:echo "Произведение: ${prod}"
+secondTask.sh:11:echo "Отношение: ${rat}"
+trirdTaskChildFile.sh:1:echo "Child is live"
+trirdTaskChildFile.sh:5:echo "Child is dead"
+trirdTaskParentFile.sh:1:echo "Parent file is live"
+trirdTaskParentFile.sh:5:echo "Parent is dead"

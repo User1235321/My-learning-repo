@@ -1,0 +1,41 @@
+import java.io.*;
+import java.util.ArrayList;
+
+public class Main {
+    public static void main(String[] args) {
+//        int b[] = {-2,5,-7,6,3,1,-15,10,12,-1,5,-7,1};
+//        for (int i = 0; i < b.length ; i++) {
+//            System.out.print(" b["+i+"]="+b[i]);
+//        }
+        ArrayList<String> stroki = new ArrayList<>();
+        try(BufferedReader bf = new BufferedReader(new InputStreamReader(
+                new FileInputStream("lineqs.csv"),"UTF8"))) {
+                String s;
+                while(( s = bf.readLine()) != null) {
+                    stroki.add(s);
+                    System.out.println(s);
+                }
+                System.out.println("\nRead from file: " + stroki.size() + " lines");
+        } catch (FileNotFoundException e) {
+            System.out.println("Файл не найден");
+        } catch (IOException e) {
+            System.out.println("Ошибка чтения");
+        }
+        int n = stroki.size(); // 9 уравнений
+        double a[][] = new double[n][n+1];
+        for (int i = 0; i < n; i++) {
+            String strNums[] = stroki.get(i).split(",");
+            for (int j = 0; j <= n; j++) {
+                a[i][j] = Double.parseDouble(strNums[j]);
+            }
+        }
+        // проверим матрицу а:
+        for(int i = 0; i < n; i++) {
+            for(int j = 0; j <= n; j++) {
+                System.out.print(a[i][j] + "  \t");
+            }
+            System.out.println();
+        }
+
+    }
+}
