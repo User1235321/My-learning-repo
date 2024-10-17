@@ -1,0 +1,6 @@
+.gitignore
+*.OBJ
+*.EXE
+*.SWP
+*.BAK
+*.o
