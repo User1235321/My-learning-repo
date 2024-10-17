@@ -1,0 +1,19 @@
+
+
+ ...
+sock = socket ( ... );
+bind   (sock, ... );
+listen (sock, 2);
+
+  while (1) {
+       fd = accept ( sock, ...)
+       if (fork == 0)	{
+		/* Child-process the request */
+			guess_word(fd, fd);
+		exit(0);	/* Child is done */
+	}  else
+		close(fd);	/* Parent does not use the connection*/
+
+  }
+
+ ... 
