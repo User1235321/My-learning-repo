@@ -18,21 +18,21 @@ section .text
     decomposition:
       mov bx, 10
       mov dx, 0
-      div bx; ax = dx:ax / bx; dx = ax % bx
+      div bx			; ax = dx:ax / bx; dx = ax % bx
       push dx
       add rcx, 1; ++rcx
-      cmp ax, 0; (ax > 0) ? (ZF = 1) : (ZF = 0)
-      jnz decomposition; while (ZF != 1) call jmp decomposition
+      cmp ax, 0			; (ax > 0) ? (ZF = 1) : (ZF = 0)
+      jnz decomposition		; while (ZF != 1) call jmp decomposition
     outputLoop:
       pop ax
-      add ax, '0' ; char(9) is '\t', but char(9 + '0') is '9'
+      add ax, '0'		; char(9) is '\t', but char(9 + '0') is '9'
       push rcx
       call print
       pop rcx
       loop outputLoop
     ret
   printTemplate:
-    mov rcx, numOfEl; number of elements in array
+    mov rcx, numOfEl		; number of elements in array
     fullPrint:
       mov ax, [rbx]; ax = *rbx
       add rbx, 2; ++rbx
@@ -63,9 +63,9 @@ section .text
     mov rbx, arr2
     call printTemplate
 
-    mov eax, 1; sys call for sys_exit
-    mov ebx, 0; exit status
-    int 0x80; call kernel
+    mov eax, 1			; sys call for sys_exit
+    mov ebx, 0			; exit status
+    int 0x80			; call kernel
 
 section .bss
   toPrint resb 1
