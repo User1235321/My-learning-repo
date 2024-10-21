@@ -42,30 +42,44 @@
     ); \
   } \
   end = timer1.now(); \
-  std::cout << std::chrono::duration_cast< std::chrono::microseconds >(end - start).count() << " microseconds\n";
+  std::cout << std::chrono::duration_cast< std::chrono::nanoseconds >(end - start).count() << " nanoseconds\n"; \
+  __asm__ \
+  ( \
+    "movl %0, %%eax\n\t" \
+    :"=m"(ax) \
+  )
 
 int main()
 {
   std::chrono::steady_clock timer1;
   auto start = timer1.now();
   auto end = timer1.now();
+  int * ax = new int;
+  *ax = 0;
 
-  std::cout << "add eax, 125 (addl $125, %%eax) 10 x 100 times: ";
-  mainFunction("addl $125, %eax\n\t");
+  std::cout << "add eax, 12 (addl $12, \%eax) 10 x 100 times: ";
+  mainFunction("addl $12, %eax\n\t");
 
-  std::cout << "add eax, ebx (addl %%ebx, %%eax) 10 x 100 times: ";
-  mainFunction("addl %ebx, %eax\n\t");
-
-  std::cout << "add eax, [ebx] (addl (%%ebx), %%eax) 10 x 100 times: ";
-  int * some = new int;
-  *some = 15;
+  std::cout << "add eax, ebx (addl \%ebx, \%eax) 10 x 100 times: ";
+  int * bx = new int[11];
+  bx[0] = 15;
   __asm__
   (
     "movl %0, %%ebx\n\t"
-    :"=m"(some)
-  ); //if i just try to use "addl (%ebx), %eax", without change ebx, programm is crash
+    :"=m"(bx)
+  );//if i just try to use "addl (%ebx), %eax", without change ebx, programm is crash
+  mainFunction("addl %ebx, %eax\n\t");
+
+  std::cout << "add eax, [ebx] (addl (\%ebx), \%eax) 10 x 100 times: ";
   mainFunction("addl (%ebx), %eax\n\t");
 
-  delete some;
+  std::cout << "add eax, [ebx + 40] (addl 40(\%ebx), \%eax) 10 x 100 times: ";
+  mainFunction("addl 40(%ebx), %eax\n\t");
+
+  std::cout << "add [ebx], eax (addl %eax, (\%ebx)) 10 x 100 times: ";
+  mainFunction("addl %eax, (%ebx)\n\t");
+
+  delete ax;
+  delete[] bx;
   return 0;
 }
