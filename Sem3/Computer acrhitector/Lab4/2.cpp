@@ -8,13 +8,13 @@
   }
   int main()
   {
-    std::string str = "addl %ebx, %eax\n\t"
+    std::string str = "addq %rbx, %rax\n\t"
     myFunction(str)
   }
   Or
   int main()
   {
-    myFunction("addl %ebx, %eax\n\t")
+    myFunction("addq %rbx, %rax\n\t")
   }
 
   So, i know, that macros is very bad, but in this situation i haven't choice.
@@ -45,7 +45,7 @@
   std::cout << std::chrono::duration_cast< std::chrono::nanoseconds >(end - start).count() << " nanoseconds\n"; \
   __asm__ \
   ( \
-    "movl %0, %%eax\n\t" \
+    "movq %0, %%rax\n" \
     :"=m"(ax) \
   )
 
@@ -57,27 +57,37 @@ int main()
   int * ax = new int;
   *ax = 0;
 
-  std::cout << "add eax, 12 (addl $12, \%eax) 10 x 100 times: ";
-  mainFunction("addl $12, %eax\n\t");
+  std::cout << "add rax, 12 (addq $12, \%rax) 10 x 100 times: ";
+  mainFunction("addq $12, %rax\n");
 
-  std::cout << "add eax, ebx (addl \%ebx, \%eax) 10 x 100 times: ";
+  std::cout << "add rax, rbx (addq \%rbx, \%rax) 10 x 100 times: ";
   int * bx = new int[11];
   bx[0] = 15;
   __asm__
   (
-    "movl %0, %%ebx\n\t"
+    "movq %0, %%rbx\n"
     :"=m"(bx)
-  );//if i just try to use "addl (%ebx), %eax", without change ebx, programm is crash
-  mainFunction("addl %ebx, %eax\n\t");
+  );//if i just try to use "addq (%rbx), %rax", without change rbx, programm is crash
+  mainFunction("addq %rbx, %rax\n");
 
-  std::cout << "add eax, [ebx] (addl (\%ebx), \%eax) 10 x 100 times: ";
-  mainFunction("addl (%ebx), %eax\n\t");
+  std::cout << "add rax, [rbx] (addq (\%rbx), \%rax) 10 x 100 times: ";
+  mainFunction("addq (%rbx), %rax\n");
 
-  std::cout << "add eax, [ebx + 40] (addl 40(\%ebx), \%eax) 10 x 100 times: ";
-  mainFunction("addl 40(%ebx), %eax\n\t");
+  std::cout << "add rax, [rbx + 40] (addq 40(\%rbx), \%rax) 10 x 100 times: ";
+  mainFunction("addq 40(%rbx), %rax\n");
 
-  std::cout << "add [ebx], eax (addl %eax, (\%ebx)) 10 x 100 times: ";
-  mainFunction("addl %eax, (%ebx)\n\t");
+  std::cout << "add [rbx], rax (addq %rax, (\%rbx)) 10 x 100 times: ";
+  mainFunction("addq %rax, (%rbx)\n");
+
+  std::cout << "add rax, [rbx + esi] (addq (\%rbx, \%rsi), \%rax) 10 x 100 times: ";
+  __asm__
+  (
+    "movq $8, %rsi\n"
+  );
+  mainFunction("addq (%rbx, %rsi), %rax\n");
+
+  std::cout << "add rax, [rbx + esi + 12] (addq 12(\%rbx, \%rsi), \%rax) 10 x 100 times: ";
+  mainFunction("addq 12(%rbx, %rsi), %rax\n");
 
   delete ax;
   delete[] bx;

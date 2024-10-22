@@ -6,5 +6,9 @@ build:
 	g++ "$n".cpp -o "$n"
 run:
 	make build n=""$n""
+	./"$n"
+	rm "$n"
+vrun:
+	make build n=""$n""
 	valgrind ./"$n"
 	rm "$n"
