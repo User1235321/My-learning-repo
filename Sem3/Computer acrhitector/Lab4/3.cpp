@@ -29,7 +29,7 @@ void printArr(int * arr, int lines, int colums)
 
 int main()
 {
-  const int lines = 10, colums = 10;
+  const int lines = 6, colums = 3;
   std::cout << "matrix size: " << lines << 'x' << colums << '\n';
   int arr[lines][colums];
 

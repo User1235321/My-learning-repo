@@ -1,16 +1,16 @@
 LIBRARY ieee;
 USE ieee.std_logic_1164.ALL;
 
-ENTITY lastTask IS
+ENTITY dtrigpov IS
 	PORT
 	(
 		d: IN std_logic;
 		clk: IN std_logic;
 		q1: OUT std_logic
 	);
-END lastTask;
+END dtrigpov;
 
-ARCHITECTURE behav of lastTask IS
+ARCHITECTURE behav of dtrigpov IS
 	BEGIN
 	PROCESS(d, clk)
 		BEGIN
