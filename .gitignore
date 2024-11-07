@@ -4,3 +4,17 @@
 *.SWP
 *.BAK
 *.o
+*.acf
+*.fit
+*.cnf
+*.hif
+*.mmf
+*.ndb
+*.pin
+*.pof
+*.rpt
+*.snf
+*.DLS
+*.sym
+*.t
+*.odt
