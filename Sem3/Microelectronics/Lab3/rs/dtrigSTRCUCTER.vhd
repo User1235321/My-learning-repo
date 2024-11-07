@@ -17,7 +17,7 @@ ARCHITECTURE behav of dtrig IS
 		(
 			a: IN std_logic;
 			b: IN std_logic;
-			c: INOUT std_logic;
+			c: INOUT std_logic
 		);
 	END COMPONENT;
 
