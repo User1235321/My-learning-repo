@@ -1,68 +1,52 @@
 #include <iostream>
+#include <bitset>
+#include <cstdlib>
+#include <cmath>
 
-void argumentAdd(long long, long long, long long &)
+void printOut(unsigned long long f, int s, unsigned long long r)
 {
-  __asm__
-  (
-    "leaq 8(%rbp), %rax\n"
-    "leaq 16(%rbp), %rbx\n"
-    "leaq 24(%rbp), %rsi\n"
-    "addq %rbx, %rax\n"
-    "movq %rax, (%rsi)\n"
-  );
+  std::cout << "***\nTen\n***\n" << "first: \t\t" << f << "\nsecond: \t" << s << "\nresult: \t" << r << '\n';
+  std::bitset< sizeof(unsigned long long) * 8 > fb(f);
+  std::bitset< sizeof(unsigned long long) * 8 > rb(r);
+  std::cout << "***\nBin\n***\n" << "first: \t\t" << fb << "\nresult: \t" << rb << '\n';
 }
-void registerAdd()
+void shlWithParam(unsigned long long, int, unsigned long long &)
 {
+  //Parametrs of function in Linux saves in rdi, rsi, rdx, rcx
   __asm__
   (
-    "addq %rbx, %rax\n"
-    "movq %rax, (%rsi)\n"
-  );
-}
-long long gFirst = 12;
-long long gSecond = 25;
-long long gSum = 0;
-void globalAdd()
-{
-  __asm__
-  (
-    "movq %0, %%rax\n"
-    "movq %1, %%rbx\n"
-    "leaq %2, %%rsi\n"
-    "addq %%rbx, %%rax\n"
-    "movq %%rax, (%%rsi)\n"
-    :/*output parameters*/
-    :"m"(gFirst), "m"(gSecond), "m"(gSum)
-    :"rax", "rbx", "rsi"
+    "movl %edi, %ebx\n"//Put right part of first param in ebx
+    "shr $32, %rdi\n"//Put left part of rdi to edi
+    "movl %edi, %eax\n"//Put left part of first param in eax
+    "movl %esi, %ecx\n"//Put second param in ecx
+    "movl %ebx, %esi\n"//Put left part of first param in esi
+    //eax = first[0-4]; ebx = first[5-8]; ecx = second; esi = ebx = first[5-8];
+
+    "shl %ecx, %eax\n"//eax = eax << ecx
+    "shr %ecx, %esi\n"//esi = esi >> ecx
+    "andl %esi, %eax\n"//eax = eax || esi
+    "shl %ecx, %ebx\n"//ebx = ebx << ecx
+
+    "movl %eax, %ecx\n"//Put eax in right part of rcx
+    "shl $32, %rcx\n"//Right part of rcx now left
+    "movl %ebx, %ecx\n"// Put ebx in right part of rcx
+    "movq %rcx, (%rdx)\n"//Put rcx in rdx
   );
 }
 
 int main()
 {
-  long long first = gFirst;
-  long long second = gSecond;
-  long long sum = first + second;
-  std::cout << "\t\t\t" << first << '\t' << second << '\t' << sum << '\n';
+  srand(time(0));
+  unsigned long long first = rand();
+  for (size_t i = 0; i < (rand() % 32); ++i) first *= 10;
+  first += rand();
+  int second = (rand () % 8);
+  unsigned long long result = 0;
+  std::cout << "Start data:\n";
+  printOut(first, second, result);
 
-  sum = 0;
-  argumentAdd(first, second, sum);
-  std::cout << "after argumentAdd: \t" << first << '\t' << second << '\t'  << sum << '\n';
-
-  sum = 0;
-  __asm__
-  (
-    "movq %0, %%rax\n"
-    "movq %1, %%rbx\n"
-    "leaq %2, %%rsi\n"
-    :/*output parameters*/
-    :"m"(first), "m"(second), "m"(sum)
-    :"rax", "rbx", "rsi"
-  );
-  registerAdd();
-  std::cout << "after registerAdd: \t" << first << '\t' << second << '\t'  << sum << '\n';
-
-  globalAdd();
-  std::cout << "after globalAdd: \t" << gFirst << '\t' << gSecond << '\t'  << gSum << '\n';
-
+  shlWithParam(first, second, result);
+  std::cout << "\n\n\nAfter shl with parameters:\n";
+  printOut(first, second, result);
   return 0;
 }
