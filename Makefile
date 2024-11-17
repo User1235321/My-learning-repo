@@ -17,7 +17,14 @@ find:
 	find -name "*.DLS"
 	find -name "*.sym"
 	find -name "*.t"
-
+	find -name "*.done"
+	find -name "*.fit.*"
+	find -name "*.map.*"
+	find -name "*.qsf"
+	find -name "*.sof"
+	find -name "*.tan.*"
+	find -name "*.qws"
+	find -name "*.qpf"
 clear:
 	find -name "*.OBJ" -delete
 	find -name "*.EXE" -delete
@@ -37,6 +44,14 @@ clear:
 	find -name "*.DLS" -delete
 	find -name "*.sym" -delete
 	find -name "*.t" -delete
+	find -name "*.done" -delete
+	find -name "*.fit.*" -delete
+	find -name "*.map.*" -delete
+	find -name "*.qsf" -delete
+	find -name "*.sof" -delete
+	find -name "*.tan.*" -delete
+	find -name "*.qws" -delete
+	find -name "*.qpf" -delete
 push:
 	make clear
 	git status

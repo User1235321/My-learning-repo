@@ -9,6 +9,6 @@ run:
 	./"$n"
 	rm "$n"
 vrun:
-	make build n=""$n""
+	make cbuild n=""$n""
 	valgrind ./"$n"
 	rm "$n"

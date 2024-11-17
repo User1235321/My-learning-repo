@@ -1,4 +1,3 @@
-.gitignore
 *.OBJ
 *.EXE
 *.SWP
@@ -19,3 +18,11 @@
 *.t
 *.odt
 *.scf
+*.done
+*.fit.*
+*.map.*
+*.qsf
+*.sof
+*.tan.*
+*.qws
+*.qpf
