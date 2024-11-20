@@ -26,3 +26,8 @@
 *.tan.*
 *.qws
 *.qpf
+*.vwf
+*.bsf
+
+db
+cmp_state.ini

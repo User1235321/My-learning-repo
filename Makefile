@@ -25,6 +25,10 @@ find:
 	find -name "*.tan.*"
 	find -name "*.qws"
 	find -name "*.qpf"
+	find -name "db"
+	find -name "cmp_state.ini"
+	find -name "*.vwf"
+	find -name "*.bsf"
 clear:
 	find -name "*.OBJ" -delete
 	find -name "*.EXE" -delete
@@ -52,6 +56,10 @@ clear:
 	find -name "*.tan.*" -delete
 	find -name "*.qws" -delete
 	find -name "*.qpf" -delete
+	find -name "db" -delete
+	find -name "cmp_state.ini" -delete
+	find -name "*.vwf" -delete
+	find -name "*.bsf" -delete
 push:
 	make clear
 	git status
