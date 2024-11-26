@@ -1,9 +1,11 @@
 find:
+#Borland c++
 	find -name "*.OBJ"
 	find -name "*.EXE"
 	find -name "*.SWP"
 	find -name "*.BAK"
-	find -name "*.o"
+
+#MaxPlusII
 	find -name "*.acf"
 	find -name "*.fit"
 	find -name "*.cnf"
@@ -16,7 +18,8 @@ find:
 	find -name "*.snf"
 	find -name "*.DLS"
 	find -name "*.sym"
-	find -name "*.t"
+
+#Quartus2
 	find -name "*.done"
 	find -name "*.fit.*"
 	find -name "*.map.*"
@@ -25,16 +28,23 @@ find:
 	find -name "*.tan.*"
 	find -name "*.qws"
 	find -name "*.qpf"
-	find -name "db"
-	find -name "cmp_state.ini"
 	find -name "*.vwf"
 	find -name "*.bsf"
+	find -name "db"
+	find -name "cmp_state.ini"
+
+#Other files
+	find -name "*.o"
+	find -name "*.t"
+
 clear:
+#Borland c++
 	find -name "*.OBJ" -delete
 	find -name "*.EXE" -delete
 	find -name "*.SWP" -delete
 	find -name "*.BAK" -delete
-	find -name "*.o" -delete
+
+#MaxPlusII
 	find -name "*.acf" -delete
 	find -name "*.fit" -delete
 	find -name "*.cnf" -delete
@@ -47,7 +57,8 @@ clear:
 	find -name "*.snf" -delete
 	find -name "*.DLS" -delete
 	find -name "*.sym" -delete
-	find -name "*.t" -delete
+
+#Quartus2
 	find -name "*.done" -delete
 	find -name "*.fit.*" -delete
 	find -name "*.map.*" -delete
@@ -56,9 +67,14 @@ clear:
 	find -name "*.tan.*" -delete
 	find -name "*.qws" -delete
 	find -name "*.qpf" -delete
-	find -name "cmp_state.ini" -delete
 	find -name "*.vwf" -delete
 	find -name "*.bsf" -delete
+	find -name "cmp_state.ini" -delete
+
+#Other files
+	find -name "*.o" -delete
+	find -name "*.t" -delete
+
 push:
 	make clear
 	git status

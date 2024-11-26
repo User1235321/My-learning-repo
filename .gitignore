@@ -1,8 +1,15 @@
+#Libre office
+*.odf
+*.odt
+*.odp
+
+#Borland C++
 *.OBJ
 *.EXE
 *.SWP
 *.BAK
-*.o
+
+#MaxPlusII
 *.acf
 *.fit
 *.cnf
@@ -15,9 +22,9 @@
 *.snf
 *.DLS
 *.sym
-*.t
-*.odt
 *.scf
+
+#Quartus2
 *.done
 *.fit.*
 *.map.*
@@ -28,6 +35,9 @@
 *.qpf
 *.vwf
 *.bsf
-
 db
 cmp_state.ini
+
+#Other files
+*.o
+*.t
