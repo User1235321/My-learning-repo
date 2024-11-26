@@ -56,7 +56,6 @@ clear:
 	find -name "*.tan.*" -delete
 	find -name "*.qws" -delete
 	find -name "*.qpf" -delete
-	find -name "db" -delete
 	find -name "cmp_state.ini" -delete
 	find -name "*.vwf" -delete
 	find -name "*.bsf" -delete
