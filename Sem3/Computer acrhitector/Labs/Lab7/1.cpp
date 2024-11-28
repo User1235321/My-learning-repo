@@ -1,8 +1,17 @@
 #include<iostream>
+#include <csignal>
+
+float a = 1.98, b = 2.35, c = 0;
+
+void signalHandler(int signum)
+{
+  std::cout << "\033[1;10mResult of division on zero: " << c << "\033[0m\n";
+  exit(0);
+}
 
 int main()
 {
-  float a = 1.98, b = 2.35, c = 0;
+  signal(SIGFPE, signalHandler);
   __asm__
   (
     "finit\n"//Init FPU
@@ -14,7 +23,7 @@ int main()
     :"m"(a), "m"(b), "m"(c)/*list of input parameters*/
     :/*list of using registers*/
   );
-  std::cout << a << " + " << b << " = " << c << '\n';
+  std::cout << "\033[1;32m" << a << " + " << b << " = " << c << "\033[0m\n";
 
   __asm__
   (
@@ -23,7 +32,7 @@ int main()
     :"m"(c)/*list of input parameters*/
     :/*list of using registers*/
   );
-  std::cout << "Get nan: " << c << '\n';
+  std::cout << "\033[1;31mGet nan: " << c << "\033[0m\n";
 
   int ctrl = 0x027A;
 	a = 128.32;
@@ -40,7 +49,5 @@ int main()
     :"m" (ctrl), "m"(a), "m"(b), "m"(c)/*list of input parameters*/
     :/*list of using registers*/
   );
-	std::cout << "Result of division on zero: " << c << "\n";
-
   return 0;
 }
