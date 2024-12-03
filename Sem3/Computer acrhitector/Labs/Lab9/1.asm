@@ -1,40 +1,43 @@
 section .data
-    device db "/dev/input/event0", 0  ; Устройство ввода (может быть другое)
-    buf resb 24                        ; Буфер для хранения события
+    arg0 db "/usr/bin/showkey", 0  ; Путь к showkey (может отличаться)
+    arg1 db "-s", 0
+    arg2 db "-a", 0
 
+    argv dd arg0, arg1, 0
+    argv2 dd arg0, arg2, 0
 section .text
     global _start
+
 _start:
-    ; Открываем устройство
-    mov rax, 2                        ; syscall: open
-    lea rdi, [device]                 ; указатель на строку
-    mov rsi, 0                        ; O_RDONLY
-    syscall                            ; вызов
+    ; fork
+    mov rax, 57 ; sys_fork
+    syscall
 
-    ; Сохраняем ответ (дескриптор файла) в rdi
-    mov rdi, rax                      ; сохраняем файловый дескриптор
+    ; Дочерний процесс (pid == 0)
+    test rax, rax
+    jz child
 
-read_loop:
-    ; Читаем событие
-    mov rax, 0                        ; syscall: read
-    mov rsi, buf                      ; указатель на буфер
-    mov rdx, 24                       ; размер буфера
-    syscall                            ; вызов
+parent:
+    ; execve(filename, argv, envp)
+    mov eax, 11        ; System call number for execve
+    mov ebx, arg0       ; Address of the command string
+    mov ecx, argv2   ; command line arguments
+    xor edx, edx       ; No environment variables
+    int 0x80
 
-    mov eax, 4			; sys call for sys_write
-    mov ebx, 1			; file descriptor 1 (stdout)
-    mov ecx, buf		; pointer to the character to print
-    mov edx, 24			; length of the output
-    int 0x80; call kernel
+    ; Код, который никогда не выполнится после успешного execve
+    mov rax, 60 ; sys_exit
+    xor rdi, rdi
+    syscall
 
-    jmp read_loop                     ; продолжаем чтение
 
-end_program:
-    ; Закрываем устройство
-    mov rax, 3                        ; syscall: close
-    syscall                            ; вызов
+child:
+    mov eax, 11        ; System call number for execve
+    mov ebx, arg0       ; Address of the command string
+    mov ecx, argv   ; command line arguments
+    xor edx, edx       ; No environment variables
+    int 0x80
 
-    ; Завершение программы
-    mov rax, 60                       ; syscall: exit
-    xor rdi, rdi                      ; статус 0
-    syscall                            ; вызов
+    mov rax, 60 ; sys_exit
+    xor rdi, rdi
+    syscall
