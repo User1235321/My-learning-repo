@@ -38,6 +38,11 @@
 db
 cmp_state.ini
 
+#LaTeX
+*.log
+*.tex
+*.aux
+
 #Other files
 *.o
 *.t

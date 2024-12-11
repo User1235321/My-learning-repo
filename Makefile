@@ -33,6 +33,11 @@ find:
 	find -name "db"
 	find -name "cmp_state.ini"
 
+#LaTeX
+	find -name "*.log"
+	find -name "*.tex"
+	find -name "*.aux"
+
 #Other files
 	find -name "*.o"
 	find -name "*.t"
@@ -70,6 +75,10 @@ clear:
 	find -name "*.vwf" -delete
 	find -name "*.bsf" -delete
 	find -name "cmp_state.ini" -delete
+
+#LaTeX
+	find -name "*.log" -delete
+	find -name "*.aux" -delete
 
 #Other files
 	find -name "*.o" -delete
