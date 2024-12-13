@@ -21,11 +21,24 @@ int main()
       else
       {
         std::cout << *queue << '\n';
-        head -= 1;
-        for (size_t i = 0; i < head; ++i)
-        {
-          *(queue + i) = *(queue + i + 1);
-        }
+        __asm__
+        (
+          "leaq %0, %%rsi\n"
+          "subq $1, (%%rsi)\n"
+          "leaq %1, %%rsi\n"
+          "movq %0, %%rcx\n"
+
+          "LoopMain:\n"
+            "jrcxz exit\n"
+            "movq 8(%%rsi), %%rax\n"
+            "movq %%rax, (%%rsi)\n"
+            "addq $8, %%rsi\n"
+          "loop LoopMain\n"
+          "exit:\n"
+          ://list of output parameters
+          :"m" (head), "m"(*queue)//list of input parameters
+          :"rsi", "rcx", "rax"//list of using registers
+        );
       }
     }
     else if(input.find("push") != std::string::npos)
@@ -33,9 +46,21 @@ int main()
       try
       {
         long long in = std::stoll(input.substr(input.find("push") + 5));
-        *(queue + head) = in;
-        head += 1;
-        std::cout << "\033[1;32m" << in << " successfull added to queue\033[0m\n";
+        __asm__
+        (
+          "leaq %0, %%rsi\n"
+          "movq %1, %%rax\n"
+          "movq $8, %%rdx\n"
+          "mulq %%rdx\n"
+          "addq %%rax, %%rsi\n"
+          "movq %2, %%rax\n"
+          "movq %%rax, (%%rsi)\n"
+          "leaq %1, %%rsi\n"
+          "addq $1, (%%rsi)\n"
+          ://list of output parameters
+          :"m" (*queue), "m"(head), "m"(in)//list of input parameters
+          :"rsi", "rax", "rdx"//list of using registers
+        );
         if (head == size)
         {
           long long * q = new long long[size * 2];
@@ -48,11 +73,20 @@ int main()
           q = nullptr;
           size *= 2;
         }
+        std::cout << "\033[1;32m" << in << " successfull added to queue\033[0m\n";
       }
       catch(...)
       {
         std::cout << "\033[1;31mBad push input!\033[0m\n";
       }
+    }
+    else if(input.find("show") != std::string::npos)
+    {
+      for(size_t i = 0; i < head; ++i)
+      {
+        std::cout << *(queue + i) << ' ';
+      }
+      std::cout << '\n';
     }
     else
     {
