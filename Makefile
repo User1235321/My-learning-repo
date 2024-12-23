@@ -38,6 +38,9 @@ find:
 	find -name "*.tex"
 	find -name "*.aux"
 
+#Java (bullshit)
+	find -name "*.class"
+
 #Other files
 	find -name "*.o"
 	find -name "*.t"
@@ -79,6 +82,9 @@ clear:
 #LaTeX
 	find -name "*.log" -delete
 	find -name "*.aux" -delete
+
+#Java (bullshit)
+	find -name "*.class" -delete
 
 #Other files
 	find -name "*.o" -delete

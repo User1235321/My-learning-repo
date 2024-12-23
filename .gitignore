@@ -43,6 +43,9 @@ cmp_state.ini
 *.tex
 *.aux
 
+#Java (bullshit)
+*.class
+
 #Other files
 *.o
 *.t
