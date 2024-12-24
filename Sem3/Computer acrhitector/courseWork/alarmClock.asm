@@ -1,8 +1,13 @@
 global _start
 
 section .data
-curtime dq 0
-audio_dev db "/dev/audio", 0
+  curtime dq 0
+  freq equ 500
+  beep_sec equ 1
+  beep_nsec equ 0
+
+section .bss
+  sleep_time: resb 16 ; for timespec
 
 section .text
 _start:
@@ -102,24 +107,42 @@ _start:
         jb timeloop
 
   beep:
-    mov eax, 5 ; open /dev/audio
-    mov ebx, audio_dev
-    mov ecx, 2
-    mov edx, 0
-    int 0x80
+    mov rax, 2 ; open
+    mov rdi, console_path ; /dev/console
+    mov rsi, 0 ; O_RDONLY
+    mov rdx, 0
+    syscall
+    mov r10, rax ; save descriptor in r10
 
-    mov dword [freq], 440
-    mov dword [duration], 1000 ; miliseconds
+    ; ioctl for sound generation
+    mov rax, 16    ; ioctl
+    mov rdi, r10    ; /dev/console
+    mov rsi, 0x4B2F ; KIOCSOUND for ioctl
+    mov rdx, freq   ; frequency
+    syscall
 
-    mov eax, 4 ; write
-    mov ebx, eax; file descriptor
-    mov ecx, freq ; pointer to data
-    mov edx, 4  ; length of data
-    int 80h
+    ; timespec
+    mov qword [sleep_time], beep_sec
+    mov qword [sleep_time + 8], beep_nsec
 
-    mov eax, 6 ; close /dev/auido
-    mov ebx, eax
-    int 0x80
+    ; pause
+    mov rax, 35    ; syscall nanosleep
+    mov rdi, sleep_time ; timespec
+    mov rsi, 0
+    syscall
+
+    ; sound off
+    mov rax, 16    ; ioctl
+    mov rdi, r10    ; /dev/console
+    mov rsi, 0x4B2F ; KIOCSOUND for ioctl
+    mov rdx, 0      ; frequency adress 0
+    syscall
+
+    ; close /dev/console
+    mov rax, 3    ; close
+    mov rdi, r10
+    syscall
+
   exit:
     mov rdi, 0
     mov rax, 60
@@ -127,5 +150,6 @@ _start:
 
 section .bss
   number resd 1
-  freq resd 1
-  duration resd 1
+
+section .data
+  console_path db "/dev/console",0
