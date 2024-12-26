@@ -14,6 +14,6 @@ cvrun:
 	rm "$n"
 arun:
 	make abuild n=""$n""
-	./"$n"
+	sudo ./"$n"
 	rm "$n"
 	rm "$n".o

@@ -2,9 +2,9 @@ global _start
 
 section .data
   curtime dq 0
-  freq equ 500
+  freq equ 200
   beep_sec equ 1
-  beep_nsec equ 0
+  beep_nsec equ 500
 
 section .bss
   sleep_time: resb 16 ; for timespec
@@ -152,4 +152,4 @@ section .bss
   number resd 1
 
 section .data
-  console_path db "/dev/console",0
+  console_path db "/dev/console", 0
