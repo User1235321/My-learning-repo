@@ -1,7 +1,9 @@
+package third;
+
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class thirdTask
+public class MainFile
 {
   public static double average(List< Integer > numbers)
   {

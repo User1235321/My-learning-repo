@@ -1,3 +1,5 @@
+package second;
+
 import java.util.Scanner;
 import java.util.TreeMap;
 import java.io.FileReader;
@@ -7,13 +9,7 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-class InvalidFileFormatException extends Exception {
-    public InvalidFileFormatException(String message) {
-        super(message);
-    }
-}
-
-public class secondTask
+public class MainFile
 {
   public static void main(String[] args)
   {

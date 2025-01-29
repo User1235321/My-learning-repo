@@ -1,6 +1,6 @@
 build:
-	javac "$n.java"
+	javac -d . "$n"/*.java
 run:
 	make build n=""$n""
-	java "$n"
-	rm -r *.class
+	java "$n".MainFile
+	rm -r "$n"/*.class
