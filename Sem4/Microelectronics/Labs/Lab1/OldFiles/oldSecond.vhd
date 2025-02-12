@@ -34,6 +34,16 @@ begin
 	end if;
 end rstr;
 
+function comp (a : std_logic_vector(7 downto 0); b : std_logic_vector(7 downto 0)) return std_logic is
+begin
+  for i in 7 downto 0 loop
+    if (a(i) /= b(i)) then
+      return '0';
+    end if;
+  end loop;
+  return '1';
+end comp;
+
 type array_type is array (7 downto 0) of std_logic_vector(7 downto 0);
 signal seventhDff : std_logic_vector (7 downto 0) := "00000000";
 signal dffArr: array_type;
@@ -61,32 +71,28 @@ begin
     end if;
 
     --compare
-    aeb <= '1';
-    for i in 7 downto 0 loop
-      if (seventhDff(i) /= KKS(i)) then
-        aeb <= '0';
-      end if;
-    end loop;
-
-    --Counter and rstr block
+    aeb <= comp(seventhDff, KKS);
+    --Counter
     if (aeb = '1') then
       qq <= 0;
-		rstrQ(0) <= rstr('0', Query, rstrQ(0));
-    	rstrQ(1) <= rstr('0', (rstrQ(0) and aeb), rstrQ(1));
-    	get1 <= rstrQ(1);
     elsif rising_edge(CLK) then
-      if (qq < 7) then
+      if (qq < 8) then
         qq <= qq + 1;
-        rstrQ(0) <= rstr('0', Query, rstrQ(0));
-    	rstrQ(1) <= rstr('0', (rstrQ(0) and aeb), rstrQ(1));
-    	get1 <= rstrQ(1);
       else
         qq <= 0;
-        rstrQ(0) <= rstr('1', Query, rstrQ(0));
-    	rstrQ(1) <= rstr('1', (rstrQ(0) and aeb), rstrQ(1));
-    	get1 <= rstrQ(1);
       end if;
     end if;
+    if (qq = 7) then
+      get1 <= '1';
+    else
+      get1 <= '0';
+    end if;
+	getOut <= get1;
+	aeb <= comp(seventhDff, KKS);
+    --rstr block
+    rstrQ(0) <= rstr(get1, Query, rstrQ(0));
+    rstrQ(1) <= rstr(get1, (rstrQ(0) and aeb), rstrQ(1));
+    get1 <= rstrQ(1);
 
     --Output
     Get <= get1;

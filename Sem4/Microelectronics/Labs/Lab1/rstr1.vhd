@@ -10,11 +10,16 @@ ARCHITECTURE behav OF rstr1 IS
 BEGIN
 PROCESS(r,s)
 	BEGIN
-		IF s='1' THEN
-			IF r='1' THEN qs<=qs;
-			ELSE qs<='0';
+		IF s = '0' THEN
+			IF r = '0' THEN
+				qs <= qs;
+			ELSE
+				qs <= '0';
 			END IF;
-		ELSE qs<='1';
+		ELSE
+			IF r = '0' THEN
+				qs <= '1';
+			END IF;
 		END IF;
 	END PROCESS;
 q<=qs;
