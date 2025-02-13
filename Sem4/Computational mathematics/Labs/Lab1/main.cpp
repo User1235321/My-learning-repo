@@ -1,65 +1,48 @@
 #include <iostream>
-#include <cmath>
 #include <vector>
 
-#include "spline.h"
+#include <SFML/Graphics.hpp>
+
+#include "myFuncs.hpp"
+#include "paint.hpp"
 
 const unsigned pointsNum = 10;
 
-double baseFunc(double x)
-{
-  return (1 - std::exp(x));
-}
-double LagrangePolynomial(const std::vector< double > & basePoints, double x)
-{
-  double result = 0;
-  for (size_t i = 0; i < pointsNum; ++i)
-  {
-    double localResult = baseFunc(basePoints[i]);
-    for (size_t j = 0; j < pointsNum; ++j)
-    {
-      if (j != i)
-      {
-        localResult *= (x - basePoints[j]);
-        localResult /= (basePoints[i] - basePoints[j]);
-      }
-    }
-    result += localResult;
-  }
-  return result;
-}
-double splineNum(const std::vector< double > & basePoints, double x)
-{
-  std::vector< double > func(pointsNum);
-  for (size_t i = 0; i < pointsNum; ++i)
-  {
-    func[i] = baseFunc(basePoints[i]);
-  }
-  tk::spline s(basePoints, func);
-  return s(x);
-}
-
 int main()
 {
+  std::cout.precision(8);
   std::cout << "\033[1;32m";
   std::cout << "Base points = 0,3 * k (k = 0, 1, ...10)\nf(x) = 1 - exp(x)\nPoints to calculate = 0,15 + 0,3k (k = 0, 1, ...9)\n";
   std::cout << "\033[0m\n";
 
-  std::vector< double > startPoints(pointsNum);
+  std::vector< double > x(pointsNum);
+
   for (size_t i = 0; i <= pointsNum; ++i)
   {
-    startPoints[i] = (0.3d * i);
+    x[i] = (0.3d * i);
   }
+
+  std::vector< double > orig(pointsNum);
+  std::vector< double > Lagrange(pointsNum);
+  std::vector< double > spline(pointsNum);
 
   for (size_t i = 0; i < pointsNum; ++i)
   {
-    double x = 0.15d + 0.3d * i;
-    std::cout << "x = " << x;
-    std::cout << "; f(x) = " << baseFunc(x);
-    std::cout << "; L(x) = " << LagrangePolynomial(startPoints, x);
-    std::cout << "; S(x) = " << splineNum(startPoints, x) << '\n';
+    double point = 0.15d + 0.3d * i;
+    std::cout << "x = " << point;
+
+    orig[i] = baseFunc(point);
+    std::cout << "; f(x) = " << orig[i];
+
+    Lagrange[i] = LagrangePolynomial(pointsNum, x, point);
+    std::cout << "; L(x) = " << Lagrange[i];
+
+    spline[i] = splineNum(pointsNum, x, point);
+    std::cout << "; S(x) = " << spline[i] << '\n';
   }
 
   std::cout << '\n';
+
+  paint(orig, Lagrange, spline);
   return 0;
 }
