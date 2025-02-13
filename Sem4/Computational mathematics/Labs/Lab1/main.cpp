@@ -1,19 +1,22 @@
 #include <iostream>
 #include <cmath>
+#include <vector>
 
-#include "spline.hpp"//dell
+#include "spline.h"
 
-long double baseFunc(long double x)
+const unsigned pointsNum = 10;
+
+double baseFunc(double x)
 {
   return (1 - std::exp(x));
 }
-long double LagrangePolynomial(size_t arrSize, long double * basePoints, long double x)
+double LagrangePolynomial(const std::vector< double > & basePoints, double x)
 {
-  long double result = 0;
-  for (size_t i = 0; i < arrSize; ++i)
+  double result = 0;
+  for (size_t i = 0; i < pointsNum; ++i)
   {
-    long double localResult = baseFunc(basePoints[i]);
-    for (size_t j = 0; j < arrSize; ++j)
+    double localResult = baseFunc(basePoints[i]);
+    for (size_t j = 0; j < pointsNum; ++j)
     {
       if (j != i)
       {
@@ -25,9 +28,15 @@ long double LagrangePolynomial(size_t arrSize, long double * basePoints, long do
   }
   return result;
 }
-long double splineNum()
+double splineNum(const std::vector< double > & basePoints, double x)
 {
-
+  std::vector< double > func(pointsNum);
+  for (size_t i = 0; i < pointsNum; ++i)
+  {
+    func[i] = baseFunc(basePoints[i]);
+  }
+  tk::spline s(basePoints, func);
+  return s(x);
 }
 
 int main()
@@ -36,20 +45,21 @@ int main()
   std::cout << "Base points = 0,3 * k (k = 0, 1, ...10)\nf(x) = 1 - exp(x)\nPoints to calculate = 0,15 + 0,3k (k = 0, 1, ...9)\n";
   std::cout << "\033[0m\n";
 
-  const size_t pointsNum = 10;
-  long double startPoints[pointsNum];
+  std::vector< double > startPoints(pointsNum);
   for (size_t i = 0; i <= pointsNum; ++i)
   {
     startPoints[i] = (0.3d * i);
   }
 
-  for (size_t i = 0; i <= 9; ++i)
+  for (size_t i = 0; i < pointsNum; ++i)
   {
-    long double x = 0.15d + 0.3d * i;
+    double x = 0.15d + 0.3d * i;
     std::cout << "x = " << x;
     std::cout << "; f(x) = " << baseFunc(x);
-    std::cout << "; L(x) = " << LagrangePolynomial(pointsNum, startPoints, x);
-    std::cout << "; f(x) - L(x) = " << (baseFunc(x) - LagrangePolynomial(pointsNum, startPoints, x)) << '\n';
+    std::cout << "; L(x) = " << LagrangePolynomial(startPoints, x);
+    std::cout << "; S(x) = " << splineNum(startPoints, x) << '\n';
   }
+
+  std::cout << '\n';
   return 0;
 }
