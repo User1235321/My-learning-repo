@@ -1,0 +1,64 @@
+head	1.1;
+access;
+symbols;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	98.08.08.11.36.05;	author peterj;	state Exp;
+branches;
+next	;
+
+
+desc
+@CMATH 1989 code
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/* polyd.c
+   Exercise the polynomial root finder. */
+
+#include <math.h>
+#include <stdio.h>
+#include "cmath.h"
+
+main ()
+{
+#define ndim 10
+double cr[ndim], ci[ndim];
+double xr[ndim], xi[ndim];
+int    n, j, nr, polish, flag;
+double abserr;
+
+printf ("\n\n  --- CMATH --- Design Software 1989\n");
+printf ("\nExercise the polynomial root finder polyroot().\n");
+n = 3;
+cr[0] = -12.0;  cr[1] = 22.0;  cr[2] = -12.0;  cr[3] = 2.0;
+ci[0] =   0.0;  ci[1] =  0.0;  ci[2] =   0.0;  ci[3] = 0.0;
+nr = 3;
+for (j = 0; j < nr; ++j)
+   {
+   xr[j] = 0.0;
+   xi[j] = 0.0;
+   }
+polish = 1;
+abserr = 1.0e-6;
+polyroot (n, cr, ci, xr, xi, &nr, abserr, polish, &flag);
+printf ("%s\n", cmathmsg(POLYROOT_C, flag));
+if (flag == 0)
+   {
+   printf ("\nThe roots are located at ...\n");
+   for (j = 0; j < nr; ++j)
+      printf ("x = %6.3f + i %6.3f\n", xr[j], xi[j]);
+   printf ("\nCorrect values are 1.0, 2.0, 3.0\n");
+   }
+
+return (0);
+}
+@

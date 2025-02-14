@@ -1,0 +1,68 @@
+head	1.1;
+access;
+symbols;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	98.08.08.11.36.05;	author peterj;	state Exp;
+branches;
+next	;
+
+
+desc
+@CMATH 1989 code
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/* qk21d.c
+   Program to exercise the fixed rule integrator qk21(). */
+
+#include <stdio.h>
+#include <math.h>
+#include "cmath.h"
+
+main ()
+{  /* begin qk21d */
+
+double a, abserr, b, resasc, resabs, userf(), result;
+double t;
+
+/* a and b are the integration limits. */
+a = 0.0;
+b = 1.0;
+
+printf ("\n\n  --- CMATH --- Design Software 1989\n");
+printf ("\nCall fixed rule quadrature routines.\n");
+printf ("qk21init() and qk21() ...\n");
+
+qk21init ();
+qk21 (userf, a, b, &result, &abserr, &resabs, &resasc);
+
+printf ("\nIntegral approximation     = %20.12e\n", result);
+printf ("Estimate of absolute error = %9.2e\n", abserr);
+t = 4.0 * atan(1.0);  /* pi */
+t = -(t * t) / 6.0;
+printf ("Correct answer             = %20.12e (-pi**2 / 6.0)\n\n", t);
+printf ("resabs = %20.12e,  resasc = %20.12e\n", resabs, resasc);
+
+return (0);
+}  /* end of qk21d */
+
+
+
+double userf (x)         /*  user supplied function.  */
+double x;
+
+{
+double t;
+t = log(x) / (1.0 - x);
+return (t);
+}
+@

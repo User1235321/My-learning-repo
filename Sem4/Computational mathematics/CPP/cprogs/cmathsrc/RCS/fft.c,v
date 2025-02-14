@@ -1,0 +1,244 @@
+head	1.1;
+access;
+symbols;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	98.08.08.11.36.05;	author peterj;	state Exp;
+branches;
+next	;
+
+
+desc
+@CMATH 1989 code
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/* fft.c
+   Fast Fourier Transform.   */
+
+/************************************************/
+/*                                              */
+/*  CMATH.  Copyright (c) 1989 Design Software  */
+/*                                              */
+/************************************************/
+
+#include "cmath.h"
+#if (STDLIBH)
+#include <stdlib.h>
+#endif
+#include <stdio.h>
+#include <math.h>
+
+#ifndef NULL
+#define  NULL  0
+#endif
+
+#ifndef PI
+#define  PI  3.14159265358979323846
+#endif
+
+/*-----------------------------------------------------------------*/
+
+#if (PROTOTYPE)
+
+int fft (int n, double zr[], double zi[], int direct, int *flag)
+
+#else
+
+int fft (n, zr, zi, direct, flag)
+int    n;
+double zr[], zi[];
+int    direct, *flag;
+
+#endif
+
+/* Purpose ...
+   -------
+   Compute the discrete Fourier transform (the inverse
+   transform) of the complex array z[k] = zr[k] + i zi[k],
+   k = 0 ... N-1, where N is a power of 2.  (i = sqrt(-1).)
+
+   The forward transform is defined as
+                1     N-1
+      Z(n) = -------  sum  z[k] . exp(2ikn/N)
+             sqrt(N)  k=0
+
+   while the inverse transform is
+                1     N-1
+      z(k) = -------  sum  Z[n] . exp(-2ikn/N)
+             sqrt(N)  n=0
+
+
+   Input ...
+   -----
+   n      : The number of elements in the arrays.
+            n must be an integer power of two and less than 2**15.
+            We assume 16-bit integers.
+            The user must ensure that n does not exceed the addressing
+            capacity of the compiler or computer (esp. MS-DOS machines)
+   zr     : real part of the complex array
+   zi     : imaginary part of the complex array
+   direct : Direction of transform.
+            = +1, Forward transform computed
+            = -1, Inverse transform computed
+
+   Output ...
+   ------
+   zr     : The real part of the Fourier transform if direct = 1,
+            or the Inverse transform if direct = -1.
+   zi     : Imaginary part.
+   flag   : Status indicator.
+            = 0,  normal return
+            = 1,  illegal user input.  e.g. n < 2, n > 2**14,
+                  zi == NULL, zr == NULL
+            = 2,  n not an integer power of 2.
+            = 3,  direct not +1 or -1
+
+   Version ... 1.0, July 1989
+   -------
+
+   This C code written by ...  Peter & Nigel,
+   ----------------------      Design Software,
+                               42 Gubberley St,
+                               Kenmore, 4069,
+                               Australia.
+
+   Reference ...
+   ---------
+   W.H. Press, B.P. Flannery, S.A. Teukolsky & W.T. Vetterling :
+   "Numerical Recipes. The art of scientific computing."
+   Cambridge University Press, Cambridge, 1986.
+
+   Notes ...
+   -----
+   (1) The ordering of the z arrays are as follows.
+       (D is the time interval for sampling.)
+
+       index   time domain    frequency domain
+                    t =              f =
+       ------------------------------------------
+         0              0               0
+         1              D            1/ND
+         2             2D            2/ND
+         ....
+         N/2-1   (N/2-1)D      (N/2-1)/ND
+         N/2       (N/2)D          +-1/2D
+         N/2+1   (N/2+1)D     -(N/2-1)/ND
+         ....
+         N-2       (N-2)D           -2/ND
+         N-1       (N-1)D           -1/ND
+
+*/
+
+{    /* begin fft()  */
+unsigned int addr, bitrev, LSB, mask;
+int nbits, j, i, nn, b, step, mmax, m;
+double t, theta, tr, ti, wr, wi, wpr, wpi;
+
+*flag = 0;
+if (n < 2 || n > 16384 || zr == NULL || zi == NULL)
+   {
+   *flag = 1;
+   return (0);
+   }
+
+if (direct != 1 && direct != -1)
+   {
+   *flag = 3;
+   return (0);
+   }
+
+/* check power of 2 and find number of bits in address */
+nn = n;
+nbits = 0;          /* number of bits needed to index data  */
+mask = ~0;          /* mask will be used later to clear LSB */
+mask = mask ^ 1;    /* mask = 1111...1110                   */
+
+while (nn > 1)
+   {
+   LSB = nn & 1;
+   if (LSB != 0)
+      {
+      /* n is not a power of 2 */
+      *flag = 2;
+      return (0);
+      }
+   nn /= 2;
+   ++nbits;
+   }
+
+/* Rearrange data into bit-reverse order. */
+for (j = 0; j < n; ++j)
+   {
+   addr = j;
+   bitrev = 0;
+   for (i = 0; i < nbits; ++i)
+      {
+      LSB = addr & 1;
+      addr = addr >> 1;         /* shift rest of address 1 bit right */
+      bitrev = bitrev << 1;
+      bitrev = bitrev & mask;   /* ensure that LSB is zero */
+      bitrev = bitrev | LSB;    /* transfer LSB from addr */
+      }
+   if (bitrev > j)
+      {
+      /* swap data elements */
+      t = zr[j]; zr[j] = zr[bitrev]; zr[bitrev] = t;
+      t = zi[j]; zi[j] = zi[bitrev]; zi[bitrev] = t;
+      }
+   }
+
+/* Now combine the elements. */
+mmax = 1;
+for (b = 0; b < nbits; ++b)
+   {
+   step = 2 * mmax;
+   /* Initialize the trigonometric recurrence */
+   theta = PI / (direct * mmax);
+   t = sin(0.5 * theta);
+   wpr = -2.0 * t * t;
+   wpi = sin(theta);
+   wr = 1.0;
+   wi = 0.0;
+   for (m = 0; m < mmax; ++m)
+      {
+      for (i = m; i < n; i += step)
+         {
+         /* Apply the Danielson-Lanczoz formula */
+         j = i + mmax;
+         tr = wr * zr[j] - wi * zi[j];
+         ti = wr * zi[j] + wi * zr[j];
+         zr[j] = zr[i] - tr;
+         zi[j] = zi[i] - ti;
+         zr[i] += tr;
+         zi[i] += ti;
+         }
+      /* Update the trig recurrence. */
+      t = wr;
+      wr += wr * wpr - wi * wpi;
+      wi += wi * wpr + t * wpi;
+      }
+   mmax = step;
+   }
+
+/* Now scale the result by sqrt(N).  */
+t = 1.0 / sqrt((double) n);
+for (j = 0; j < n; ++j)
+   {
+   zr[j] *= t;
+   zi[j] *= t;
+   }
+
+return (0);
+}
+
+/*-----------------------------------------------------------------*/
+@

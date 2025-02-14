@@ -1,0 +1,165 @@
+------------------------------------------------------------------
+Design Software                                         polyroot()
+------------------------------------------------------------------
+
+
+1.0  Purpose.
+
+     Find the roots of a polynomial p(x) where
+     p(x)  =  S  c .x       .  
+The coefficients c , j = 0 ... n may be complex.
+  
+
+2.0  How to use the function.
+
+     The function polyroot()  receives  all  information  via  its 
+formal arguments.  It is declared as 
+     
+     int polyroot (n, cr, ci, xr, xi, nr, abserr, polish, flag)
+     int    n;
+     double cr[], ci[], xr[], xi[];
+     int    *nr;
+     double abserr;
+     int    polish, *flag;
+
+
+2.1  Parameter types.
+
+     n         : integer value
+     cr        : pointer to an array of double values
+                 of dimension cr[ndim], ndim > n+1
+     ci        : pointer to an array of double values
+                 of dimension ci[ndim], ndim > n+1
+     xr        : pointer to an array of double values
+                 of dimension xr[mdim], mdim > nr
+     xi        : pointer to an array of double values
+                 of dimension xi[mdim], mdim > nr
+     nr        : pointer to an integer variable
+     abserr    : double value
+     polish    : integer value
+     flag      : pointer to an integer variable
+
+
+2.2  Input.
+
+     n         : Order of the polynomial.
+     cr        : Real parts of the polynomial coefficients.
+     ci        : Imaginary parts of the polynomial coefficients.
+     xr        : Real parts of the guesses for the polynomial
+                 roots.  If you have a reasonable guess then use
+                 it.  Otherwise a value of zero should for each
+                 guess should result polyroot() finding the roots
+                 in ascending order of magnitude.
+     xi        : Imaginary parts of the initial guesses.
+     nr        : The number of roots to find.  1 < nr < n.
+     abserr    : The precision to which the roots are found..
+     polish    : Convergence flag.
+                 = 0,  Stop when the roots are found to a 
+                       precision of abserr.
+                 = 1,  First identify the roots to precision
+                       abserr then polish until machine
+                       precision is achieved.
+
+
+2.3  Output.
+
+     polyroot(): returns the an unspecified integer value
+                 which should be ignored. 
+     xr        : Real parts of nr polynomial roots
+     xi        : Imaginary parts of nr polynomial roots
+                 x  = xr[j] + i * xi[j], j = 0 ... nr-1.
+     nr        : Number of roots found satisfactorily.
+     flag      : A status indicator.
+                 flag = 0, normal return
+                 flag = 1, A root did not converge.  The values
+                           in xr[] and xi[] may not be valid.
+                 flag = 2, could not allocate work space
+                 flag = 3, illegal user input.
+                           e.g. n < 1, cr == NULL, ci == NULL,
+                           xr == NULL, xi == NULL, nr < 1, nr > n
+                           abserr < 0.0.
+                 flag = 4, incorrect order for polynomial.
+                           cr[n] == 0.0 and ci[n] == 0.0.
+
+
+3.0  Method.
+
+     The roots of the polynomial are obtained one at a time  using 
+Laguerre's method.  As each  root  is  found,  the  polynomial  is 
+deflated so that future iterations do not return to the same root.  
+The  roots  are  polished  (improved)  using  the  same  iterative 
+technique but with the original polynomial coefficients.
+
+
+4.0  Reference
+
+     W.H. Press, B.P. Flannery, S.A. Teukolsky & W.T.  Vetterling:  
+"Numerical Recipes.  The art of scientific computing."   Cambridge 
+University Press, 1986.
+
+
+5.0  Example.
+
+     Find the roots of
+     p(x)  =  -12 + 22x - 12x  + 2x    .
+
+
+/* polyd.c
+   Exercise the polynomial root finder. */
+
+#include <math.h>
+#include <stdio.h>
+#include "cmath.h"
+
+main ()
+{
+#define ndim 10
+double cr[ndim], ci[ndim];
+double xr[ndim], xi[ndim];
+int    n, j, nr, polish, flag;
+double abserr;
+
+printf ("\n\n  --- CMATH --- Design Software 1989\n");
+printf ("\nExercise the polynomial root finder polyroot().\n");
+n = 3;
+cr[0] = -12.0;  cr[1] = 22.0;  cr[2] = -12.0;  cr[3] = 2.0;
+ci[0] =   0.0;  ci[1] =  0.0;  ci[2] =   0.0;  ci[3] = 0.0;
+nr = 3;
+for (j = 0; j < nr; ++j)
+   {
+   xr[j] = 0.0;
+   xi[j] = 0.0;
+   }
+polish = 1;
+abserr = 1.0e-6;
+polyroot (n, cr, ci, xr, xi, &nr, abserr, polish, &flag);
+printf ("%s\n", cmathmsg(POLYROOT_C, flag));
+if (flag == 0)
+   {
+   printf ("\nThe roots are located at ...\n");
+   for (j = 0; j < nr; ++j)
+      printf ("x = %6.3f + i %6.3f\n", xr[j], xi[j]);
+   printf ("\nCorrect values are 1.0, 2.0, 3.0\n");
+   }
+
+return (0);
+}
+
+
+6.0  Program Results.
+
+  --- CMATH --- Design Software 1989
+
+Exercise the polynomial root finder polyroot().
+polyroot() : normal return
+
+The roots are located at ...
+x =  1.000 + i  0.000
+x =  2.000 + i  0.000
+x =  3.000 + i  0.000
+
+Correct values are 1.0, 2.0, 3.0
+
+
+
+

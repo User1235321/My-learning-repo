@@ -1,0 +1,41 @@
+head	1.1;
+access;
+symbols;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	98.08.08.11.36.05;	author peterj;	state Exp;
+branches;
+next	;
+
+
+desc
+@CMATH 1989 code
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/* stints.h  -- some global definitions for stint1.c
+                                         &   stint.c    */
+
+/* Maximum number of 10 ode's.
+   The value of ndim may be changed to suit the problem. */
+#define   ndim    10
+#define   matdim  ndim
+
+
+/* The following variables are to be retained between calls to
+   the ode solver */
+static int nstep, nfe, nje, ninvs;
+
+
+/* These macros are used in function stint() */
+#define    MAX(a,b)   ((a<b) ? b : a)
+#define    MIN(a,b)   ((a<b) ? a : b)
+@

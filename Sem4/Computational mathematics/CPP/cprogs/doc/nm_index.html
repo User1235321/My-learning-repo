@@ -1,0 +1,212 @@
+<HTML>
+<HEAD>
+   <TITLE>NM_LIB Function Index</TITLE>
+</HEAD>
+<BODY>
+   <H2>NM_LIB Index by File Name</H2>
+   <P>
+   Click on the <I>file name</I> to see the source code.
+   Click on the <I>function name</I> to see the documentation.
+   (Note that this documentation is incomplete.)
+   </P>
+
+   <TABLE BORDER>
+      <TR>
+         <TH>File Name</TH>
+         <TH>Functions and/or<BR>Routines</TH>
+         <TH>Purpose</TH>
+         <TH>Other<BR>functions<BR>required</TH>
+      </TR>
+      <TR>
+         <TD><A HREF="../cmathsrc/bandfac.c">bandfac.c</A></TD>
+         <TD>bandfac(),<BR>bandslv()</TD>
+         <TD>solve a banded matrix equation</TD>
+         <TD>none</TD>
+      </TR>
+      <TR>
+         <TD><A HREF="../cmathsrc/bspline.c">bspline.c</A></TD>
+         <TD>bspline(), bseval(),<BR>
+             interv(), bsplvb(),<BR>             
+             bsdcpnts(), bsplinit(),<BR> 
+             bisect(), bsplend(),<BR>
+             bsplmake(), bspldest()<BR>
+         </TD>
+         <TD>interpolate and differentiate<BR>
+             using a B-spline
+         </TD>
+         <TD>bandfac(),<BR>bandslv()</TD>
+      </TR>
+      <TR>
+         <TD><A HREF="../cmathsrc/cheby.c">cheby.c</A></TD>
+         <TD>cheby(), chebyc(),<BR>chebyd(), chebyi()</TD>
+         <TD>Chebyshev polynomial<BR>interpolation</TD>
+         <TD>none</TD>
+      </TR>
+      <TR>
+         <TD><A HREF="../cmathsrc/cmplx.c">cmplx.c</A></TD>
+         <TD>cabslt(), cmultn(),<BR>cdivsn(), csqroot()</TD>
+         <TD>complex arithmetic (stand-alone)</TD>
+         <TD>none</TD>
+      </TR>
+      <TR>
+         <TD><A HREF="../cmathsrc/complex.c">complex.c</A></TD>
+         <TD>see complex.h</TD>
+         <TD>complex arithmetic (integrated package)</TD>
+         <TD>none</TD>
+      </TR>
+      <TR>
+         <TD><A HREF="../cmathsrc/conjgg.c">conjgg.c</A></TD>
+         <TD>conjgg(), linem(),<BR>braket(),partiald()</TD>
+         <TD>minimize a continuous function <BR>of several variables</TD>
+         <TD>none</TD>
+      </TR>
+      <TR>
+         <TD><A HREF="../cmathsrc/cmathmsg.c">cmathmsg.c</A></TD>
+         <TD>cmathmsg()</TD>
+         <TD>translate CMATH error codes <BR>to English text</TD>
+         <TD>none</TD>
+      </TR>
+      <TR>
+         <TD><A HREF="../cmathsrc/decomp.c">decomp.c</A></TD>
+         <TD>decomp(), solve()</TD>
+         <TD>solve a system of<BR>linear equations</TD>
+         <TD>none</TD>
+      </TR>
+      <TR>
+         <TD><A HREF="../cmathsrc/dft.c">dft.c</A></TD>
+         <TD>dft(), chirp(),<BR>chirpmult()</TD>
+         <TD>Discrete Fourier transform <BR>
+             of a general length array
+         </TD>
+         <TD>fft()</TD>
+      </TR>
+      <TR>
+         <TD><A HREF="../cmathsrc/fft.c">fft.c</A></TD>
+         <TD>fft()</TD>
+         <TD>Fast Fourier transform <BR>of a complex array</TD>
+         <TD>none</TD>
+      </TR>
+      <TR>
+         <TD><A HREF="../cmathsrc/fitpoly.c">fitpoly.c</A></TD>
+         <TD>fitpoly()</TD>
+         <TD>fit a polynomial (least squares)</TD>
+         <TD>cheby(),<BR>decomp(),<BR>solve()</TD>
+      </TR>
+      <TR>
+         <TD><A HREF="../cmathsrc/fitspl.c">fitspl.c</A></TD>
+         <TD>fitspl(), L2spl(),<BR>L2deriv()</TD>
+         <TD>fit a cubic spline (least squares)</TD>
+         <TD>conjgg()</TD>
+      </TR>
+      <TR>
+         <TD><A HREF="../cmathsrc/indexx.c">indexx.c</A></TD>
+         <TD>indexx()</TD>
+         <TD>sort an array of numbers</TD>
+         <TD>none</TD>
+      </TR>
+      <TR>
+         <TD><A HREF="../cmathsrc/invert.c">invert.c</A></TD>
+         <TD>invert()</TD>
+         <TD>invert a matrix</TD>
+         <TD>decomp(),<BR>solve()</TD>
+      </TR>
+      <TR>
+         <TD><A HREF="../cmathsrc/nelmin.c">nelmin.c</A></TD>
+         <TD>nelmin()</TD>
+         <TD>minimize a function<BR>of several variables</TD>
+         <TD>none</TD>
+      </TR>
+      <TR>
+         <TD><A HREF="../cmathsrc/poly.c">poly.c</A></TD>
+         <TD>polyroot(),<BR>
+             polymake(), polydiv(),<BR>
+             laguerre(), polyeval()
+         </TD>
+         <TD>find the roots of<BR>a complex polynomial</TD>
+         <TD>cabslt()<BR>cdivsn()<BR>cmultn()<BR>csqroot()</TD>
+      </TR>
+      <TR>
+         <TD><A HREF="../cmathsrc/qags.c">qags.c</A></TD>
+         <TD>qags(), qqsort(),<BR>qextn()</TD>
+         <TD>adaptive Gaussian quadrature</TD>
+         <TD>qk21(),<BR>qk21init()</TD>
+      </TR>
+      <TR>
+         <TD><A HREF="../cmathsrc/qinf.c">qinf.c</A></TD>
+         <TD>qinf(), ftrnsfm()</TD>
+         <TD>Gaussian quadrature on <BR>
+             an infinite domain
+         </TD>
+         <TD>qags(),<BR>qk21(),<BR>qk21init()</TD>
+      </TR>
+      <TR>
+         <TD><A HREF="../cmathsrc/qk21.c">qk21.c</A></TD>
+         <TD>qk21(), qk21init()</TD>
+         <TD>fixed-rule Gaussian quadrature</TD>
+         <TD>none</TD>
+      </TR>
+      <TR>
+         <TD><A HREF="../cmathsrc/qr.c">qr.c</A></TD>
+         <TD>qr(), balanc(),hqr(),<BR>
+             elmhes(), eltran(),<BR>
+             balbak(), qrvector(),<BR>
+             qrv(), hqr2()
+         </TD>
+         <TD>compute eigenvalues and eigenvectors<BR>
+             of a general matrix
+         </TD>
+         <TD>cdivsn(),<BR>cabslt()</TD>
+      </TR>
+      <TR>
+         <TD><A HREF="../cmathsrc/quanc8.c">quanc8.c</A></TD>
+         <TD>quanc8()</TD>
+         <TD>adaptive Newton-Cotes quadrature</TD>
+         <TD>none</TD>
+      </TR>
+      <TR>
+         <TD><A HREF="../cmathsrc/rkf45.c">rkf45.c</A></TD>
+         <TD>rkf45(), rkfinit(),<BR>fehl45(), rkfend()</TD>
+         <TD>integrate non-stiff ODE's</TD>
+         <TD>none</TD>
+      </TR>
+      <TR>
+         <TD><A HREF="../cmathsrc/spline.c">spline.c</A></TD>
+         <TD><A HREF="./spline.html">spline(), seval(),<BR>
+             deriv(), sinteg()</A>
+         </TD>
+         <TD>interpolate using a cubic spline</TD>
+         <TD>none</TD>
+      </TR>
+      <TR>
+         <TD><A HREF="../cmathsrc/stint.c">stint.c</A></TD>
+         <TD>stint0(), stint1(),<BR>stint2(), stint3()</TD>
+         <TD>integrate stiff ODE's</TD>
+         <TD>decomp(),<BR>solve()</TD>
+      </TR>
+      <TR>
+         <TD><A HREF="../cmathsrc/tridiag.c">tridiag.c</A></TD>
+         <TD>tridiag(), trisolve()</TD>
+         <TD>solve a tridiagonal matrix equation</TD>
+         <TD>none</TD>
+      </TR>
+      <TR>
+         <TD><A HREF="../cmathsrc/zeroin.c">zeroin.c</A></TD>
+         <TD>zeroin()</TD>
+         <TD>solve a single nonlinear equation</TD>
+         <TD>none</TD>
+      </TR>
+      <TR>
+         <TD><A HREF="../cmathsrc/zerov.c">zerov.c</A></TD>
+         <TD>zerov(), residsq(),<BR>jacobn(), dresid()</TD>
+         <TD>solve a system of nonlinear equations</TD>
+         <TD>nelmin(),<BR>decomp(),<BR>solve(),<BR>conjgg()</TD>
+      </TR>
+   </TABLE>
+
+   <HR>
+   <ADDRESS>
+      <B>NM_LIB</B> (C) P. A. Jacobs<BR>
+      Last Updated: 1-Mar-1998
+   </ADDRESS>
+</BODY>
+</HTML>

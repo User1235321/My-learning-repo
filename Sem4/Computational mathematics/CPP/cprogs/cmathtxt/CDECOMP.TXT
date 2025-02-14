@@ -1,0 +1,219 @@
+------------------------------------------------------------------
+Design Software                                cdecomp(), csolve()
+------------------------------------------------------------------
+
+
+1.0  Purpose.
+
+     Solve the linear algebraic equation Ax = b by decomposing the 
+matrix A into an upper-triangular matrix U and a lower  triangular 
+matrix L such that At=tLU.  The elements of each of  these  arrays 
+are COMPLEX.
+
+
+2.0  How to use the functions.
+
+     The function cdecomp() receives and returns  all  information 
+via its formal arguments.  It is declared as 
+     
+     int cdecomp (n, ndim, A, cond, pivot, flag)
+     int    n, ndim;
+     struct COMPLEX *A;
+     double *cond;
+     int    pivot[], *flag;
+
+If cdecomp() successfully  decomposes  A,  then  csolve()  may  be 
+invoked to solve the system for any number  of  right-hand  sides.  
+csolve() is declared as 
+
+     int csolve (n, ndim, A, b, pivot)
+     int    n, ndim;
+     struct COMPLEX *A, b[];
+     int    pivot[];
+
+
+2.1  Parameter types.
+
+     n         : integer value
+     ndim      : integer value
+     A         : pointer to an array of COMPLEX elements with
+                 dimension A[ndim*ndim], ndim > n.
+                 For some compilers, you may declare A as a two
+                 dimensional array and address it as A[i][j]. 
+                 Alternatively, A may be declared as a pointer to
+                 a single dimensional array and be addressed as 
+                 A[i*ndim + j].  The real and imaginary parts may
+                 be accessed as A[k].re and A[k].im respectively.
+     cond      : pointer to a double variable
+     pivot     : pointer to a vector of integer values with
+                 dimension pivot[ndim], ndim > n
+     flag      : pointer to an integer variable
+     b         : pointer to a vector of COMPLEX elements with
+                 dimension b[ndim], ndim > n
+
+
+2.2  Input to cdecomp().
+
+     n         : The order of matrix A. n < ndim.
+     ndim      : The dimension of the rows of A as defined in the
+                 calling program.  cdecomp() needs this value to 
+                 access the elements of A correctly.
+     A         : The matrix to be decomposed.
+
+
+2.3  Output from cdecomp().
+
+     cdecomp() : returns an unspecified integer value which should
+                 be ignored.
+     A         : The original matrix is replaced with the upper
+                 triangular matrix U and a permuted version of
+                 the lower triangular matrix I-L such that
+                 (permutation matrix) * A = L * U.
+     cond      : An estimate of the condition number of A.  
+                 If (cond + 1.0 == cond) then A is singular to 
+                 working precision.  cond is set to 1.0e+32 if
+                 exact singularity is detected.  Also, the value
+                 of flag is set to 3 if A is singular.
+     pivot     : The pivot vector.  pivot[k] is the index of the
+                 k-th pivot row.  pivot[n-1] is (-1)  , where
+                 ni is the number of interchanges.
+     flag      : Status indicator.
+                 flag = 0 : normal return
+                 flag = 1 : could not allocate memory for
+                            workspace
+                 flag = 2 : illegal user input (e.g. n < 1,
+                            n > ndim, A == NULL, pivot == NULL)
+                 flag = 3 : A is singular or nearly singular.  
+                            This is often caused by incorrectly
+                            passing data to cdecomp().
+
+The determinant can be obtained by setting
+     det = pivot[n-1] * A[0][0] * A[1][1] * ... * A[n-1][n-1]  .
+Note that these are COMPLEX operations.
+
+
+2.4  Workspace for cdecomp().
+
+     A vector of 2n double elements is allocated internally.
+
+
+2.5  Input to csolve().
+
+     n         : The order of matrix A. n < ndim.
+     ndim      : The dimension of the rows of A as defined in 
+                 the calling program.
+     A         : The factorized matrix from cdecomp().
+     b         : The right-hand-side vector.
+     pivot     : The pivot vector from cdecomp().
+
+
+2.6  Output from csolve().
+
+     csolve()  : returns an unspecified integer value. It should
+                 be ignored.
+     b         : The solution vector x in Ax = b.  If the
+                 condition number of A is large, then the
+                 solution may be inaccurate due to round-
+                 off error.  The relative error
+                 @ dx @  / @ x @  <  n * cond * e
+                 where e is the relative machine precision and the
+                 vector norms are formed by summing the absolute
+                 values of their elements.
+
+
+3.0  Method.
+
+     The matrix is  decomposed  using  Gaussian  elimination  with 
+partial pivoting.  The multipliers computed by cdecomp() and  used 
+in the forward elimination of A are stored  as  L.   The  function 
+csolve() uses these multipliers to perform  the  same  elimination 
+operations  on  b  and  then  solves  the  linear   system   using 
+back-substitution.
+
+
+4.0  Reference
+
+G.E. Forsythe, M.A. Malcolm, & C.B. Moler  : "Computer Methods for 
+Mathematical Computations". Prentice-Hall, Englewood Cliffs,  N.J. 
+1977.
+
+
+5.0  Example.
+
+     Solve 1 1-i    2-i   2-i 1 1 x  1   1  8+2i       1
+           1 2+s    9     4   1 1 x  1 = 1 (15+s)(1+i) 1  ,
+           1 1+i    7+i   2+i 1 1 x  1   1  7+13i      1
+
+where s = 1.0e-6 and i t=t-1.  The parameter s can  be  varied  to 
+investigate the effects of solving an ill-conditioned system.   As 
+s L 0, the matrix becomes singular.
+
+/* cdecompd.c
+   Sample driver for cdecomp() and csolve().
+*/
+
+#include <math.h>
+#include <stdio.h>
+#include "cmath.h"
+
+#define mdim 10
+#define INDX(i, j)  (i) * mdim + (j)
+
+main ()
+{
+static struct COMPLEX a[mdim * mdim], b[mdim];
+double cond;
+int    n, pivot[mdim], i, flag;
+double s;
+
+n       = 3;
+
+/* Set up real parts. */
+s       = 1.0e-6;  /* as s ---> 0.0, matrix becomes singular */
+b[0].re = 8.0;           b[1].re = 15.0+s;         b[2].re = 7.0;
+a[INDX(0,0)].re = 1.0;   a[INDX(0,1)].re = 2.0;    a[INDX(0,2)].re = 2.0;
+a[INDX(1,0)].re = 2.0+s; a[INDX(1,1)].re = 9.0;    a[INDX(1,2)].re = 4.0;
+a[INDX(2,0)].re = 1.0;   a[INDX(2,1)].re = 7.0;    a[INDX(2,2)].re = 2.0;
+
+/* Set up imaginary parts. */
+b[0].im = 2.0;           b[1].im = 15.0+s;         b[2].im = 13.0;
+a[INDX(0,0)].im = -1.0;  a[INDX(0,1)].im = -1.0;   a[INDX(0,2)].im = -1.0;
+a[INDX(1,0)].im = 0;     a[INDX(1,1)].im = 0.0;    a[INDX(1,2)].im = 0.0;
+a[INDX(2,0)].im = 1.0;   a[INDX(2,1)].im = 1.0;    a[INDX(2,2)].im = 1.0;
+
+printf ("\n\n  --- CMATH --- Design Software 1989\n");
+printf ("\nTest driver for cdecomp() and csolve().\n\n");
+
+cdecomp (n, mdim, a, &cond, pivot, &flag);
+printf ("%s\n", cmathmsg(CDECOMP_C, flag));
+
+if (flag == 0)
+   {
+   csolve (n, mdim, a, b, pivot);
+
+   printf ("Solution    =     ");
+   for(i = 0; i < n; i++) printf ("(%6.3f, %6.3f) ", b[i].re, b[i].im);
+   printf ("\n");
+   printf ("Correct answer is (1.0, 1.0), (1.0, 1.0), (1.0, 1.0)\n");
+
+   printf ("\n");
+   printf ("Condition number = %e\n", cond);
+   }
+
+return (0);
+}
+
+
+6.0  Program Results.
+
+  --- CMATH --- Design Software 1989
+
+Test driver for cdecomp() and csolve().
+
+cdecomp() : normal return
+Solution    =     (  1.00,  1.000) (  1.00,  1.000) ( 1.000,   1.00) 
+Correct answer is (1.0, 1.0), (1.0, 1.0), (1.0, 1.0)
+
+Condition number = 3.56678e+07
+
+

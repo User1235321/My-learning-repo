@@ -1,0 +1,297 @@
+head	1.1;
+access;
+symbols;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	98.08.08.11.36.05;	author peterj;	state Exp;
+branches;
+next	;
+
+
+desc
+@CMATH 1989 code
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/* cmplx.c
+   Some self-contained complex number routines.
+   */
+
+/************************************************/
+/*                                              */
+/*  CMATH.  Copyright (c) 1989 Design Software  */
+/*                                              */
+/************************************************/
+
+#include "cmath.h"
+#include <math.h>
+
+/*-----------------------------------------------------------------*/
+
+#if (PROTOTYPE)
+
+int cdivsn (double xr, double xi, double yr, double yi,
+            double *zr, double *zi)
+
+#else
+
+int cdivsn (xr, xi, yr, yi, zr, zi)
+double xr, xi, yr, yi;
+double *zr, *zi;
+
+#endif
+
+/* Purpose ...
+   -------
+   Complex number division routine without complex numbers.
+
+   Input ...
+   -----
+   xr + i xi  : numerator
+   yr + i yi  : denominator
+
+   Output ...
+   ------
+   zr + i zi  : (xr + i xi) / (yr + i yi)
+
+   Version ... 1.0,  July 1989
+   -------
+
+   This C code written by ...  Peter & Nigel,
+   ----------------------      Design Software,
+                               42 Gubberley St,
+                               Kenmore, 4069,
+                               Australia.
+
+   Reference ...
+   ---------
+   J.H. Wilkinson & C.Reinsch "Handbook for automatic computation.
+   Vol II. Linear algebra."  Springer-Verlag 1971, pp357-358.
+*/
+
+{  /* begin cdivsn() */
+double factor;
+
+if (fabs(yr) > fabs(yi))
+   {
+   factor = yi / yr;
+   *zr = (xr + factor * xi) / (factor * yi + yr);
+   *zi = (xi - factor * xr) / (factor * yi + yr);
+   }
+else
+   {
+   factor = yr / yi;
+   *zr = (factor * xr + xi) / (factor * yr + yi);
+   *zi = (factor * xi - xr) / (factor * yr + yi);
+   }
+
+return (0);
+}
+
+/*-----------------------------------------------------------------*/
+
+#if (PROTOTYPE)
+
+int cmultn (double xr, double xi, double yr, double yi,
+            double *zr, double *zi)
+
+#else
+
+int cmultn (xr, xi, yr, yi, zr, zi)
+double xr, xi, yr, yi;
+double *zr, *zi;
+
+#endif
+
+/* Purpose ...
+   -------
+   Complex number multiplication routine.
+
+   Input ...
+   -----
+   xr + i xi  : first complex factor
+   yr + i yi  : second complex factor
+
+   Output ...
+   ------
+   zr + i zi  : (xr + i xi) * (yr + i yi)
+
+   Version ... 1.0,  July 1989
+   -------
+
+   This C code written by ...  Peter & Nigel,
+   ----------------------      Design Software,
+                               42 Gubberley St,
+                               Kenmore, 4069,
+                               Australia.
+
+   Reference ...
+   ---------
+   J.H. Wilkinson & C.Reinsch "Handbook for automatic computation.
+   Vol II. Linear algebra."  Springer-Verlag 1971, pp357-358.
+*/
+
+{  /* begin cmultn() */
+double scale;
+
+scale = fabs(xr);
+if (scale < fabs(xi))  scale = fabs(xi);
+if (scale < fabs(yr))  scale = fabs(yr);
+if (scale < fabs(yi))  scale = fabs(yi);
+
+if (scale == 0.0)
+   {
+   *zr = 0.0;
+   *zi = 0.0;
+   }
+else
+   {
+   xr /= scale; xi /= scale;
+   yr /= scale; yi /= scale;
+   scale *= scale;
+   *zr = scale * (xr * yr - xi * yi);
+   *zi = scale * (xr * yi + yr * xi);
+   }
+
+return (0);
+}
+
+/*-----------------------------------------------------------------*/
+
+#if (PROTOTYPE)
+
+double cabslt (double xr, double xi)
+
+#else
+
+double cabslt (xr, xi)
+double xr, xi;
+
+#endif
+
+/* Purpose ...
+   -------
+   Magnitude of a complex number.
+
+   Input ...
+   -----
+   xr + i xi  : complex number
+
+   Output ...
+   ------
+   cabslt() returns the magnitude of x as a double value.
+
+   Version ... 1.0,  July 1989
+   -------
+
+   This C code written by ...  Peter & Nigel,
+   ----------------------      Design Software,
+                               42 Gubberley St,
+                               Kenmore, 4069,
+                               Australia.
+
+   Reference ...
+   ---------
+   J.H. Wilkinson & C.Reinsch "Handbook for automatic computation.
+   Vol II. Linear algebra."  Springer-Verlag 1971, pp357-358.
+*/
+
+{  /* begin cabslt() */
+double t;
+
+xr = fabs(xr);  xi = fabs(xi);
+if ( (xr == 0.0) && (xi == 0.0) )
+   t = 0.0;
+else
+   {
+   if (xr > xi)
+      {
+      t = xi / xr;
+      t = xr * sqrt(1.0 + t * t);
+      }
+   else
+      {
+      t = xr / xi;
+      t = xi * sqrt(1.0 + t * t);
+      }
+   }
+return (t);
+}
+
+/*-----------------------------------------------------------------*/
+
+#if (PROTOTYPE)
+
+int csqroot (double xr, double xi, double *zr, double *zi)
+
+#else
+
+int csqroot (xr, xi, zr, zi)
+double xr, xi;
+double *zr, *zi;
+
+#endif
+
+/* Purpose ...
+   -------
+   Square root of a complex number.
+
+   Input ...
+   -----
+   xr + i xi  : complex number
+
+   Output ...
+   ------
+   zr + i zi  : square root of x
+
+   Version ... 1.0,  July 1989
+   -------
+
+   This C code written by ...  Peter & Nigel,
+   ----------------------      Design Software,
+                               42 Gubberley St,
+                               Kenmore, 4069,
+                               Australia.
+
+   Reference ...
+   ---------
+   J.H. Wilkinson & C.Reinsch "Handbook for automatic computation.
+   Vol II. Linear algebra."  Springer-Verlag 1971, pp357-358.
+*/
+
+{  /* begin csqroot() */
+double t;
+
+if ( (xr == 0.0) && (xi == 0.0) )
+   {
+   *zr = 0.0;
+   *zi = 0.0;
+   }
+else
+   {
+   t = cabslt(xr, xi);
+   if (xr >= 0.0)
+      {
+      *zr = sqrt( (xr+t)/2.0 );
+      *zi = xi / (2.0 * (*zr));
+      }
+   else
+      {
+      *zi = sqrt( (fabs(xr)+t)/2.0 );
+      *zi = (xi < 0.0) ? -fabs(*zi) : fabs(*zi);
+      *zr = xi / (2.0 * (*zi));
+      }
+   }
+return (0);
+}
+
+/*-----------------------------------------------------------------*/
+@

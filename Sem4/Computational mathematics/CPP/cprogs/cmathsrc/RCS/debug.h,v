@@ -1,0 +1,86 @@
+head	1.1;
+access;
+symbols;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	98.08.08.11.36.05;	author peterj;	state Exp;
+branches;
+next	;
+
+
+desc
+@CMATH 1989 code
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@#define  DECOMP_C    101
+#define  SOLVE_C     102
+#define  BANDFAC_C   103
+#define  BANDSLV_C   104
+#define  TRIDIAG_C   105
+#define  TRISOLVE_C  106
+#define  QR_C        107
+#define  QRVECTOR_C  108
+#define  INVERT_C    109
+
+#define  ZEROIN_C    201
+#define  ZEROV_C     202
+#define  LAGUERRE_C  203
+#define  POLYROOT_C  204
+
+#define  SPLINE_C    301
+#define  SEVAL_C     302
+#define  DERIV_C     303
+#define  INIT_INTERV_C  304
+#define  BISECT_C    305
+#define  INTERV_C    306
+#define  INIT_BSPLVB_C 307
+#define  BSPLVB_C     308
+#define  FREE_BSPLVB_C  309
+#define  BSEVAL_C    310
+#define  BSDERIV_CPNTS_C  311
+#define  BSDERIV_C    312
+#define  BSPLINE_C   313
+#define  FITSPL_C    314
+
+#define  QK21_C      401
+#define  QK21INIT_C  402
+#define  QAGS_C      403
+#define  QUANC8_C    404
+
+#define  RKF45_C     501
+#define  RKFINIT_C   502
+#define  RKFEND_C    503
+#define  FEHL45_C    504
+
+#define  STINT0_C    601
+#define  STINT1_C    602
+#define  STINT2_C    603
+#define  STINT3_C    604
+
+#define  NELMIN_C    701
+#define  CONJGG_C    702
+
+#define  FFT_C       801
+#define  DFT_C       802
+#define  CHIRP_C     803
+
+#define  CDIVSN_C    901
+#define  CMULTN_C    902
+#define  CSQROOT_C   903
+#define  CABSLT_C    904
+
+#define  INDEXX_C   1001
+
+#define  CMATHMSG_C 2001
+
+/*-----------------------------------------------------------------*/
+@

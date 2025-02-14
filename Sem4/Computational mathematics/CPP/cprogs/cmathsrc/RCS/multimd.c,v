@@ -1,0 +1,108 @@
+head	1.1;
+access;
+symbols;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	98.08.08.11.36.05;	author peterj;	state Exp;
+branches;
+next	;
+
+
+desc
+@CMATH 1989 code
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/* multimd.c
+
+   try out the numerical recipes function minimization
+   in multi dimensions  */
+
+#include <math.h>
+#include <stdio.h>
+
+#include "braket.c"
+#include "linem.c"
+#include "multim.c"
+
+main ()
+{
+
+double ax, bx, cx, fa, fb, fc, object(), linem(), fmin, xmin;
+double work[3], p[3], dirctn[3], xmax, work2[3], work3[3];
+int flag, nfe, nje, iter, braket(), deriv(), n;
+
+ax = 1.0;
+bx = 2.0;
+xmax = 100.0;
+dirctn[0] = -0.7071;
+dirctn[1] = 0.7071;
+p[0] = 1.2;
+p[1] = -2.0;
+nfe = 0;
+n = 2;
+
+printf ("bracketing ...\n");
+braket (object, p, dirctn, n, &ax, &bx, &cx, xmax, &fa, &fb, &fc,
+        work, &nfe, &flag);
+
+printf ("flag = %d .. nfe = %d\n", flag, nfe);
+printf ("ax = %f .. fa = %f\n", ax, fa);
+printf ("bx = %f .. fb = %f\n", bx, fb);
+printf ("cx = %f .. fc = %f\n", cx, fc);
+
+printf ("\nLine minimization ...\n");
+nfe = 0;
+fmin = linem (object, p, dirctn, n, 1.0e-6, 100,
+              &xmin, xmax, work, &nfe, &flag);
+
+printf ("flag = %d .. nfe = %d\n", flag, nfe);
+printf ("x1 = %f .. x2 = %f\n", p[0], p[1]);
+printf ("xmin = %f .. fmin = %f\n", xmin, fmin);
+
+printf ("\nmultidimensional minimization ...\n");
+p[0] = -1.0;
+p[1] = 1.0;
+multim (object, deriv, p, 2, 1.0e-6, &fmin, &flag, 100,
+        xmax, &iter, &nfe, &nje, work, work2, work3, dirctn);
+
+printf ("flag = %d .. nfe = %d .. nje = %d\n", flag, nfe, nje);
+printf ("x1 = %f .. x2 = %f\n", p[0], p[1]);
+printf ("fmin = %f\n", fmin);
+
+}  /* end of main */
+
+
+
+double object (x)
+double x[];
+/* test function to minimize
+   This function is taken from the text "Practical Optimization"
+   by P.E. Gill et al.  It is also the example used in the NAG manuals.
+   */
+{
+double r;
+r = 4.0 * x[0] * (x[0] + x[1]) + 2.0 * x[1] * (x[1] + 1.0) + 1.0;
+r *= exp(x[0]);
+return (r);
+}
+
+
+int deriv (x, dx)
+double x[], dx[];
+{
+/* double object(); */
+double temp;
+temp = exp(x[0]);
+dx[0] = object(x) + temp * (8.0 * x[0] + 4.0 * x[1]);
+dx[1] = temp * (4.0 * (x[0] + x[1]) + 2.0);
+return (0);
+}@

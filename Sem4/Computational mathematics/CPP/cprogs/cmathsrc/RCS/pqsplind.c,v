@@ -1,0 +1,59 @@
+head	1.1;
+access;
+symbols;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	98.08.08.11.36.05;	author peterj;	state Exp;
+branches;
+next	;
+
+
+desc
+@CMATH 1989 code
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/* pqsplind.c
+   Exercise the periodic quadratic spline routine.
+   */
+
+#include <math.h>
+#include "pqsplin.c"
+
+main ()
+{
+#define  M  30
+double y[M], v[M], w1[M], w2[M], w3[M];
+double pi, delx;
+int n, j, flag;
+
+pi = 4.0 * atan(1.0);
+n = 20;
+delx = 2.0 * pi / n;
+
+printf ("Data points\n");
+for (j = 0; j <= n; ++j)
+   {
+   y[j] = sin(delx * j);
+   printf ("%d  %10.4f\n", j, y[j]);
+   }
+
+PQSplin (y, v, n, &flag, w1, w2, w3);
+printf ("\nFlag = %d\n", flag);
+
+printf ("\nBreak-points\n");
+for (j = 0; j < n; ++j)
+   {
+   printf ("%d  %10.4f\n", j, v[j]);
+   }
+
+}  /* ... end of main */
+@

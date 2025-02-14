@@ -1,0 +1,107 @@
+head	1.1;
+access;
+symbols;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	98.08.08.11.36.05;	author peterj;	state Exp;
+branches;
+next	;
+
+
+desc
+@CMATH 1989 code
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/* nelmind.c
+
+Sample driver to exercise the function minimization routine
+NELMIN.  This example of constrained minimization is taken
+from Olsson and Nelson [5] example 3.3.
+
+They give the solution X1 = 0.811
+                       X2 = -0.585
+                       YS = 87.8
+                       YP = 67.1
+with the objective function F = -YP + ABS(YS - 87.8)
+*/
+
+#include <math.h>
+#include <stdio.h>
+#include "cmath.h"
+
+main ()
+{
+
+double xmin[10], step[10];
+double ynewlo, reqmin, reltol, abstol;
+double testfun();
+int n, konvge, kcount, numres, ifault, icount;
+
+n = 2;
+reqmin = 1.0e-16;
+abstol = 1.0e-12;
+reltol = 1.0e-12;
+konvge = 5;
+kcount = 1000;
+step[0] = 0.5e+00;
+step[1] = 0.5e+00;
+xmin[0] = 0.0e+00;
+xmin[1] = 0.0e+00;
+
+printf ("\nTrial for nelmin() function minimizer ...\n\n");
+
+nelmin (testfun, n, xmin, &ynewlo, reqmin, step,
+	konvge, &icount, kcount, &numres, &ifault,
+	reltol, abstol);
+
+printf ("Minimum value of ");
+printf ("%f", ynewlo);
+printf ("  found at ..\n");
+printf ("x1 = %f  .. x2 = %f\n\n", xmin[0], xmin[1]);
+printf ("Statistics ... ");
+printf ("icount = %d .. numres = %d .. ifault = %d\n\n",
+         icount, numres, ifault);
+
+printf ("Expected solution ...\n");
+printf ("X1 = 0.811   X2 = -0.585   YS = 87.8   YP = 67.1\n");
+printf ("objective function F = -YP + ABS(YS - 87.8)\n\n");
+
+}  /* main .. nelmind */
+
+
+double testfun (n, x)
+int    n;
+double x[];
+{
+double ys1, ys2, ys3, yp1, yp2, yp3, ys, yp, bound;
+double temp;
+
+bound = sqrt (x[0] * x[0] + x[1] * x[1]);
+if (bound <= 1.0)
+  {
+  ys1 = 82.17 - 1.01 * x[0] - 8.61 * x[1];
+  ys2 = 1.4 * x[0] * x[0] - 8.76 * x[1] * x[1];
+  ys3 = -7.2 * x[0] * x[1];
+  ys  = ys1 + ys2 + ys3;
+
+  yp1 = 53.69 + 7.26 * x[0] - 10.33 * x[1];
+  yp2 = 7.22 * x[0] * x[0] + 6.43 * x[1] * x[1];
+  yp3 = 11.36 * x[0] * x[1];
+  yp = yp1 + yp2 + yp3;
+
+  temp = -yp + 1.0 * fabs(ys - 87.8);
+  }
+  else temp = 1.0e+32;
+
+return temp;
+}
+@

@@ -1,0 +1,430 @@
+head	1.1;
+access;
+symbols;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	98.08.08.11.46.29;	author peterj;	state Exp;
+branches;
+next	;
+
+
+desc
+@CMATH 1989 makefiles
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@# MAKEFILE for the CMATH library
+# This will build a set of demonstration files for a UNIX environment.
+#
+################################################
+#                                              #
+#  CMATH.  Copyright (c) 1989 Design Software  #
+#                                              #
+################################################
+#
+# This code written by ...  Peter & Nigel,
+# --------------------      Design Software,
+#                           42 Gubberley St,
+#                           Kenmore, 4069,
+#                           Australia.
+#
+#------------- These are the sample programs -----------------------
+#
+cmath.x : bandfacd.x bsplined.x cdecompd.x \
+	chebyd.x cmplxd.x complexd.x conjggd.x \
+	decompd.x dftd.x \
+	fftd.x fitpolyd.x fitspld.x \
+	indexxd.x invertd.x lspd.x \
+	nelmind.x polyd.x \
+	qagsd.x qinfd.x qk21d.x quanc8d.x \
+	qrd.x qrvd.x \
+	rkf45d.x splined.x stintd.x svdd.x \
+	tridiagd.x zeroind.x zerovd.x ;
+#
+	echo Now, try out the CMATH routines.
+#
+	bandfacd.x
+	bsplined.x
+	cdecompd.x
+	chebyd.x
+	cmplxd.x
+	complexd.x
+	conjggd.x
+	decompd.x
+	dftd.x
+	fftd.x
+	fitpolyd.x
+	fitspld.x
+	indexxd.x
+	invertd.x
+	lspd.x
+	nelmind.x
+	polyd.x
+	qagsd.x
+	qinfd.x
+	qk21d.x
+	quanc8d.x
+	qrd.x
+	qrvd.x
+	rkf45d.x
+	stintd.x
+	splined.x
+	svdd.x
+	tridiagd.x
+	zeroind.x
+	zerovd.x
+#
+#------------- Executable modules for sample programs --------------
+#
+bandfacd.x : bandfacd.o bandfac.o cmathmsg.o
+	cc bandfacd.o bandfac.o cmathmsg.o -lm -o bandfacd.x
+
+bsplined.x : bsplined.o bspline.o bandfac.o cmathmsg.o
+	cc bsplined.o bspline.o bandfac.o cmathmsg.o -lm -o bsplined.x 
+
+cdecompd.x : cdecompd.o cdecomp.o cmplx.o cmathmsg.o
+	cc cdecompd.o cdecomp.o cmplx.o cmathmsg.o -lm -o cdecompd.x 
+
+chebyd.x : chebyd.o cheby.o cmathmsg.o
+	cc chebyd.o cheby.o cmathmsg.o -lm -o chebyd.x
+
+cmplxd.x : cmplxd.o cmplx.o
+	cc cmplxd.o cmplx.o -lm -o cmplxd.x
+
+complexd.x : complexd.o complex.o
+	cc complexd.o complex.o -lm -o complexd.x
+
+conjggd.x : conjggd.o conjgg.o cmathmsg.o
+	cc conjggd.o conjgg.o cmathmsg.o -lm -o conjggd.x
+
+decompd.x : decompd.o decomp.o cmathmsg.o
+	cc decompd.o decomp.o cmathmsg.o -lm -o decompd.x
+
+dftd.x : dftd.o dft.o fft.o cmathmsg.o
+	cc dftd.o dft.o fft.o cmathmsg.o -lm -o dftd.x
+
+fftd.x : fftd.o fft.o cmathmsg.o
+	cc fftd.o fft.o cmathmsg.o -lm -o fftd.x
+
+fitpolyd.x : fitpolyd.o fitpoly.o cheby.o \
+	decomp.o cmathmsg.o
+	cc fitpolyd.o fitpoly.o cheby.o \
+	decomp.o cmathmsg.o -lm -o fitpolyd.x
+
+fitspld.x : fitspld.o fitspl.o conjgg.o \
+	spline.o cmathmsg.o
+	cc fitspld.o fitspl.o conjgg.o \
+	spline.o cmathmsg.o -lm -o fitspld.x
+
+indexxd.x : indexxd.o indexx.o cmathmsg.o
+	cc indexxd.o indexx.o cmathmsg.o -lm -o indexxd.x
+
+invertd.x : invertd.o invert.o decomp.o cmathmsg.o
+	cc invertd.o invert.o decomp.o cmathmsg.o -lm -o invertd.x
+
+lspd.x : lspd.o lsp.o svd.o cmathmsg.o
+	cc lspd.o lsp.o svd.o cmathmsg.o -lm -o lspd.x
+
+nelmind.x : nelmind.o nelmin.o cmathmsg.o
+	cc nelmind.o nelmin.o cmathmsg.o -lm -o nelmind.x
+
+polyd.x : polyd.o poly.o cmplx.o cmathmsg.o
+	cc polyd.o poly.o cmplx.o cmathmsg.o -lm -o polyd.x
+
+qagsd.x : qagsd.o qags.o qk21.o cmathmsg.o
+	cc qagsd.o qags.o qk21.o cmathmsg.o -lm -o qagsd.x
+
+qinfd.x : qinfd.o qinf.o qags.o qk21.o cmathmsg.o
+	cc qinfd.o qinf.o qags.o qk21.o cmathmsg.o -lm -o qinfd.x
+
+qk21d.x : qk21d.o qk21.o cmathmsg.o
+	cc qk21d.o qk21.o cmathmsg.o -lm -o qk21d.x
+
+qrd.x : qrd.o qr.o cmplx.o cmathmsg.o
+	cc qrd.o qr.o cmplx.o cmathmsg.o -lm -o qrd.x
+
+qrvd.x : qrvd.o qr.o cmplx.o cmathmsg.o
+	cc qrvd.o qr.o cmplx.o cmathmsg.o -lm  -o qrvd.x
+
+quanc8d.x : quanc8d.o quanc8.o cmathmsg.o
+	cc quanc8d.o quanc8.o cmathmsg.o -lm -o quanc8d.x
+
+rkf45d.x : rkf45d.o rkf45.o cmathmsg.o
+	cc rkf45d.o rkf45.o cmathmsg.o -lm -o rkf45d.x
+
+splined.x : splined.o spline.o cmathmsg.o
+	cc splined.o spline.o cmathmsg.o -lm -o splined.x
+
+stintd.x : stintd.o stint.o decomp.o cmathmsg.o
+	cc stintd.o stint.o decomp.o cmathmsg.o -lm -o stintd.x
+
+svdd.x : svdd.o svd.o cmathmsg.o
+	cc svdd.o svd.o cmathmsg.o -lm -o svdd.x
+
+tridiagd.x : tridiagd.o tridiag.o cmathmsg.o
+	cc tridiagd.o tridiag.o cmathmsg.o -lm  -o tridiagd.x
+
+zeroind.x : zeroind.o zeroin.o cmathmsg.o
+	cc zeroind.o zeroin.o cmathmsg.o -lm  -o zeroind.x
+
+zerovd.x : zerovd.o zerov.o decomp.o conjgg.o nelmin.o \
+	 cmathmsg.o
+	cc zerovd.o zerov.o decomp.o conjgg.o \
+	 nelmin.o cmathmsg.o -lm -o zerovd.x
+
+#----------- Object Modules for CMATH routines ------------
+
+bandfac.o : bandfac.c cmath.h
+	stripz.x bandfac.c
+	cc -c bandfac.c
+
+bspline.o : bspline.c cmath.h
+	stripz.x bspline.c
+	cc -c bspline.c
+
+cdecomp.o : cdecomp.c cmath.h
+	stripz.x cdecomp.c
+	cc -c cdecomp.c
+
+cheby.o : cheby.c cmath.h
+	stripz.x cheby.c
+	cc -c cheby.c
+
+cmathmsg.o : cmathmsg.c cmath.h
+	stripz.x cmathmsg.c
+	cc -c cmathmsg.c
+
+cmplx.o : cmplx.c cmath.h
+	stripz.x cmplx.c
+	cc -c cmplx.c
+
+complex.o : complex.c complex.h cmath.h
+	stripz.x complex.c
+	stripz.x complex.h
+	cc -c complex.c
+
+conjgg.o : conjgg.c cmath.h
+	stripz.x conjgg.c
+	cc -c conjgg.c
+
+decomp.o : decomp.c cmath.h
+	stripz.x decomp.c
+	cc -c decomp.c
+
+dft.o : dft.c cmath.h
+	stripz.x dft.c
+	cc -c dft.c
+
+fft.o : fft.c cmath.h
+	stripz.x fft.c
+	cc -c fft.c
+
+fitpoly.o : fitpoly.c cmath.h
+	stripz.x fitpoly.c
+	cc -c fitpoly.c
+
+fitspl.o : fitspl.c cmath.h
+	stripz.x fitspl.c
+	cc -c fitspl.c
+
+indexx.o : indexx.c cmath.h
+	stripz.x indexx.c
+	cc -c indexx.c
+
+invert.o : invert.c cmath.h
+	stripz.x invert.c
+	cc -c invert.c
+
+lsp.o : lsp.c cmath.h
+	stripz.x lsp.c
+	cc -c lsp.c
+
+nelmin.o : nelmin.c cmath.h
+	stripz.x nelmin.c
+	cc -c nelmin.c
+
+poly.o : poly.c cmath.h
+	stripz.x poly.c
+	cc -c poly.c
+
+qags.o : qags.c cmath.h
+	stripz.x qags.c
+	cc -c qags.c
+
+qinf.o : qinf.c cmath.h
+	stripz.x qinf.c
+	cc -c qinf.c
+
+qk21.o : qk21.c cmath.h
+	stripz.x qk21.c
+	cc -c qk21.c
+
+qr.o : qr.c cmath.h
+	stripz.x qr.c
+	cc -c qr.c
+
+quanc8.o : quanc8.c cmath.h
+	stripz.x quanc8.c
+	cc -c quanc8.c
+
+rkf45.o : rkf45.c cmath.h
+	stripz.x rkf45.c
+	cc -c rkf45.c
+
+spline.o : spline.c cmath.h
+	stripz.x spline.c
+	cc -c spline.c
+
+stint.o : stint.c cmath.h
+	stripz.x stint.c
+	cc -c stint.c
+
+svd.o : svd.c cmath.h
+	stripz.x svd.c
+	cc -c svd.c
+
+tridiag.o : tridiag.c cmath.h
+	stripz.x tridiag.c
+	cc -c tridiag.c
+
+zeroin.o : zeroin.c cmath.h
+	stripz.x zeroin.c
+	cc -c zeroin.c
+
+zerov.o : zerov.c cmath.h
+	stripz.x zerov.c
+	cc -c zerov.c
+
+#----------- Object Modules for sample drivers ------------
+
+bandfacd.o : bandfacd.c cmath.h
+	stripz.x bandfacd.c
+	cc -c bandfacd.c
+
+bsplined.o : bsplined.c cmath.h
+	stripz.x bsplined.c
+	cc -c bsplined.c
+
+cdecompd.o : cdecompd.c cmath.h
+	stripz.x cdecompd.c
+	cc -c cdecompd.c
+
+chebyd.o : chebyd.c cmath.h
+	stripz.x chebyd.c
+	cc -c chebyd.c
+
+cmplxd.o : cmplxd.c cmath.h
+	stripz.x cmplxd.c
+	cc -c cmplxd.c
+
+complexd.o : complexd.c complex.h cmath.h
+	stripz.x complexd.c
+	stripz.x complex.h
+	cc -c complexd.c
+
+conjggd.o : conjggd.c cmath.h
+	stripz.x conjggd.c
+	cc -c conjggd.c
+
+decompd.o : decompd.c cmath.h
+	stripz.x decompd.c
+	cc -c decompd.c
+
+dftd.o : dftd.c cmath.h
+	stripz.x dftd.c
+	cc -c dftd.c
+
+fftd.o : fftd.c cmath.h
+	stripz.x fftd.c
+	cc -c fftd.c
+
+fitpolyd.o : fitpolyd.c cmath.h
+	stripz.x fitpolyd.c
+	cc -c fitpolyd.c
+
+fitspld.o : fitspld.c cmath.h
+	stripz.x fitspld.c
+	cc -c fitspld.c
+
+indexxd.o : indexxd.c cmath.h
+	stripz.x indexxd.c
+	cc -c indexxd.c
+
+invertd.o : invertd.c cmath.h
+	stripz.x invertd.c
+	cc -c invertd.c
+
+lspd.o : lspd.c cmath.h
+	stripz.x lspd.c
+	cc -c lspd.c
+
+nelmind.o : nelmind.c cmath.h
+	stripz.x nelmind.c
+	cc -c nelmind.c
+
+polyd.o : polyd.c cmath.h
+	stripz.x polyd.c
+	cc -c polyd.c
+
+qagsd.o : qagsd.c cmath.h
+	stripz.x qagsd.c
+	cc -c qagsd.c
+
+qinfd.o : qinfd.c cmath.h
+	stripz.x qinfd.c
+	cc -c qinfd.c
+
+qk21d.o : qk21d.c cmath.h
+	stripz.x qk21d.c
+	cc -c qk21d.c
+
+qrd.o : qrd.c cmath.h
+	stripz.x qrd.c
+	cc -c qrd.c
+
+qrvd.o : qrvd.c cmath.h
+	stripz.x qrvd.c
+	cc -c qrvd.c
+
+quanc8d.o : quanc8d.c cmath.h
+	stripz.x quanc8d.c
+	cc -c quanc8d.c
+
+rkf45d.o : rkf45d.c cmath.h
+	stripz.x rkf45d.c
+	cc -c rkf45d.c
+
+splined.o : splined.c cmath.h
+	stripz.x splined.c
+	cc -c splined.c
+
+stintd.o : stintd.c cmath.h
+	stripz.x stintd.c
+	cc -c stintd.c
+
+svdd.o : svdd.c cmath.h
+	stripz.x svdd.c
+	cc -c svdd.c
+
+tridiagd.o : tridiagd.c cmath.h
+	stripz.x tridiagd.c
+	cc -c tridiagd.c
+
+zeroind.o : zeroind.c cmath.h
+	stripz.x zeroind.c
+	cc -c zeroind.c
+
+zerovd.o : zerovd.c cmath.h
+	stripz.x zerovd.c
+	cc -c zerovd.c
+
+
+@

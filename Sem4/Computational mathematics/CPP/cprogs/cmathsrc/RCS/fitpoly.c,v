@@ -1,0 +1,263 @@
+head	1.1;
+access;
+symbols;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	98.08.08.11.36.05;	author peterj;	state Exp;
+branches;
+next	;
+
+
+desc
+@CMATH 1989 code
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/* fitpoly.c
+   Fit a polynomial (in Chebyshev form) to a set of data points.
+   */
+
+/************************************************/
+/*                                              */
+/*  CMATH.  Copyright (c) 1989 Design Software  */
+/*                                              */
+/************************************************/
+
+#include "cmath.h"
+#if (STDLIBH)
+#include <stdlib.h>
+#endif
+#include <stdio.h>
+#include <math.h>
+
+#ifndef NULL
+#define  NULL  0
+#endif
+
+
+/*-----------------------------------------------------------------*/
+
+#if (PROTOTYPE)
+
+int fitpoly (int nd, double x[], double y[], double weight[],
+            double a, double b, int m, double c[], int *fail)
+
+#else
+
+int fitpoly (nd, x, y, weight, a, b, m, c, fail)
+int    nd;
+double x[], y[], weight[];
+double a, b;
+int    m;
+double c[];
+int    *fail;
+
+#endif
+
+/* Purpose ...
+   -------
+   Fit (in a least squares sense) a Chebyshev polynomial series
+   to a set of weighted data points.  The series is that defined
+   in cheby.c, vis.
+
+          n-1
+   F(x) = sum c[j] Tj(z)  +  c[0]/2
+          j=1
+
+   where z = 2 * (x - (b+a)/2) / (b-a) and Tj(z) is the jth
+   Chebyshev polynomial.  Note that -1 <= z <= +1.
+
+   Input ...
+   -----
+   nd      : number of data points. These are numbered 0 .. nd-1.
+   x[]     : x-coordinates of the data points
+             There is no particular order required.
+   y[]     : y-coordinates of the data points
+   weight[]: user assigned weights for the data
+   a       : lower bound of the Chebyshev polynomial
+   b       : upper bound of the Chebyshev polynomial
+             Note that the a <= x[k] <= b, k = 0 ... nd-1
+   m       : number of coefficients in the Chebyshev series
+
+   Output ...
+   ------
+   c[]     : The coefficients of the Chebyshev series.
+   fail    : status indicator
+             fail = 1 : illegal values for nd, ns
+                        nd < 1, m < 1
+             fail = 2 : the x[k] are not bounded by [a, b]
+             fail = 3 : not all of the weights are positive
+             fail = 4 : could not allocate workspace.
+             fail = 5 : solution for c[] failed
+
+   Workspace ...
+   ---------
+   double d[nd][m]
+   double a[m*m]
+   int    pivot[m]
+
+   This C code written by ...  Peter & Nigel,
+   ----------------------      Design Software,
+                               42 Gubberley St,
+                               Kenmore, 4069,
+                               Australia.
+
+   Version ... 1.0, Sept 1989
+   -------     1.1, 12 Dec 1989,  fixed memory allocation/deallocation
+
+   Reference ...
+   ---------
+   W. Cheny & D Kincaid : "Numerical Mathematics and Computing."
+   Brooks/Cole publishing company, Monterey, California, 1980.
+
+   Notes ...
+   -----
+   (1) Uses the CMATH routines decomp(), solve().
+   (2) Use cheby() to evaluate the Chebyshev series computed
+       by this routine.
+
+*/
+
+{
+int    i, j, k, flag;
+int    *pivot;
+double **d, *aa, cond;
+double zk, sum;
+
+/* Check error conditions */
+*fail = 0;
+
+/* do we have a polynomial and data ? */
+if (nd < 1 || m < 1 || weight == NULL || x == NULL || y == NULL
+    || c == NULL)
+   {
+   *fail = 1;
+   return (0);
+   }
+
+for (k = 0; k < nd; ++k)  /* are the data points in [a, b] */
+   {
+   if ((x[k] - a) * (x[k] - b) > 4.0 * EPSILON)
+      {
+      *fail = 2;
+      return (0);
+      }
+   }
+
+for (k = 0; k < nd; ++k)  /* finite and positive weights */
+   {
+   if (weight[k] <= 0.0)
+      {
+      *fail = 3;
+      return (0);
+      }
+   }
+
+/* try to allocate workspace */
+aa = (double *) NULL;
+d = (double **) NULL;
+pivot = (int *) NULL;
+
+aa = (double *) malloc (m * m * sizeof(double));
+if (aa == NULL)
+   {
+   *fail = 4;
+   goto LeaveFit;
+   }
+d = (double **) malloc (m * sizeof(double *));
+if (d == NULL)
+   {
+   *fail = 4;
+   goto LeaveFit;
+   }
+for (i = 0; i < m; ++i) d[i] = (double *) NULL;
+for (i = 0; i < m; ++i)
+   {
+   d[i] = (double *) malloc (nd * sizeof(double));
+   if (d[i] == NULL)
+      {
+      *fail = 4;
+      goto LeaveFit;
+      }
+   }
+pivot = (int *) malloc (m * sizeof(int));
+if (pivot == NULL)
+   {
+   *fail = 4;
+   goto LeaveFit;
+   }
+
+/* Set up temporary array using the Chebyshev recurrence.
+   d[j][k] will become the jth Chebyshev polynomial value
+   at data point k  */
+for (k = 0; k < nd; ++k)
+   {
+   zk = ((x[k] - a) - (b - x[k])) / (b - a);  /* transform x */
+   d[0][k] = 1.0;
+   d[1][k] = zk;
+   for (j = 2; j < m; ++j)
+      d[j][k] = 2.0 * zk * d[j-1][k] - d[j-2][k];
+   }
+
+/* set up the coefficients of the normal equations */
+for (i = 0; i < m; ++i)
+   {
+   /* right-hand-side vector */
+   sum = 0.0;
+   for (k = 0; k < nd; ++k)  sum += y[k] * d[i][k] * weight[k];
+   c[i] = sum;
+
+   /* matrix coefficients. Note that these are symmetric. */
+   for (j = i; j < m; ++j)
+      {
+      sum = 0.0;
+      for (k = 0; k < nd; ++k) sum += d[i][k] * d[j][k] * weight[k];
+      aa[i * m + j] = sum;
+      aa[j * m + i] = sum;
+      }
+   }
+
+/* solve the normal equations for the Chebyshev series
+   coefficients */
+decomp (m, m, aa, &cond, pivot, &flag);
+
+switch (flag)
+   {
+   case 0  : break;             /* normal return */
+   case 1  : *fail = 4; break;  /* workspace problem */
+   case 2  : *fail = 1; break;  /* user input invalid */
+   case 3  : *fail = 5; break;  /* singular eqns */
+   default : *fail = 1;
+   }
+
+if (flag == 0)
+   {
+   solve (m, m, aa, c, pivot);
+   c[0] *= 2.0;   /* modify coefficient to match that in cheby() */
+   }
+
+LeaveFit:
+
+if (pivot != NULL) { free(pivot); pivot = NULL; }
+if (d  != NULL)
+   {
+   for (i = 0; i < m; ++i)
+      if (d[i] != NULL) { free(d[i]); d[i] = NULL; }
+   free(d);
+   d = NULL;
+   }
+if (aa != NULL) { free(aa); aa = NULL; }
+
+return (0);
+}
+
+/*-----------------------------------------------------------------*/
+@

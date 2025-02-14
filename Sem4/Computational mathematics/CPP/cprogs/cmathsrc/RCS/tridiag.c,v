@@ -1,0 +1,223 @@
+head	1.1;
+access;
+symbols;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	98.08.08.11.36.05;	author peterj;	state Exp;
+branches;
+next	;
+
+
+desc
+@CMATH 1989 code
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/* tridiag.c
+   Tridiagonal matrix solver  */
+
+/************************************************/
+/*                                              */
+/*  CMATH.  Copyright (c) 1989 Design Software  */
+/*                                              */
+/************************************************/
+
+#include <math.h>
+#include "cmath.h"
+
+/*-----------------------------------------------------------------*/
+
+#if (PROTOTYPE)
+
+int tridiag (int n,
+             double ld[], double d[], double ud[],
+             int *flag)
+
+#else
+
+int tridiag (n, ld, d, ud, flag)
+int    n;
+double ld[], d[], ud[];
+int    *flag;
+
+#endif
+
+/* Purpose ...
+   -------
+   Solve a set of equations in tridiagonal form
+
+   [ d0   ud0  0    0 ....                     ] [x0  ]     [r0  ]
+   | ld1  d1   ud1  0 ....                     | |x1  |     |r1  |
+   | .......................................   | |..  |  =  |..  |
+   | 0    0    0    ldj  dj  udj  0   0    0   | |xj  |     |rj  |
+   | .......................................   | |..  |     |..  |
+   [                              0 ldn-1 dn-1 ] [xn-1]     [rn-1]
+
+   using Gaussian elimination without pivoting.
+
+   This function, tridiag(), performs the forward elimination
+   while trisolve() may be used to solve for any number of
+   RHS vectors.
+
+   Input ...
+   -----
+   n     : order of system
+   ld    : lower off-diagonal  (elements 1 .. n-1)
+   d     : diagonal            (elements 0 .. n-1)
+   ud    : upper off-diagonal  (elements 0 .. n-2)
+
+   Output ...
+   ------
+   d, ud  : will contain the upper triangular matrix on return
+   ld     : will contain a record of the multipliers used to
+            eliminate the lower diagonal elements
+   flag   : = 0, for normal return
+            = 1, for routine failure
+	        (one of the diagonal elements was zero)
+            = 2, n < 3
+
+   This C code written by ...  Peter & Nigel,
+   ----------------------      Design Software,
+                               42 Gubberley St,
+                               Kenmore, 4069,
+                               Australia.
+
+   Version ... 1.0,  march 1988
+   -------     2.0,  may   1989 : function solve added
+
+   Notes ...
+   -----
+   (1) If the routine fails because d[0] (or d[n-1]) is zero then
+       rewrite the equations with d[1] (or d[n-2]) eliminated.
+       There should not be any problems with a diagonally
+       dominant system.
+   (2) Uses function fabs() from the standard math library.
+
+*/
+
+/* Matrix elements smaller than TOL are assumed zero.
+   This may cause problems if the matrix is unbalanced.
+   Try to make all the elements Order(1). */
+#define  TOL  EPSILON
+
+/*-----------------------------------------------------------------*/
+
+{  /* beginning of function tridiag() ... */
+double mult, pivot;
+int j;
+
+*flag = 0;
+
+if (n < 3)  { *flag = 2; goto Finish; }
+
+/* perform forward elimination and record multipliers */
+
+for (j = 1; j < n; ++j)
+   {  /* eliminate ld[j] */
+   pivot = d[j-1];
+   if (fabs(pivot) < TOL) { *flag = 1; goto Finish; }
+   mult = ld[j] / pivot;
+   if (fabs(mult) > TOL)
+      {
+      ld[j] = mult;
+      d[j] -= ud[j-1] * mult;
+      }
+   else
+      ld[j] = 0.0;
+   }
+
+Finish:
+return;
+}   /* end of tridiag() */
+
+
+/*-----------------------------------------------------------------*/
+
+#if (PROTOTYPE)
+
+int trisolve (int n,
+              double ld[], double d[], double ud[], double x[],
+              int *flag)
+
+#else
+
+int trisolve (n, ld, d, ud, x, flag)
+int    n;
+double ld[], d[], ud[], x[];
+int    *flag;
+
+#endif
+
+/* Purpose ...
+   -------
+   Solve a set of equations in tridiagonal form using Gaussian
+   elimination without pivoting.
+
+   This function, trisolve(), performs the back-substitution
+   on the supplied RHS vector.
+
+   Do not use this function if tridiag() has failed.
+
+   Input ...
+   -----
+   n         : order of system
+   ld, d, ud : modified matrix diagonals as computed by tridiag()
+   x         : right-hand-side vector
+
+   Output ...
+   ------
+   flag   : = 0, for normal return
+            = 1, for routine failure
+	        (one of the diagonal elements was zero)
+
+   This C code written by ...  Peter & Nigel,
+   ----------------------      Design Software,
+                               42 Gubberley St,
+                               Kenmore, 4069,
+                               Australia.
+
+   Version ... 1.0,  may 1989
+   -------
+
+   Notes ...
+   -----
+   (1) Uses function fabs() from the standard math library.
+
+*/
+
+{
+int    j;
+double pivot;
+
+*flag = 0;
+
+/* forward elimination of RHS vector
+   using recorded multipliers  */
+for (j = 1; j < n; ++j) x[j] -= ld[j] * x[j-1];
+
+/* --- back substitution --- */
+pivot = d[n-1];
+if (fabs(pivot) < TOL) { *flag = 1; goto Finish; }
+x[n-1] /=  pivot;
+
+for (j = n-2; j >= 0; --j)
+   {  /* solve for x[j] */
+   pivot = d[j];
+   if (fabs(pivot) < TOL) { *flag = 1; goto Finish; }
+   x[j] = (x[j] - ud[j] * x[j+1]) / pivot;
+   }
+
+Finish:
+return (0);
+}
+
+/*-----------------------------------------------------------------*/
+@

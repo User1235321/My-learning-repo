@@ -1,0 +1,144 @@
+c     ga_opt.fh
+c     Header file for the Genetic Algorithm Optimizer.
+c     ------------------------------------------------
+
+c     ---------
+c     Constants
+c     ---------
+
+c     Debug levels 
+c     0: no messages printed
+c     1: summary results each generation
+c     2: subroutine tracing
+c     3: intermediate results printed
+c     4: right down to the bit level
+c     5: print messages on start and finish of 
+c        frequently called function/subroutines
+
+      integer   GA_DEBUG
+      parameter(GA_DEBUG = 0)
+
+c     Dimensions for the work arrays
+c     MAXPOP    : number of individuals in a population
+c     MAXSTRING : number of bits in a chromosome string
+c     MAXPAR    : number of parameters encoded in a string
+
+      integer   MAXPOP, MAXSTRING, MAXPAR
+      parameter(MAXPOP    = 100)
+      parameter(MAXSTRING = 50)
+      parameter(MAXPAR    = 5)
+
+c     Fitness scaling constant.
+c     For small populations of between 50 and 100,
+c     values of 1.2 to 2.0 can be used.
+
+      parameter(FMULTIPLE = 2.0)
+
+c     -------------------------
+c     Types and Data Structures
+c     -------------------------
+
+      structure /individual/
+c        Chromosome = string of bits
+         integer chrom(MAXSTRING)
+c        Phenotype  = parameter value
+         real*8 x(MAXPAR)
+c        scaled fitness measure
+         real*8 fitness
+c        value of objective function
+         real*8 objective
+c        ids of my parents
+         integer parent1, parent2
+      end structure
+
+c     -----------
+c     Global data
+c     -----------
+
+      structure /ga_data/
+
+c        Data for the populations
+         record /individual/ oldpop(MAXPOP), newpop(MAXPOP)
+
+c        Number of individuals in population (Assumed even)
+         integer popsize
+
+c        Length of string encoding chromosome
+         integer lchrom
+
+c        Number of perameters in the phenotype
+         integer nx
+
+c        bits per parameter
+         integer xbits
+
+c        scale to keep 0.0 <= x < 1.0 
+         real*8 xscale
+
+c        generation counter
+         integer gen
+
+c        maximum number of generations
+         integer maxgen
+
+c        max generations with no improvement
+c        reset each time a new best is found
+         integer spin
+         integer spin_counter
+
+c        Seed for random numbers
+         integer iseed
+
+c        probability of cross-over
+         real*8 pcross
+
+c        probability of mutation
+         real*8 pmutation
+
+c        sum of population fittness
+         real*8 sumfitness
+
+c        running count of mutations
+         integer nmutation
+
+c        running count of cross-overs
+         integer ncross
+
+c        fitness scaling parameters
+         real*8 a_scale, b_scale
+  
+c        Average fitness of population
+         real*8 avg
+
+c        Maximum fitness of population
+         real*8 max
+
+c        Minimum fitness of population 
+         real*8 min
+
+c        array of choices
+         integer choices(MAXPOP)
+
+c        number of remaining choices, as used in the stochastic
+c        remainder selection process.
+         integer nremain
+
+c        index of the individual with maximum fitness this generation
+         integer best
+
+c        The best individual in all previous generations
+         record /individual/ ultimate
+
+c        elitist=1, apply elitist strategy
+c               =0, completely replace pop
+         integer elitist
+
+c        report_flag=1, write fitness report for each generation
+c                   =0, don't write anything
+         integer report_flag
+
+c        return_flag gives some hints as to what (if anything) went wrong
+         integer return_flag
+      end structure
+
+c --------- end of ga_opt.fh -----------

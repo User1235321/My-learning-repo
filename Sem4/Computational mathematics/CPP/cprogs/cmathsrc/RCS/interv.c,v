@@ -1,0 +1,190 @@
+head	1.1;
+access;
+symbols;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	98.08.08.11.36.05;	author peterj;	state Exp;
+branches;
+next	;
+
+
+desc
+@CMATH 1989 code
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/* interv.c
+   Knot vector interval search.  */
+
+/************************************************/
+/*                                              */
+/*  CMATH.  Copyright (c) 1989 Design Software  */
+/*                                              */
+/************************************************/
+
+#include "cmath.h"
+
+/*---------------------------------------------------------------------------*/
+
+int         ihi, middle;
+static int  ilo;
+/*
+  Globals for getting knot and parameter values(s) to bisect, without
+  passing arguments.
+*/
+double       *t, param;
+
+/*  A little ditty to make sure interv kicks off correctly.  */
+
+int init_interv()
+
+{
+  ilo = 0;
+  return ilo;
+}  /*  End of init_interv()  */
+
+/*  Bisection search once main routine has bracketed knot interval.  */
+
+int  bisect ()
+
+{
+  middle = (ilo + ihi) / 2;
+  while (middle != ilo) {
+     if (param < t[middle])
+        ihi = middle;
+       else
+        ilo = middle;
+     middle = (ilo + ihi) / 2;
+  }
+  return ilo;
+}  /*  End of routine bisect()  */
+
+#if (ANSII)
+
+int  interv (double knots[], int numknots, double parameter, int *left,
+             int *flag)
+
+#else
+
+int  interv (knots[], numknots, parameter, *left, *flag)
+int    numknots, *left, *flag;
+double  knots[], parameter;
+
+#endif
+
+/* Purpose ...
+   Computes left = max(i, where 0 <= i < numknots and knots(i) <= parameter)
+   The programme is designed to be efficient in the common situation that
+   it is called repeatedly, with 'parameter' taken from an increasing or
+   decreasing sequence.
+
+
+   Input :
+   -------
+   knots     :  A real sequence, of length numknots, assumed to be nondecreasing.
+   numknots  :  Number of terms in the sequence knots.
+   parameter :  The point whose location with respect to the sequence t is
+                to be determined.
+
+   Output   :
+   ----------
+   left      :  max(i, where 0 <= i < numknots and knots(i) <= parameter)
+   flag      :  status flag
+                =0  normal return.
+
+   This C code written by ...  Nigel and Peter
+                               Design Software,
+                               42 Gubberley Street,
+                               KENMORE, 4069.
+                               Australia.
+
+   Notes ...
+   -----
+   (1)  Adapted from the FORTRAN subroutine of the same name, from
+        de Boor, C.  A Practical Guide to Splines.  Applied Mathematical
+        Sciences Volume 27.  Springer-Verlag, New York.  1978.
+   (2)  knots[0] must be less than knots[numknots-1].
+
+
+*/
+
+{  /*  Begin procedure interv()  */
+
+int  istep;
+
+  *flag = 0;
+  ihi = ilo + 1;
+  if ( ihi >= numknots ) {
+     ihi = numknots - 1;
+     ilo = ihi - 1;
+  }
+
+/*  set up values for bisect.  */
+  param = parameter;
+  t = knots;
+
+  if ( param < knots[ihi] ) {
+     if ( param >= knots[ilo] ) {  /*  have bracketed parameter - finished!  */
+        *left = ilo;
+        return;
+     };
+
+/*  param < knots[ilo], decrease ilo  */
+     istep = 1;
+     Decr_ilo:
+        ihi = ilo;
+        ilo = ihi - istep;
+        if ( ilo <= 0 ) {
+/*  Check input data for validity.  Last resort.  */
+           if (param < knots[0])  {
+              *flag = -1;
+              *left = 0;
+              return;
+           }
+           ilo = 0;
+           *left = bisect ();
+           return;
+        };
+        if ( param >= knots[ilo] ) {
+           *left = bisect ();
+           return;
+        }
+        istep = istep * 2;
+     goto Decr_ilo;
+     }
+    else  {
+/*  parameter >= knots[ihi], increase ihi  */
+     istep = 1;
+     Incr_ihi:
+        ilo = ihi;
+        ihi = ilo + istep;
+        if ( ihi >= numknots - 1 ) {
+           ihi = numknots - 1;
+/*  Check input data for validity.  Last resort.  */
+           if (param >= knots[ihi])  {
+              *flag = 1;
+              *left = ihi;
+              return;
+           }
+           *left = bisect ();
+           return;
+        };
+        if ( param < knots[ihi] ) {
+           *left = bisect ();
+           return;
+        }
+        istep = istep * 2;
+     goto Incr_ihi;
+     }
+}  /*  End on subroutine interv()  */
+
+
+@

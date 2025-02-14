@@ -1,0 +1,234 @@
+------------------------------------------------------------------
+Design Software                                           nelmin()
+------------------------------------------------------------------
+
+
+1.0  Purpose.
+
+     Find the minimum value of a user defined scalar function f(x) 
+where  x  is  a  vector  of   independent   variables.    Function 
+derivatives are not required and  f(x)  need  not  be  continuous.  
+This minimizer is best for cases with  fewer  than  5  independent 
+variables but will still work for cases with more.
+
+     Although  nelmin()  formally   minimizes   an   unconstrained 
+function f(x), constraints may be included by either (i) including 
+a  penalty  function  in  f(x)  or  (ii)  setting  f(x)  to   some 
+(relatively) large value when x is out of bounds.
+
+
+2.0  How to use the function.
+
+     The function nelmin() is declared as an integer function  but 
+receives and returns all information via its formal arguments.  It 
+is defined as
+     
+     int nelmin (f, n, x, fmin, reqmin, dx, convge, nfe,
+                 maxfe, numres, flag, reltol, abstol)
+     double (*f)();
+     int    n;
+     double x[], *fmin, reqmin, dx[];
+     int    convge, *nfe, maxfe, *numres, *flag;
+     double reltol, abstol;
+
+
+2.1  Parameter types.
+
+     f         : pointer to a function returning a double value
+                 double f (n, x)
+                 int    n;
+                 double x[];
+                 {
+                 return (double value);
+                 }
+     n         : integer value
+     x         : pointer to a vector of double values 
+                 with dimension > n
+     fmin      : pointer to a double variable
+     reqmin    : double value
+     dx        : pointer to a vector of double values 
+                 with dimension > n
+     convge    : integer value
+     nfe       : pointer to an integer variable
+     maxfe     : integer value
+     numres    : pointer to an integer variable
+     flag      : pointer to an integer variable
+     reltol    : double value
+     abstol    : double value
+
+
+2.2  Input.
+
+     f         : The name of the user defined function f(x).
+                 For best results, f should be scaled to be 
+                 order 1.0.
+     n         : The number of independent variables.
+     x         : The vector containing the starting guess.
+                 For best results the elements of x should be
+                 scaled to stay within the range -1.0 < x < 1.0,
+                 j = 0 ... n-1.
+     reqmin    : The search will be terminated when the variance 
+                 for the set of function values defining the
+                 simplex is less than reqmin.
+                 It must be set to a value larger than the
+                 rounding error of the variance computation.
+                 A value somewhere between the required accuracy
+                 of the function at the minimum and the square
+                 of this value is a good starting point.
+     dx        : The size of the steps to be taken in each 
+                 direction when forming the initial "simplex".
+                 The points in the simplex are the vertices of an
+                 n-dimensional polyhedron.  The relative 
+                 magnitudes of the dx[] elements should reflect
+                 the magnitudes of the elements  of x.
+     convge    : The convergence check is carried out every
+                 convge steps.
+     maxfe     : Maximum number of function evaluations allowed.
+     reltol    : Relative tolerance on the true minimum check.
+                 Should be set to zero for well behaved objective
+                 functions where restarts are not a problem.
+     abstol    : Absolute tolerance on the true minimum check.
+                 As for reltol, abstol should be set to zero
+                 unless restarts are a problem.
+
+
+2.3  Output.
+
+     nelmin()  : return an unspecified integer value which
+                 should be ignored.
+     x         : The best guess for the coordinates of the minimum.
+     fmin      : The value of the objective function at this 
+                 minimum point.
+     nfe       : Number of function evaluations used.
+     numres    : The number of restarts.  A restart occurs if the
+                 convergence test based on the variance of the 
+                 simplex function values is passed but the true
+                 mimimum check fails.  The simplex will be
+                 contracted about the best guess and the search
+                 continued.
+     flag      : An error indicator.
+                 flag = 0 : Normal return.
+                 flag = 1 : Values for reqmin, n, or convge are
+                            illegal.
+                 flag = 2 : The search was terminated because
+                            maxfe was exceeded.
+                 flag = 3 : Could not allocate memory for
+                            the internal workspace.
+
+
+2.4  Workspace.
+
+     Array workspace consisting of (n t+t6n) elements is allocated 
+within nelmin().
+
+
+3.0  Method.
+
+     The functtion nelmin() generates a simplex of n+1  points  in 
+n-dimensional space.  It then takes a number of steps  "down-hill" 
+away from large values of f(x).  At  each  step,  the  simplex  is 
+updated by dropping the point having maximum f(x) and  introducing 
+a new point with a lower value.
+
+
+4.0  References.
+
+     J.A. Nelder & R. Mead (1965): "A simplex method for  function 
+minimization."  Computer Journal 7, 308-313.
+
+     R. O'Neill (1971): "Algorithm  AS47.   Function  minimization 
+using a simplex algorithm."  Appl. Statist. 20, 338-345.
+
+
+5.0  Example.
+
+     Find the minimum of 
+
+     f(x , x ) = exp(x ) (4x  + 2x  + 4x x  + 2x  + 1)
+with starting values x  = -1.0, x  = 1.0.
+
+/* nelmind.c
+   Sample driver to exercise the function minimizer nelmin().
+*/
+
+#include <math.h>
+#include <stdio.h>
+#include "cmath.h"
+
+main ()
+{
+
+double xmin[10], step[10];
+double fmin, reqmin, reltol, abstol;
+double object();
+int    n, konvge, maxfe, numres, flag, nfe;
+
+n       = 2;
+reqmin  = 1.0e-16;
+abstol  = 1.0e-12;
+reltol  = 1.0e-12;
+konvge  = 5;
+maxfe   = 1000;
+step[0] = 0.1;
+step[1] = 0.1;
+xmin[0] = -1.0;
+xmin[1] =  1.0;
+
+printf ("\n\n  --- CMATH --- Design Software 1989\n");
+printf ("\nExercise the function minimizer nelmin().\n\n");
+
+nelmin (object, n, xmin, &fmin, reqmin, step,
+        konvge, &nfe, maxfe, &numres, &flag,
+        reltol, abstol);
+printf ("%s\n\n", cmathmsg(NELMIN_C, flag));
+
+if (flag == 0 || flag == 2)
+   {
+   printf ("Minimum objective value of ");
+   printf ("%e", fmin);
+   printf ("  found at ..\n");
+   printf ("x[0] = %f  .. x[1] = %f\n\n", xmin[0], xmin[1]);
+   printf ("Statistics ... ");
+   printf ("nfe = %d .. numres = %d\n\n",
+            nfe, numres);
+
+   printf ("Expected solution ...\n");
+   printf ("x0 = 0.5   x1 = -1.0   objective = 0.0\n");
+   }
+
+return (0);
+}  /* end of nelmind */
+
+double object (n, x)
+int    n;
+double x[];
+/* test function to minimize
+   This function is taken from the text
+   "Practical Optimization"  by P.E. Gill et al.
+   It is also the example used in the NAG manuals.
+   */
+{
+double r;
+r = 4.0 * x[0] * (x[0] + x[1]) + 2.0 * x[1] * (x[1] + 1.0) + 1.0;
+r *= exp(x[0]);
+return (r);
+}
+
+
+6.0  Program Results.
+
+  --- CMATH --- Design Software 1989
+
+Exercise the function minimizer nelmin().
+
+nelmin() : normal return
+
+Minimum objective value of 5.81929e-10  found at ..
+x[0] = 0.500010  .. x[1] = -1.000019
+
+Statistics ... nfe = 81 .. numres = 0
+
+Expected solution ...
+x0 = 0.5   x1 = -1.0   objective = 0.0
+
+

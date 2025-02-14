@@ -1,0 +1,64 @@
+head	1.1;
+access;
+symbols;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	98.08.08.11.36.05;	author peterj;	state Exp;
+branches;
+next	;
+
+
+desc
+@CMATH 1989 code
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/* cmath2.h
+
+   Definitions for the numerical methods package.
+
+   P.A. Jacobs   Department of Mechanical Engineering
+		 University of Queensland
+
+-------------------------------------------------------------------*/
+
+int    decomp ();                /* Decompose a square matrix      */
+int    solve ();                 /* Solve linear system            */
+
+int    indexx ();                /* index an array of numbers      */
+
+int    nelmin ();                /* Simplex minimization           */
+
+int    qags ();                  /* adaptive Gaussian quadrature   */
+int    qqsort ();
+int    qextn ();
+
+int    qk21 ();                  /* fixed rule Gaussian quadrature */
+int    qk21init ();
+
+int    quanc8 ();              /* adaptive Newton-Cotes quadrature */
+
+int    rkf45 ();                 /* ode integrator                 */
+int    fehl45 ();                /* single step part               */
+
+int    splinecoeff ();           /* Cubic splines                  */
+double splineeval  ();
+double splinederiv ();
+
+int    stint1 ();                /* easy-to-use stiff ODE integ.   */
+int    stint ();                 /* difficult to use version       */
+
+int    tridiag ();               /* tridiagonal matrix solver      */
+
+double zeroin ();                /* zero of a function             */
+
+/*-----------------------------------------------------------------*/
+@

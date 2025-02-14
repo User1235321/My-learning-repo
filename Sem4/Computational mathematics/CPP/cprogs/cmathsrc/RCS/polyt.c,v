@@ -1,0 +1,103 @@
+head	1.1;
+access;
+symbols;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	98.08.08.11.36.05;	author peterj;	state Exp;
+branches;
+next	;
+
+
+desc
+@CMATH 1989 code
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/* polyt.c
+   Exercise the polynomial manipulation routines. */
+
+#include <math.h>
+#include <stdio.h>
+#include "cmath.h"
+
+main ()
+{
+#define ndim 10
+double cr[ndim], ci[ndim];
+double xxr[ndim], xxi[ndim];
+double errest, xr, xi, pr, pi, pdr, pdi, pddr, pddi, abserr;
+int    n, j, nr;
+struct polynomial p;
+int    polish, flag;
+double errtol;
+
+n = 4;
+cr[0] = -12.0;  cr[1] = 22.0;  cr[2] = -12.0;  cr[3] = 2.0;
+cr[4] = 0.0;
+ci[0] =   0.0;  ci[1] =  0.0;  ci[2] =   0.0;  ci[3] = 0.0;
+ci[4] = 0.0;
+
+printf ("\n\nExercise the polynomial functions.\n");
+
+polymake (&p, n, cr, ci);
+for (j = 0; j <= n; ++j)
+   printf ("coeff[%d] = (%6.3f,%6.3f)\n", j, p.cr[j], p.ci[j]);
+
+xr = 1.0;  xi = 0.0;
+polyeval (&p, xr, xi, &pr, &pi, &pdr, &pdi, &pddr, &pddi, &errest);
+printf ("\npoly = (%6.3f,%6.3f) at x = (%6.3f,%6.3f)\n",
+         pr, pi, xr, xi);
+printf ("\npd   = (%6.3f,%6.3f) at x = (%6.3f,%6.3f)\n",
+         pdr, pdi, xr, xi);
+printf ("\npdd  = (%6.3f,%6.3f) at x = (%6.3f,%6.3f)\n",
+         pddr, pddi, xr, xi);
+
+polish = 0;
+errtol = 1.0e-10;
+xr = 6.0;  xi = 3.0;
+laguerre (&p, &xr, &xi, errtol, polish, &flag);
+printf ("\nroot at x = (%6.3f,%6.3f)\n", xr, xi);
+printf ("flag = %d\n", flag);
+polyeval (&p, xr, xi, &pr, &pi, &pdr, &pdi, &pddr, &pddi, &errest);
+printf ("\npoly = (%6.3f,%6.3f) at x = (%6.3f,%6.3f)\n",
+         pr, pi, xr, xi);
+
+polydiv (&p, xr, xi);
+n = p.n;
+for (j = 0; j <= n; ++j)
+   printf ("coeff[%d] = (%6.3f,%6.3f)\n", j, p.cr[j], p.ci[j]);
+
+printf ("\n\nFind all roots\n");
+n = 2;
+cr[0] = 26.0/49.0;  cr[1] = -2.0/7.0;  cr[2] = 1.0;  cr[3] = 0.0;
+cr[4] = 0.0;
+ci[0] =   0.0;  ci[1] =  0.0;  ci[2] =   0.0;  ci[3] = 0.0;
+ci[4] = 0.0;
+polish = 1;
+nr = n;
+abserr = 1.0e-6;
+for (j = 0; j < nr; ++j)
+   {
+   xxr[j] = 0.0;
+   xxi[j] = 0.0;
+   }
+polyroot (n, cr, ci, xxr, xxi, &nr, abserr, polish, &flag);
+printf ("%s\n", cmathmsg(POLYROOT_C, flag));
+printf ("flag = %d\n", flag);
+if (flag == 0)
+   {
+   for (j = 0; j < nr; ++j)
+      {
+      printf ("x = (%6.3f,%6.3f)\n", xxr[j], xxi[j]);
+      }
+   }
+
+}@

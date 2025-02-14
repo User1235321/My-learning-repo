@@ -1,0 +1,115 @@
+head	1.1;
+access;
+symbols;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	98.08.08.11.36.05;	author peterj;	state Exp;
+branches;
+next	;
+
+
+desc
+@CMATH 1989 code
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/* comment.c
+   Strip comments from a c source file.  */
+
+/************************************************/
+/*                                              */
+/*  CMATH.  Copyright (c) 1989 Design Software  */
+/*                                              */
+/************************************************/
+
+#include "cmath.h"
+#if (STDLIBH)
+#include <stdlib.h>
+#endif
+#include <stdio.h>
+#include <string.h>
+#include <math.h>
+
+#ifndef NULL
+#define  NULL  0
+#endif
+
+/* Purpose ...
+   -------
+   Strip comments from the file specified on the command line.
+   Write the UNcommented code out to a new file.
+
+   Version ... 1.0, Sep 1989
+   -------
+
+   This C code written by ...  Peter & Nigel,
+   ----------------------      Design Software,
+                               42 Gubberley St,
+                               Kenmore, 4069,
+                               Australia.
+   */
+
+
+main (argc, argv)
+int argc;
+char *argv[];
+
+{
+FILE *fpin, *fpout;
+unsigned char ch1, ch2;
+
+if (argc != 3)
+   {
+   printf ("usage --- comment <infile> <outfile>\n");
+   exit (0);
+   }
+
+if (strcmp (argv[1], argv[2]) == 0)
+   {
+   printf ("cannot have <infile> == <outfile>\n");
+   exit (0);
+   }
+
+if ((fpin = fopen(argv[1],"r")) == NULL)
+   {
+   printf ("comment cannot open input file %s \n", argv[1]);
+   exit(0);
+   }
+if ((fpout = fopen(argv[2],"w")) == NULL)
+   {
+   printf ("comment cannot open output file %s \n", argv[2]);
+   exit(0);
+   }
+
+ch2 = getc(fpin);
+while (!feof(fpin) && ch2 != 0 && ch2 != 255)
+   {
+   ch1 = ch2;                                  /* save previous character */
+   ch2 = getc(fpin);                               /* get a new character */
+   if (ch1 == '/' && ch2 == '*')
+      {                                       /* read and discard comment */
+      do {
+         ch1 = ch2;
+         ch2 = getc (fpin);
+         } while (!(ch1 == '*' && ch2 == '/'));
+      ch1 = ch2;
+      ch2 = getc(fpin);
+      }
+   else
+      putc(ch1, fpout);                                 /* genuine C code */
+   }
+
+fclose (fpin);
+fclose (fpout);
+
+return (0);
+}
+@

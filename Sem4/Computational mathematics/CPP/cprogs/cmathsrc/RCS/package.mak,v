@@ -1,0 +1,330 @@
+head	1.1;
+access;
+symbols;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	98.08.08.11.46.29;	author peterj;	state Exp;
+branches;
+next	;
+
+
+desc
+@CMATH 1989 makefiles
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@# MAKEFILE for the CMATH library
+# This will copy and strip the cmath source files so that
+# they are ready for distribution.
+#
+################################################
+#                                              #
+#  CMATH.  Copyright (c) 1989 Design Software  #
+#                                              #
+################################################
+#
+# This code written by ...  Peter & Nigel,
+# --------------------      Design Software,
+#                           42 Gubberley St,
+#                           Kenmore, 4069,
+#                           Australia.
+#
+#------------- These are the sample programs -----------------------
+
+cmath.c2 :  bandfac.c2 bspline.c2 cdecomp.c2 \
+            cheby.c2 cmplx.c2 complex.c2 conjgg.c2 \
+            decomp.c2 dft.c2 \
+            fft.c2 fitpoly.c2 fitspl.c2 \
+            indexx.c2 invert.c2 lsp.c2 \
+            nelmin.c2 poly.c2 \
+            qags.c2 qinf.c2 qk21.c2 quanc8.c2 \
+            qr.c2  \
+            rkf45.c2 spline.c2 stint.c2 svd.c2 \
+            tridiag.c2 zeroin.c2 zerov.c2
+
+   copy \tc\cmath\turboc.mak a: /v
+   copy \tc\cmath\unix.mak   a: /v
+   copy \tc\cmath\msc.mak    a: /v
+
+   copy \tc\cmath\read.me    a: /v
+
+   copy \tc\cmath\stripz.c   a: /v
+   copy \tc\cmath\stripz.prj a: /v
+
+   copy \tc\cmath\cmath.h    a: /v
+   copy \tc\cmath\cmathmsg.c a: /v
+
+   copy \tc\cmath\bandfacd.c   a: /v
+   copy \tc\cmath\bandfacd.prj a: /v
+   copy bandfac.c2   a:bandfac.c /v
+
+   copy \tc\cmath\bsplined.c   a: /v
+   copy \tc\cmath\bsplined.prj a: /v
+   copy bspline.c2   a:bspline.c /v
+
+   copy \tc\cmath\cdecompd.c  a: /v
+   copy \tc\cmath\cdecompd.prj  a: /v
+   copy cdecomp.c2  a:cdecomp.c /v
+
+   copy \tc\cmath\chebyd.c   a: /v
+   copy \tc\cmath\chebyd.prj a: /v
+   copy cheby.c2   a:cheby.c /v
+
+   copy \tc\cmath\cmplxd.c   a: /v
+   copy \tc\cmath\cmplxd.prj a: /v
+   copy cmplx.c2   a:cmplx.c /v
+
+   copy \tc\cmath\complexd.c a: /v
+   copy \tc\cmath\complexd.prj a: /v
+   copy \tc\cmath\complex.h  a: /v
+   copy complex.c2 a:complex.c /v
+
+   copy \tc\cmath\conjggd.c  a: /v
+   copy \tc\cmath\conjggd.prj  a: /v
+   copy conjgg.c2  a:conjgg.c /v
+
+   copy \tc\cmath\decompd.c  a: /v
+   copy \tc\cmath\decompd.prj  a: /v
+   copy decomp.c2  a:decomp.c /v
+
+   copy \tc\cmath\dftd.c     a: /v
+   copy \tc\cmath\dftd.prj   a: /v
+   copy dft.c2     a:dft.c /v
+
+   copy \tc\cmath\fftd.c     a: /v
+   copy \tc\cmath\fftd.prj   a: /v
+   copy fft.c2     a:fft.c /v
+
+   copy \tc\cmath\fitpolyd.c a: /v
+   copy \tc\cmath\fitpolyd.prj a: /v
+   copy fitpoly.c2 a:fitpoly.c /v
+
+   copy \tc\cmath\fitspld.c  a: /v
+   copy \tc\cmath\fitspld.prj  a: /v
+   copy fitspl.c2  a:fitspl.c /v
+
+   copy \tc\cmath\indexxd.c  a: /v
+   copy \tc\cmath\indexxd.prj  a: /v
+   copy indexx.c2  a:indexx.c /v
+
+   copy \tc\cmath\invertd.c  a: /v
+   copy \tc\cmath\invertd.prj  a: /v
+   copy invert.c2 a:invert.c /v
+
+   copy \tc\cmath\lspd.c  a: /v
+   copy \tc\cmath\lspd.prj  a: /v
+   copy lsp.c2 a:lsp.c /v
+
+   copy \tc\cmath\nelmind.c a: /v
+   copy \tc\cmath\nelmind.prj a: /v
+   copy nelmin.c2 a:nelmin.c /v
+
+   copy \tc\cmath\polyd.c a: /v
+   copy \tc\cmath\polyd.prj a: /v
+   copy poly.c2 a:poly.c /v
+
+   copy \tc\cmath\qagsd.c a: /v
+   copy \tc\cmath\qagsd.prj a: /v
+   copy qags.c2 a:qags.c /v
+
+   copy \tc\cmath\qinfd.c a: /v
+   copy \tc\cmath\qinfd.prj a: /v
+   copy qinf.c2 a:qinf.c /v
+
+   copy \tc\cmath\qk21d.c a: /v
+   copy \tc\cmath\qk21d.prj a: /v
+   copy qk21.c2 a:qk21.c /v
+
+   copy \tc\cmath\quanc8d.c a: /v
+   copy \tc\cmath\quanc8d.prj a: /v
+   copy quanc8.c2 a:quanc8.c /v
+
+   copy \tc\cmath\qrd.c a: /v
+   copy \tc\cmath\qrd.prj a: /v
+   copy qr.c2 a:qr.c /v
+   copy \tc\cmath\qrvd.c a: /v
+   copy \tc\cmath\qrvd.prj a: /v
+
+   copy \tc\cmath\rkf45d.c a: /v
+   copy \tc\cmath\rkf45d.prj a: /v
+   copy rkf45.c2 a:rkf45.c /v
+
+   copy \tc\cmath\svdd.c a: /v
+   copy \tc\cmath\svdd.prj a: /v
+   copy svd.c2 a:svd.c /v
+
+   copy \tc\cmath\stintd.c a: /v
+   copy \tc\cmath\stintd.prj a: /v
+   copy stint.c2 a:stint.c /v
+
+   copy \tc\cmath\splined.c a: /v
+   copy \tc\cmath\splined.prj a: /v
+   copy spline.c2 a:spline.c /v
+
+   copy \tc\cmath\tridiagd.c a: /v
+   copy \tc\cmath\tridiagd.prj a: /v
+   copy tridiag.c2 a:tridiag.c /v
+
+   copy \tc\cmath\zeroind.c a: /v
+   copy \tc\cmath\zeroind.prj a: /v
+   copy zeroin.c2 a:zeroin.c /v
+
+   copy \tc\cmath\zerovd.c a: /v
+   copy \tc\cmath\zerovd.prj a: /v
+   copy zerov.c2 a:zerov.c /v
+
+#------------- stripped source files for CMATH routines --------------
+
+bandfac.c2 : \tc\cmath\bandfac.c
+   comment \tc\cmath\bandfac.c bandfac.c1
+   squish  bandfac.c1 bandfac.c2
+   del bandfac.c1
+
+bspline.c2 : \tc\cmath\bspline.c
+   comment \tc\cmath\bspline.c bspline.c1
+   squish  bspline.c1 bspline.c2
+   del bspline.c1
+
+cdecomp.c2 : \tc\cmath\cdecomp.c
+   comment \tc\cmath\cdecomp.c cdecomp.c1
+   squish  cdecomp.c1 cdecomp.c2
+   del cdecomp.c1
+
+cheby.c2 : \tc\cmath\cheby.c
+   comment \tc\cmath\cheby.c cheby.c1
+   squish  cheby.c1 cheby.c2
+   del cheby.c1
+
+cmplx.c2 : \tc\cmath\cmplx.c
+   comment \tc\cmath\cmplx.c cmplx.c1
+   squish  cmplx.c1 cmplx.c2
+   del cmplx.c1
+
+complex.c2 : \tc\cmath\complex.c
+   comment \tc\cmath\complex.c complex.c1
+   squish  complex.c1 complex.c2
+   del complex.c1
+
+conjgg.c2 : \tc\cmath\conjgg.c
+   comment \tc\cmath\conjgg.c conjgg.c1
+   squish  conjgg.c1 conjgg.c2
+   del conjgg.c1
+
+decomp.c2 : \tc\cmath\decomp.c
+   comment \tc\cmath\decomp.c decomp.c1
+   squish  decomp.c1 decomp.c2
+   del decomp.c1
+
+dft.c2 : \tc\cmath\dft.c
+   comment \tc\cmath\dft.c dft.c1
+   squish  dft.c1 dft.c2
+   del dft.c1
+
+fft.c2 : \tc\cmath\fft.c
+   comment \tc\cmath\fft.c fft.c1
+   squish  fft.c1 fft.c2
+   del fft.c1
+
+fitpoly.c2 : \tc\cmath\fitpoly.c
+   comment \tc\cmath\fitpoly.c fitpoly.c1
+   squish  fitpoly.c1 fitpoly.c2
+   del fitpoly.c1
+
+fitspl.c2 : \tc\cmath\fitspl.c
+   comment \tc\cmath\fitspl.c fitspl.c1
+   squish  fitspl.c1 fitspl.c2
+   del fitspl.c1
+
+indexx.c2 : \tc\cmath\indexx.c
+   comment \tc\cmath\indexx.c indexx.c1
+   squish  indexx.c1 indexx.c2
+   del indexx.c1
+
+invert.c2 : \tc\cmath\invert.c
+   comment \tc\cmath\invert.c invert.c1
+   squish  invert.c1 invert.c2
+   del invert.c1
+
+lsp.c2 : \tc\cmath\lsp.c
+   comment \tc\cmath\lsp.c lsp.c1
+   squish  lsp.c1 lsp.c2
+   del lsp.c1
+
+nelmin.c2 : \tc\cmath\nelmin.c
+   comment \tc\cmath\nelmin.c nelmin.c1
+   squish nelmin.c1 nelmin.c2
+   del nelmin.c1
+
+poly.c2 : \tc\cmath\poly.c
+   comment \tc\cmath\poly.c poly.c1
+   squish poly.c1 poly.c2
+   del poly.c1
+
+qags.c2 : \tc\cmath\qags.c
+   comment \tc\cmath\qags.c qags.c1
+   squish qags.c1 qags.c2
+   del qags.c1
+
+qinf.c2 : \tc\cmath\qinf.c
+   comment \tc\cmath\qinf.c qinf.c1
+   squish  qinf.c1 qinf.c2
+   del qinf.c1
+
+qk21.c2 : \tc\cmath\qk21.c
+   comment \tc\cmath\qk21.c qk21.c1
+   squish  qk21.c1 qk21.c2
+   del qk21.c1
+
+qr.c2 : \tc\cmath\qr.c
+   comment \tc\cmath\qr.c qr.c1
+   squish  qr.c1 qr.c2
+   del qr.c1
+
+quanc8.c2 : \tc\cmath\quanc8.c
+   comment \tc\cmath\quanc8.c quanc8.c1
+   squish quanc8.c1 quanc8.c2
+   del quanc8.c1
+
+rkf45.c2 : \tc\cmath\rkf45.c
+   comment \tc\cmath\rkf45.c rkf45.c1
+   squish  rkf45.c1 rkf45.c2
+   del rkf45.c1
+
+svd.c2 : \tc\cmath\svd.c
+   comment \tc\cmath\svd.c svd.c1
+   squish  svd.c1 svd.c2
+   del svd.c1
+
+spline.c2 : \tc\cmath\spline.c
+   comment \tc\cmath\spline.c spline.c1
+   squish  spline.c1 spline.c2
+   del spline.c1
+
+stint.c2 : \tc\cmath\stint.c
+   comment \tc\cmath\stint.c stint.c1
+   squish  stint.c1 stint.c2
+   del stint.c1
+
+tridiag.c2 : \tc\cmath\tridiag.c
+   comment \tc\cmath\tridiag.c tridiag.c1
+   squish  tridiag.c1 tridiag.c2
+   del tridiag.c1
+
+zeroin.c2 : \tc\cmath\zeroin.c
+   comment \tc\cmath\zeroin.c zeroin.c1
+   squish  zeroin.c1 zeroin.c2
+   del zeroin.c1
+
+zerov.c2 : \tc\cmath\zerov.c
+   comment \tc\cmath\zerov.c zerov.c1
+   squish zerov.c1 zerov.c2
+   del zerov.c1
+@

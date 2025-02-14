@@ -1,0 +1,123 @@
+                               CMATH                              
+
+  A Mathematical Software Library for the C Programming Language. 
+
+                    Peter Jacobs and Nigel Lott                   
+                         Design Software,                         
+                       42 Gubberley Street,                       
+                        Kenmore, Qld 4069,                        
+                            AUSTRALIA.                            
+
+     The CMATH library is a collection  of  mathematical  routines 
+written in the C programming language.  They include  routines  to 
+perform  the  basic  numerical  operations  of  equation  solving, 
+quadrature and function minimization and have similar capabilities 
+to some of the FORTRAN routines available  in  the  IMSL  and  NAG 
+libraries.  There is also a set of routines for  the  manipulation 
+of complex numbers.  
+
+The major areas of numerical mathematics covered by CMATH are ...
+
+Interpolation and Differentiation
+   Interpolate, differentiate or integrate using a cubic spline.
+   Interpolate or differentiate using a B-spline.
+   Interpolate or differentiate using a Chebyshev polynomial.
+   Fit a cubic spline using least squares.
+   Fit a polynomial using least squares.
+
+Matrices and Linear Equations
+   Decompose and solve a general matrix equation.
+   Invert a general matrix.
+   Decompose and solve a banded matrix equation.
+   Solve a tridiagonal system of equations.
+   Compute the Eigenvalues of a general real matrix. (QR method)
+   Eigenvalues and Eigenvectors of a general matrix.
+   Decompose and solve an MxN matrix equation.
+   Decompose and solve a COMPLEX system of equations.
+
+Nonlinear Equations
+   Solve a single nonlinear equation.
+   Solve a set of nonlinear equations.
+   Find the roots of a polynomial.
+
+Minimization
+   Minimize a function using function values only.
+   Minimize a well behaved function. (Conjugate gradient method)
+
+Quadrature
+   Fixed rule Gaussian quadrature.
+   Adaptive Gaussian quadrature.
+   Adaptive Newton-Cotes quadrature.
+   Integration over an infinite domain.
+
+Integration of Ordinary Differential Equations
+   Integrate a set of nonstiff ODE's. (Runge-Kutta method)
+   Integrate a set of stiff ODE's.  (Multi-step method)
+
+Fourier Transforms
+   Fast Fourier transform of a complex array.
+   Discrete Fourier transform of a general length array.
+
+Extras
+   An integrated package for COMPLEX arithmetic.
+   Sort an array of numbers into ascending order.
+   Translate CMATH error codes to English text.
+
+     The routines are supplied as machine readable source code  on 
+MS-DOS 5.25" discs.  We have used the library on a large range  of 
+machines and compilers including ... 
+.  MS-DOS micro-computers running Turbo-C, Microsoft-C and 
+   HI-TECH C compilers;
+.  UNIX workstations such as Hewlett-Packard series 9000, 
+   Sun series 3 and Silicon Graphics' Personal IRIS;
+.  minicomputers manufactured by Perkin Elmer, Pyramid and DEC;
+.  mainframes such as the IBM 3081 and the Convex C1.
+We think that the routines are fairly portable!
+
+     A 140 page reference manual is provided  and  sample  drivers 
+are supplied to demonstrate the use of  the  routines.   For  each 
+routine, the manual includes the following details.
+1.  The purpose of the routine.
+2.  Instructions on how to call the routine including explanations
+    of all input and output parameters.
+3.  A brief description of the algorithm used.
+4.  A reference to further literature on the algorithm.
+5.  A sample driver coded in C.
+6.  The output expected from the sample driver.
+The sample drivers may also be used to reduce your  coding  effort 
+when starting a new application.
+
+     If you would like more information or would like to  purchase 
+the CMATH library, please write to us or fill in  the  order  form 
+below.
+
+------------------------------------------------------------------
+
+                       CMATH order form for                       
+
+Miss, Mrs, Mr, Dr  _______________________________________
+
+Address  _________________________________________________
+
+         _________________________________________________
+
+         _________________________________Postcode________
+
+
+------------------------------------------------------------------
+| Qty |                    Item                        |  Cost   |
+------------------------------------------------------------------
+|     | CMATH library with manual          @ $90. each |         |
+|     | Extra manuals                      @ $25. each |         |
+|     | Post and Packing                               |  $5.    |
+------------------------------------------------------------------
+|                                             Total    |         |
+------------------------------------------------------------------
+
+Please make your crossed cheque or postal order payable to
+
+                         Design Software,                         
+                         42 Gubberley St,                         
+                         Kenmore, Q 4069,                         
+                            AUSTRALIA.                            
+

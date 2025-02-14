@@ -1,0 +1,116 @@
+head	1.1;
+access;
+symbols;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	98.08.08.11.36.05;	author peterj;	state Exp;
+branches;
+next	;
+
+
+desc
+@CMATH 1989 code
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/* fitspld.c
+   Sample driver for spline fitting routine fitspl().
+   */
+
+#include <math.h>
+#include <stdio.h>
+#include "cmath.h"
+
+main ()
+{
+int    i, flag, last;
+double sums, yy;
+#define  nd  28
+double x[nd], y[nd], w[nd];
+#define  ns  6
+double xs[ns], ys[ns], b[ns], c[ns], d[ns];
+double s1, s2;
+
+/* Data points, (x, y) and weight */
+
+x[0] = 0.20;  x[1] = 0.34;  x[2] = 0.47;  x[3] = 0.60;
+x[4] = 0.74;  x[5] = 0.90;  x[6] = 1.09;  x[7] = 1.32;
+x[8] = 1.60;  x[9] = 1.70;  x[10] = 1.90; x[11] = 2.25;
+x[12] = 2.60; x[13] = 2.95; x[14] = 3.10; x[15] = 3.65;
+x[16] = 4.00; x[17] = 4.66; x[18] = 5.15; x[19] = 5.64;
+x[20] = 6.17; x[21] = 7.00; x[22] = 8.00; x[23] = 9.00;
+x[24] = 10.0; x[25] = 11.0; x[26] = 12.0; x[27] = 13.0;
+
+y[0] = 0.00;  y[1] = 1.00;  y[2] = 2.00;  y[3] = 3.00;
+y[4] = 4.00;  y[5] = 5.00;  y[6] = 6.00;  y[7] = 7.00;
+y[8] = 8.00;  y[9] = 8.24;  y[10] = 8.62; y[11] = 9.00;
+y[12] = 9.10; y[13] = 9.00; y[14] = 8.90; y[15] = 8.50;
+y[16] = 8.15; y[17] = 7.50; y[18] = 7.00; y[19] = 6.50;
+y[20] = 6.00; y[21] = 5.30; y[22] = 4.54; y[23] = 3.89;
+y[24] = 3.39; y[25] = 2.96; y[26] = 2.56; y[27] = 2.20;
+
+w[0] = 0.20;   w[1] = 0.20;   w[2] = 0.20;   w[3] = 0.20;
+w[4] = 0.30;   w[5] = 0.50;   w[6] = 0.70;   w[7] = 0.80;
+w[8] = 0.90;   w[9] = 1.00;   w[10] = 1.00;  w[11] = 1.00;
+w[12] = 1.00;  w[13] = 1.00;  w[14] = 1.00;  w[15] = 0.90;
+w[16] = 0.80;  w[17] = 0.70;  w[18] = 0.50;  w[19] = 0.60;
+w[20] = 0.70;  w[21] = 0.90;  w[22] = 1.00;  w[23] = 1.00;
+w[24] = 1.00;  w[25] = 1.00;  w[26] = 1.00;  w[27] = 1.00;
+
+/* Spline knots and end slopes. */
+
+xs[0] = 0.20;  xs[1] = 1.50;  xs[2] = 2.60;  xs[3] = 4.00;
+xs[4] = 8.00;  xs[5] = 13.0;
+ys[0] = 0.00;  ys[1] = 8.00;  ys[2] = 9.10;  ys[3] = 8.15;
+ys[4] = 4.54;  ys[5] = 2.20;
+s1 = 7.14;
+s2 = -0.36;
+
+printf ("\n\n  --- CMATH --- Design Software 1989\n");
+printf ("\nTest program for fitspl().\n");
+
+sums = 1.0e-4;
+fitspl (nd, x, y, w, ns, xs, ys, &s1, &s2, &sums, &flag);
+printf ("%s\n", cmathmsg(FITSPL_C, flag));
+
+if (flag == 0 || flag == 5)
+   {
+   printf ("\nFitted spline ...\n");
+   printf ("    i       xs[i]       ys[i]\n");
+   printf ("---------------------------------\n");
+
+   for (i = 0; i < ns; ++i)
+      printf ("%5d  %10.3f  %10.3f\n", i, xs[i], ys[i]);
+   printf ("\nslope at x[%d] = %10.5f\n", 0, s1);
+   printf ("slope at x[%d] = %10.5f\n", ns, s2);
+
+   printf ("\n    i     x[i]      y[i]      w[i]     spline\n");
+   printf ("------------------------------------------------\n");
+   spline (ns, 1, 1, s1, s2, xs, ys, b, c, d, &flag);
+   if (flag != 0)
+      printf ("%s\n", cmathmsg(SPLINE_C, flag));
+   else
+      {
+      last = 1;
+      for (i = 0; i < nd; ++i)
+         {
+         yy = seval(ns, x[i], xs, ys, b, c, d, &last);
+         printf ("%5d %9.3f %9.3f %9.3f %9.3f\n",
+                 i, x[i], y[i], w[i], yy);
+         }
+      }
+
+   printf ("\nWeighted sum of residuals = %10.2e\n", sums);
+   }
+
+return (0);
+}
+@

@@ -1,0 +1,200 @@
+------------------------------------------------------------------
+Design Software                                             qinf()
+------------------------------------------------------------------
+
+
+1.0  Purpose.
+
+     Compute the integrals
+      It=ti  tf(x)tdx, 
+      It=ti  tf(x)tdx, 
+      It=ti  tf(x)tdx, 
+where f(x) is a user defined function and a is finite.  
+
+
+2.0  How to use the function.
+
+     The function qinf() receives and returns all information  via 
+its formal arguments.  It is defined as 
+
+     int qinf (f, a, inf, epsabs, epsrel, result, errest, nfe, flag)
+     double (*f)(), a;
+     int    inf;
+     double epsabs, epsrel, *result, *errest;
+     int    *nfe, *flag;
+
+
+2.1  Parameter types.
+
+     f         : pointer to a function returning a double value
+                 double f (x)
+                 double x;
+                 {
+                 ...
+                 return (double value);
+                 }
+     a         : double value
+     inf       : integer value
+     epsabs    : double value
+     epsrel    : double value
+     result    : pointer to a double variable
+     errest    : pointer to a double variable
+     nfe       : pointer to an integer variable
+     flag      : pointer to an integer variable
+
+
+2.2  Input.
+
+     f         : The name of the user defined function f(x).
+     a         : The finite limit of integration. (Note that a
+                 has no meaning for inf = 2.)
+     inf       : The flag specifying the infinite integration
+                 limit.  The integration ranges are
+                 inf = -1,  (-8, a)
+                 inf = +1,  (a, +8)
+                 inf = +2,  (-8, +8)
+     epsabs    : The absolute error tolerance. Should be positive.
+     epsrel    : The relative error tolerance. Should be positive.
+
+
+2.3  Output.
+
+     qinf()    : returns an unspecified integer value which 
+                 should be ignored.
+     result    : An approximation to the integral I.
+     errest    : An estimate of the absolute error in I.
+     nfe       : The number of function evaluations used in the 
+                 calculation of result.
+     flag      : A reliability indicator.
+                 flag = 0 : Normal return.  The requested accuracy
+                            has probably been achieved.
+                 flag > 0 : Abnormal return.  The requested 
+                            accuracy has not been achieved.
+                 flag = 1 : The maximum number of subdivisions
+                            allowed has been reached.  There may
+                            be a localized difficulty (e.g. a
+                            singularity or discontinuity) within
+                            the integration range.
+                 flag = 2 : The occurrence of round-off has been
+                            detected.  The error may be under-
+                            estimated.
+                 flag = 3 : Extremely bad integrand behaviour 
+                            occurs at some points within the 
+                            integration range.
+                 flag = 4 : The routine does not converge.  
+                            Round-off error is detected in the
+                            extrapolation table.  The returned
+                            value of result is the best that can
+                            be obtained.
+                 flag = 5 : The integral is probably divergent or
+                            slowly convergent.  Note that
+                            divergence may occur with other values
+                            of flag.
+                 flag = 6 : Invalid input.  e.g. epsabs < 0 and
+                            epsrel < 0.  The values of result, 
+                            errest and nfe are set to zero.
+
+
+3.0  Method.
+
+     The  function  qinf()  first  transforms  the  range  of  the 
+independent variable to (0,t1) and then  used  uses  the  adaptive 
+quadrature algorithm qags() over  this  transformed  domain.   The 
+transformed integrals are
+      It=ti  tf(x)tdx, = i  tf(a-(1-t)/t)/t tdt     ,
+      It=ti  tf(x)tdx, = i  tf(a+(1-t)/t)/t tdt     ,
+      It=ti  tf(x)tdx, = i  t{f((1-t)/t) + f((t-1)/t)}/t tdt     .
+
+
+4.0  Reference
+
+R. Piessens,  E.  de  Doncker-Kapenga,  C.W.  Uberhuber  and  D.K. 
+Kahaner:   "QUADPACK:   A   subroutine   package   for   automatic 
+integration." Springer  Series  in  Computational  Mathematics  1. 
+(1983).
+
+
+5.0  Example.
+
+     Compute I = i   ---------  dx =  ---------- , a = 1.5.
+
+
+/* qinfd.c
+   Program to exercise the integrator qinf(). */
+
+#include <math.h>
+#include <stdio.h>
+#include "cmath.h"
+
+double alpha;   
+
+main ()
+{  /* begin driver */
+
+double a, errest, epsabs, epsrel, f(), result;
+int    inf, flag, nfe;
+double temp;
+
+/* integrand parameter */
+alpha = 1.5;
+
+/* a is the finite integration limit. */
+a = 0.0;
+/* inf indicates which infinite limit to use */
+inf = 1;
+/* epsabs and epsrel determine the accuracy requirement. */
+epsabs = 0.0;
+epsrel = 1.0e-8;
+
+printf ("\n\n  --- CMATH --- Design Software 1989\n");
+printf ("\nCall the quadrature routine qinf() ...\n");
+
+qinf (f, a, inf, epsabs, epsrel, &result, &errest, &nfe, &flag);
+printf ("%s\n\n", cmathmsg(QINF_C, flag));
+
+printf ("integral approximation         = %20.12e\n", result);
+printf ("estimate of absolute error     = %9.2e\n", errest);
+printf ("number of function evaluations = %5d\n", nfe);
+
+printf ("\nThe correct answer is ...\n");
+temp = 4.0 * atan(1.0);
+temp = (1.0 - alpha) / pow(10.0, alpha) * temp / sin(alpha * temp);
+printf ("10**-alpha*(1-alpha)*pi\n");
+printf ("-----------------------        = %20.12e\n", temp);
+printf ("    sin(alpha*pi)      \n");
+
+return (0);
+}  /* end of main */
+
+
+
+double f (x)          /*  user supplied function.  */
+double x;
+
+{
+double temp;
+temp = 1.0 + 10.0 * x;
+temp = pow(x, alpha-1.0) / (temp * temp);
+return (temp);
+}
+
+
+6.0  Program Results.
+
+  --- CMATH --- Design Software 1989
+
+Call the quadrature routine qinf() ...
+qinf() : normal return
+
+integral approximation         =    4.96729413290e-02
+estimate of absolute error     =   1.1e-10
+number of function evaluations =   735
+
+The correct answer is ...
+10**-alpha*(1-alpha)*pi
+-----------------------        =    4.96729413290e-02
+    sin(alpha*pi)      
+
+
+
+

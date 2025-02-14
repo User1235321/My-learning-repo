@@ -1,0 +1,107 @@
+head	1.1;
+access;
+symbols;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	98.08.08.11.36.05;	author peterj;	state Exp;
+branches;
+next	;
+
+
+desc
+@CMATH 1989 code
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/* stintd.c
+   Sample driver for stiff ODE integrator, stint1().
+   */
+
+#include <stdio.h>
+#include <math.h>
+#include "cmath.h"
+
+main ()
+{
+int    n, mf, fail, flag, nfe, nje, totfe, totje;
+double x1, x2, dx, relerr, y[2];
+int    f (), jacob (), step;
+
+n      = 2;
+mf     = 1;
+dx     = 3.0e-5;
+relerr = 1.0e-5;
+y[0]   = 1.0;
+y[1]   = 0.0;
+totfe  = 0;
+totje  = 0;
+
+printf ("\n\n  --- CMATH --- Design Software 1989\n");
+printf ("\nExercise the stiff ODE solver stint1().\n");
+
+stint0 (n, &fail);
+printf ("\n%s\n\n", cmathmsg(STINT0_C, fail));
+
+if (fail == 0)
+   {
+   printf ("\n      x          y[0]        y[1]\n");
+   printf ("----------------------------------------\n");
+
+   for (step = 1; step <= 5; ++step)
+      {
+      x2 = 0.4 * step;
+      x1 = x2 - 0.4;
+      stint1 (n, y, &x1, x2, dx, relerr, mf,
+              &nfe, &nje, &flag, f, jacob);
+      if (flag < 0) break;
+      printf (" %10.5f %11.6f %11.6f\n", x1, y[0], y[1]);
+      totfe += nfe;
+      totje += nje;
+      }
+
+   stint3 ();
+
+   printf ("\nCorrect answer at x = 2.0 is ...\n");
+   printf ("y[0] = 0.270671,     y[1] = -0.135335\n");
+   printf ("y[0] = 2 * exp(-x),  y[1] = -exp(-x)\n");
+
+   printf ("\n%s\n", cmathmsg (STINT1_C, flag));
+   printf ("total nfe = %d,  total nje = %d\n", totfe, totje);
+   }
+
+return (0);
+}
+
+
+
+int f (n, x, y, ydot)
+int    n;
+double x, y[], ydot[];
+
+{
+ydot[0] =  998.0 * y[0] + 1998.0 * y[1];
+ydot[1] = -999.0 * y[0] - 1999.0 * y[1];
+return (0);
+}
+
+
+
+int jacob(n, x, y, jac)
+int    n;
+double x, y[], jac[];
+{
+jac[0] = 998.0;
+jac[1] = 1998.0;
+jac[2] = -999.0;
+jac[3] = -1999.0;
+return (0);
+}
+@

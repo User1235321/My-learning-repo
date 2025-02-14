@@ -1,0 +1,82 @@
+head	1.1;
+access;
+symbols;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	98.08.08.11.36.05;	author peterj;	state Exp;
+branches;
+next	;
+
+
+desc
+@CMATH 1989 code
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/* qinfd.c
+   Program to exercise the integrator qinf(). */
+
+#include <math.h>
+#include <stdio.h>
+#include "cmath.h"
+
+double alpha;   
+
+main ()
+{  /* begin driver */
+
+double a, errest, epsabs, epsrel, f(), result;
+int    inf, flag, nfe;
+double temp;
+
+/* integrand parameter */
+alpha = 1.5;
+
+/* a is the finite integration limit. */
+a = 0.0;
+/* inf indicates which infinite limit to use */
+inf = 1;
+/* epsabs and epsrel determine the accuracy requirement. */
+epsabs = 0.0;
+epsrel = 1.0e-8;
+
+printf ("\n\n  --- CMATH --- Design Software 1989\n");
+printf ("\nCall the quadrature routine qinf() ...\n");
+
+qinf (f, a, inf, epsabs, epsrel, &result, &errest, &nfe, &flag);
+printf ("%s\n\n", cmathmsg(QINF_C, flag));
+
+printf ("integral approximation         = %20.12e\n", result);
+printf ("estimate of absolute error     = %9.2e\n", errest);
+printf ("number of function evaluations = %5d\n", nfe);
+
+printf ("\nThe correct answer is ...\n");
+temp = 4.0 * atan(1.0);
+temp = (1.0 - alpha) / pow(10.0, alpha) * temp / sin(alpha * temp);
+printf ("10**-alpha*(1-alpha)*pi\n");
+printf ("-----------------------        = %20.12e\n", temp);
+printf ("    sin(alpha*pi)      \n");
+
+return (0);
+}  /* end of main */
+
+
+
+double f (x)          /*  user supplied function.  */
+double x;
+
+{
+double temp;
+temp = 1.0 + 10.0 * x;
+temp = pow(x, alpha-1.0) / (temp * temp);
+return (temp);
+}
+@

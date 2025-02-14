@@ -1,0 +1,158 @@
+------------------------------------------------------------------
+Design Software                                           quanc8()
+------------------------------------------------------------------
+
+
+1.0  Purpose.
+
+     Compute the definite integral It=ti tf(x)tdx, where f(x) is a 
+user defined function.  The function f(x) must be  "well  behaved" 
+over the entire interval [a, b].
+
+
+2.0  How to use the function.
+
+     The function quanc8() receives and  returns  all  information 
+via its formal arguments.  It is declared as 
+
+     int quanc8 (f, a, b, epsabs, epsrel, result, errest, nfe,
+                 posn, flag)
+     double (*f)(), a, b, epsabs, epsrel, *result, *errest;
+     int    *nfe;
+     double *posn;
+     int    *flag;
+
+
+2.1  Parameter types.
+
+     f         : pointer to a user defined function
+                 double f (x)
+                 double x;
+                 {
+                 ...
+                 return (double value);
+                 }
+     a         : double value
+     b         : double value
+     epsabs    : double value
+     epsrel    : double value
+     result    : pointer to a double variable
+     errest    : pointer to a double variable
+     nfe       : pointer to an integer variable
+     posn      : pointer to a double variable
+     flag      : pointer to an integer variable
+
+
+2.2  Input.
+
+     f         : The name of the user defined function f(x).
+     a         : The lower limit of integration.
+     b         : The upper limit of integration.
+     epsrel    : The relative error tolerance. Should be positive.
+     epsabs    : The absolute error tolerance. Should be positive.
+
+
+2.3  Output.
+
+     quanc8()  : returns an unspecified integer value which should
+                 be ignored.
+     result    : An approximation to the integral I.
+     errest    : An estimate of the absolute error in I.
+     nfe       : The number of function evaluations used in the 
+                 calculation of result.
+     posn      : If flag < 0, then posn is the point reached when
+                 the limit on nfe was approached.
+     flag      : Error indicator.  
+                 = 0, normal return.
+                 = 1, invalid user input, relerr < 0, abserr < 0
+                 < 0, If flag = -n then n subintervals did not
+                      converge.  A small number (say 10) of 
+                      unconverged subintervals may be acceptable.
+                      Check posn for further information.
+
+
+3.0  Method.
+
+     quanc8() used an adaptive quadrature algorithm based  on  the 
+8-panel  Newton-Cotes  formula.   The  method  will  have  trouble 
+estimating I if the function has discontinuities or  singularities 
+in at<txt<tb or if the  function  evaluation  is  contaminated  by 
+numerical noise (round-off). 
+
+
+4.0  Reference
+
+G.E. Forsythe, M.A. Malcolm, & C.B. Moler  : "Computer Methods for 
+Mathematical Computations". Prentice-Hall, Englewood Cliffs,  N.J. 
+1977.
+
+
+5.0  Example.
+
+     Compute I = i  ------ dx .
+
+
+/*  QUANC8D.C
+    sample driver for quanc8
+*/
+
+#include <math.h>
+#include <stdio.h>
+#include "cmath.h"
+
+main ()
+{
+double f();
+double a, b, epsabs, epsrel, result, errest, posn;
+int    nfe, flag;
+
+a = 0.0;
+b = 2.0;
+epsrel = 1.0e-10;
+epsabs = 0.0;
+
+printf ("\n\n  --- CMATH --- Design Software 1989\n");
+printf ("\nTrial for function integrator quanc8() ...\n");
+quanc8 (f, a, b, epsabs, epsrel, &result, &errest,
+        &nfe, &posn, &flag);
+printf ("%s\n\n", cmathmsg(QUANC8_C, flag));
+
+printf ("nfe = %d \n", nfe);
+printf ("integral = %20.12f\n", result);
+printf ("error    = %e \n", errest);
+if (flag < 0)
+   {
+   printf ("trouble spot at x = %e \n", posn);
+   printf ("%d unconverged subintervals\n", abs(flag));
+   }
+printf ("correct answer is 1.6054129768 \n");
+
+return (0);
+}  /* end of main */
+
+
+double f (x)   /* test function */
+double x;
+{
+double temp;
+if (x == 0.0) temp = 1.0;
+if (x != 0.0) temp = sin(x) / x;
+return (temp);
+}
+
+
+6.0  Program Results.
+
+  --- CMATH --- Design Software 1989
+
+Trial for function integrator quanc8() ...
+quanc8() : normal return
+
+nfe = 33 
+integral =       1.605412976803
+error    = 1.13735e-16 
+correct answer is 1.6054129768 
+
+
+
+

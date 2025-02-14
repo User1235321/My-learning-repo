@@ -1,0 +1,59 @@
+                                                 Design Software,
+                                                 42 Gubberley St,
+                                                 Kenmore, Qld 4069,
+                                                 AUSTRALIA.
+
+Dear Colleague,
+
+We wish to introduce you  to  the  CMATH  software  library.   The 
+library is a collection of mathematical routines written in the  C 
+programming  language  and  includes  routines  to  perform  basic 
+numerical operations such as:
+     Qinterpolation and differentiation of user supplied data;
+     Qsolution of simultaneous linear and nonlinear equations;
+     Qminimization of multidimensional functions;
+     Qquadrature;
+     Qintegration of ordinary differential equations;
+     QFourier transforms;
+     Qmanipulation of complex numbers.
+The features of the library are:
+     Qa well documented user interface.
+     Qthe checking of user input.
+     Qsoft failure.  Error codes are returned where appropriate.
+      These can be output as a succinct English explanation.
+     Qtest cases.  These can be used as a basis for constructing 
+      new programs, and for checking installation.
+     Qthe use of C's dynamic memory allocation.  This results in 
+      efficient memory use and simplified parameter lists.
+
+The CMATH  library  is  directed  toward  the  needs  of  tertiary 
+educators, students and researchers in the  applied  sciences  and 
+professional scientists and engineers in industry.   The  routines 
+are ready for embedding in your own C programs and will save  many 
+hours of coding and debugging time and thus let you concentrate on 
+your application.  Already,  CMATH  routines  have  been  used  in 
+numerically intensive computations in:
+     Qcomputational fluid dynamics;
+     Qstructural mechanics and design;
+     QCAD surface design;
+     Qsimulation of dynamical systems;
+     Qgas dynamic and hydraulic design;
+     Qstatistical modelling and parameter estimation.
+For educators, the availability of this inexpensive  and  portable 
+software should facilitate the teaching of C programming to second 
+or third level engineering and applied science students where  the 
+emphasis is on more difficult numerical problems.
+
+This combination of features and the numerical techniques  covered 
+by the CMATH routines, makes CMATH a competitive library.  If  you 
+wish to obtain further information or wish to purchase  the  CMATH 
+library, please contact us.
+
+Yours faithfully,
+
+
+
+
+Nigel Lott and Peter Jacobs,
+Design Software.
+

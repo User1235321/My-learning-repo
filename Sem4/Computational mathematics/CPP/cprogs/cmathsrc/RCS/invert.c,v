@@ -1,0 +1,170 @@
+head	1.1;
+access;
+symbols;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	98.08.08.11.36.05;	author peterj;	state Exp;
+branches;
+next	;
+
+
+desc
+@CMATH 1989 code
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/* invert.c
+   Invert a matrix using decomp() and solve().
+*/
+
+/************************************************/
+/*                                              */
+/*  CMATH.  Copyright (c) 1989 Design Software  */
+/*                                              */
+/************************************************/
+
+#include "cmath.h"
+#if (ANSII || IBM3083)
+#include <stdlib.h>
+#endif
+#include <stdio.h>
+#include <math.h>
+
+#ifndef NULL
+#define  NULL  0
+#endif
+
+
+/*-----------------------------------------------------------------*/
+
+#if (PROTOTYPE)
+
+int invert (int n, int ndim,
+            double *a, double *ainv,
+            int *flag)
+
+#else
+
+int invert (n, ndim, a, ainv, flag)
+int    n, ndim;
+double *a, *ainv;
+int    *flag;
+
+#endif
+
+/* Purpose ...
+   -------
+   Invert a matrix using direct methods (LU decomposition and
+   back-substitution).  The inverse is built up column by column
+   from the identity matrix.
+
+   Input ...
+   -----
+   n      : order of the matrices
+   ndim   : the declared dimension of the rows of the matrices
+   a      : matrix to be inverted
+
+   Output ...
+   ------
+   ainv   : inverse of a if a is nonsingular
+   a      : the matrix in a overwritten
+   flag   : status indicator
+            = 0, normal return
+            = 1, a is singular to working precision
+            = 2, could not allocate memory for workspace
+            = 3, invalid parameters
+                 n > ndim, a == NULL, ainv == NULL, n < 1
+
+   Workspace ...
+   ---------
+   An vector of n double elements and a vector of n integer elements
+   are allocated by invert().  Decomp() allocates a further n double
+   elements.
+
+   This C code written by ...  Peter & Nigel,
+   ----------------------      Design Software,
+                               42 Gubberley St,
+                               Kenmore, 4069,
+                               Australia.
+
+   Version ... 1.0,  May 1989
+   -------
+
+*/
+
+/*-----------------------------------------------------------------*/
+
+{  /* begin invert() ... */
+
+int    i, j, in, *piv, fail;
+double *x, cond;
+
+*flag = 0;
+x = (double *) NULL;
+piv = (int *) NULL;
+
+if (n > ndim || n < 1 || a == NULL || ainv == NULL)
+   {
+   *flag = 3;
+   return (0);
+   }
+
+x = (double *) malloc (n * sizeof(double));
+if (x == NULL)
+   {
+   *flag = 2;
+   goto BailOut;
+   }
+
+piv = (int *) malloc (n * sizeof(int));
+if (piv == NULL)
+   {
+   *flag = 2;
+   goto BailOut;
+   }
+
+decomp (n, ndim, a, &cond, piv, &fail);
+if (fail != 0)
+   {
+   *flag = 2;
+   goto BailOut;
+   }
+if (cond == (cond+1.0))
+   {
+   *flag = 1;
+   goto BailOut;
+   }
+
+/* set up identity matrix */
+for (i = 0; i < n; ++i)
+   {
+   in = i * ndim;
+   for (j = 0; j < n; ++j) ainv[in + j] = 0.0;
+   ainv[in + i] = 1.0;
+   }
+
+/* now, build up inverse by columns */
+for (j = 0; j < n; ++j)
+   {
+   for (i = 0; i < n; ++i) x[i] = ainv[i*ndim + j];
+   solve (n, ndim, a, x, piv);
+   for (i = 0; i < n; ++i) ainv[i*ndim + j] = x[i];
+   }
+
+BailOut:
+if (piv != NULL) { free(piv); piv = NULL; }
+if (x   != NULL) { free(x); x = NULL; }
+
+return (0);
+}  /* ... end of invert() */
+
+/*-----------------------------------------------------------------*/
+@

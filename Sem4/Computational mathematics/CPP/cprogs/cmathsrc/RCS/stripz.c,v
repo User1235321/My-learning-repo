@@ -1,0 +1,127 @@
+head	1.1;
+access;
+symbols;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	98.08.08.11.36.05;	author peterj;	state Exp;
+branches;
+next	;
+
+
+desc
+@CMATH 1989 code
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/* stripz.c
+   Strip Control-Z characters.  */
+
+/************************************************/
+/*                                              */
+/*  CMATH.  Copyright (c) 1989 Design Software  */
+/*                                              */
+/************************************************/
+
+#include "cmath.h"
+#if (STDLIBH)
+#include <stdlib.h>
+#endif
+#include <stdio.h>
+#include <math.h>
+
+#ifndef NULL
+#define  NULL  0
+#endif
+
+/* Purpose ...
+   -------
+   Strip Control-Z characters from the file specified on the
+   command line.  Some UNIX C-compilers will not tolerate strange
+   characters.
+
+   If you encounter this difficulty then manually strip the Control-Z
+   terminator from this file and compile it on your new machine.
+   (It is written in a subset of C that should work on most machines.)
+
+   Stripz may then be used to modify all of the other source files.
+
+   Version ... 1.0, July 1989
+   -------
+
+   This C code written by ...  Peter & Nigel,
+   ----------------------      Design Software,
+                               42 Gubberley St,
+                               Kenmore, 4069,
+                               Australia.
+   */
+
+
+main (argc, argv)
+int argc;
+char *argv[];
+
+{
+#define CTRLZ 26
+FILE *fp, *temp;
+unsigned char ch;
+
+if (argc != 2)
+   {
+   printf ("usage --- stripz <file_name.ext>\n");
+   exit (0);
+   }
+
+if ((fp = fopen(argv[1],"r")) == NULL)
+   {
+   printf ("stripz cannot open file %s\n", argv[1]);
+   exit(0);
+   }
+if ((temp = fopen("zstrip","w")) == NULL)
+   {
+   printf ("stripz cannot open temporary file\n");
+   exit(0);
+   }
+
+ch = getc(fp);
+while (!feof(fp) && ch != 0 && ch != 255)
+   {
+   if (ch != CTRLZ && ch != CTRLZ + 128) putc(ch, temp);
+   ch = getc(fp);
+   }
+
+fclose (fp);
+fclose (temp);
+
+/* now copy back to original name */
+
+if ((fp = fopen(argv[1],"w")) == NULL)
+   {
+   printf ("stripz cannot open output file %s\n", argv[1]);
+   exit(0);
+   }
+if ((temp = fopen("zstrip","r")) == NULL)
+   {
+   printf ("stripz cannot open temporary file\n");
+   exit(0);
+   }
+
+ch = getc(temp);
+while (!feof(temp) && ch != 0 && ch != 255)
+   {
+   if (ch != CTRLZ && ch != CTRLZ + 128) putc(ch, fp);
+   ch = getc(temp);
+   }
+
+fclose (fp);
+fclose (temp);
+return (0);
+}
+@

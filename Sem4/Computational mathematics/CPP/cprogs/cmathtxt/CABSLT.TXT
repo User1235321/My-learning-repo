@@ -1,0 +1,49 @@
+------------------------------------------------------------------
+Design Software                                           cabslt()
+------------------------------------------------------------------
+
+
+1.0  Purpose.
+
+     Compute the magnitude of a complex number x = xr + i xi where 
+i  = -1.  
+
+
+2.0  How to use the function.
+
+     The complex magnitude function is declared as 
+     
+     double cabslt (xr, xi)
+     double xr, xi;
+
+
+2.1  Parameter types.
+
+     xr        : double value
+     xi        : double value
+
+
+2.2  Input.
+
+     xr        : Real part of x.
+     xi        : Imaginary part x.
+
+
+2.3  Output.
+
+     cabslt()  : returns a double value for the magnitude of x.
+
+
+3.0  Method.
+
+     The   magnitude   is   computed   using   real    arithmetic.  
+Intermediate results are scaled to  avoid  overflow  and  loss  of 
+precision.
+
+
+4.0  Reference
+
+     J.H.  Wilkinson  &  C.  Reinsch  :  "Handbook  for  automatic 
+computation.  Vol II. Linear Algebra."  Springer-Verlag 1971.
+
+

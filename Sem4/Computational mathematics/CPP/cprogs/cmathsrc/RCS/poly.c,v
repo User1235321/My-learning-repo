@@ -1,0 +1,579 @@
+head	1.1;
+access;
+symbols;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	98.08.08.11.36.05;	author peterj;	state Exp;
+branches;
+next	;
+
+
+desc
+@CMATH 1989 code
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/* poly.c
+   Polynomial manipulation routines.  */
+
+/************************************************/
+/*                                              */
+/*  CMATH.  Copyright (c) 1989 Design Software  */
+/*                                              */
+/************************************************/
+
+
+/* This C code written by ...  Peter & Nigel,
+   ----------------------      Design Software,
+                               42 Gubberley St,
+                               Kenmore, 4069,
+                               Australia.
+*/
+
+#include "cmath.h"
+#if (STDLIBH)
+#include <stdlib.h>
+#endif
+#include <stdio.h>
+#include <math.h>
+
+#ifndef NULL
+#define  NULL  0
+#endif
+
+/*-----------------------------------------------------------------*/
+
+#if (PROTOTYPE)
+
+int polyroot (int n, double cr[], double ci[],
+              double xr[], double xi[],
+              int *nr, double abserr,
+              int polish, int *flag )
+
+#else
+
+int polyroot (n, cr, ci, xr, xi, nr, abserr, polish, flag)
+int    n;
+double cr[], ci[];
+double xr[], xi[];
+int    *nr;
+double abserr;
+int    polish, *flag;
+
+#endif
+
+/* Purpose ...
+   -------
+   Find nr roots of the polynomial defined as
+           n                       j
+   q(x) = sum (cr[j] + i ci[j]) * x
+          j=0
+
+   Input ...
+   -----
+   n      : order of the polynomial (i.e. highest power of x)
+   cr     : real parts of the polynomial coefficients
+            cr[j], j = 0 ... n
+   ci     : imaginary parts of the polynomial coefficients
+            ci[j], j = 0 ... n
+   xr     : real part of the initial guess for the roots
+            xr[i], j = 0 ... nr-1
+   xi     : imaginary part of the initial guess for the roots
+            xi[j], j = 0 ... nr-1
+   nr     : number of roots to be found. nr <= n.
+   abserr : precision to which roots are to be found.
+   polish : = 0 : the roots are to be found approximately
+            = 1 : The roots are to be polished after being
+                  found to a precision of abserr.  That is:
+                  iteration is stopped when machine precision
+                  or round-off is achieved.
+
+   Output ...
+   ------
+   xr[j] + i xi[j],  j = 0 ... n-1
+           : estimates of the roots
+   flag    : status indicator
+             = 0,  normal return
+             = 1,  did not converge
+             = 2,  could not allocate workspace
+             = 3,  illegal user input
+                   n < 1, cr == NULL, ci == NULL
+                   xr == NULL, xi == NULL, *nr < 1, *nr > n,
+                   abserr <= 0.0.
+             = 4,  polynomial order incorrect
+                   cr[n] == 0.0 && ci[n] == 0.0
+
+   Workspace ...
+   ---------
+   2 arrays of n+1 double elements are allocated internally.
+
+   Version ... 1.0, July 1989
+   -------
+
+   This C code written by ...  Peter & Nigel,
+   ----------------------      Design Software,
+                               42 Gubberley St,
+                               Kenmore, 4069,
+                               Australia.
+
+   Reference ...
+   ---------
+   W.H. Press, B.P. Flannery, S.A. Teukolsky & W.T. Vetterling
+   "Numerical Recipes.  The art of scientific computing."
+   Cambridge University Press, 1986.
+
+*/
+
+{
+int    j;
+struct polynomial q, p;
+double *dr, *di;
+double xxr, xxi;
+int    fail;
+
+*flag = 0;
+if (n < 1 || cr == NULL || ci == NULL || xr == NULL || xi == NULL
+    || *nr > n || *nr < 1 || abserr <= 0.0)
+   {
+   *flag = 3;
+   return (0);
+   }
+
+if (cr[n] == 0.0 && ci[n] == 0.0)
+   {
+   *flag = 4;
+   return (0);
+   }
+
+/* keep a copy of the coefficients */
+dr = (double *) NULL;
+di = (double *) NULL;
+dr = (double *) malloc ((n+1) * sizeof(double));
+if (dr == NULL)
+   {
+   *flag = 2;
+   goto Bailout;
+   }
+di = (double *) malloc ((n+1) * sizeof(double));
+if (di == NULL)
+   {
+   *flag = 2;
+   goto Bailout;
+   }
+for (j = 0; j <= n; ++j)
+   {
+   dr[j] = cr[j];
+   di[j] = ci[j];
+   }
+
+polymake (&q, n, cr, ci);   /* the operating polynomial */
+polymake (&p, n, dr, di);   /* and its copy             */
+
+/* Now find all of the roots of q(x) */
+for (j = 0; j < *nr; ++j)
+   {
+   /* start the search at the user supplied point */
+   xxr = xr[j];  xxi = xi[j];
+   laguerre (&q, &xxr, &xxi, abserr, 0, &fail);
+   if (fail)
+      {
+      *flag = 1;
+      *nr = j;    /* this number of roots were found successfully */
+      goto Bailout;
+      }
+   if ( fabs(xxi) <= 2.0 * abserr * abserr * fabs(xxr) )
+      {
+      /* push the estimate onto the real axis */
+      xxi = 0.0;
+      }
+   xr[j] = xxr;  xi[j] = xxi;
+
+   /* now deflate polynomial */
+   polydiv (&q, xxr, xxi);
+   }
+
+if (polish)
+   {
+   /* improve the roots using the original coefficients */
+   for (j = 0; j < *nr; ++j)
+      {
+      laguerre (&p, &xr[j], &xi[j], abserr, 1, &fail);
+      if (fail)
+         {
+         *flag = 1;
+         *nr = j;       /* this number of roots were polished */
+         goto Bailout;
+         }
+      }
+   }
+
+Bailout:
+if (di != NULL) { free(di); di = (double *) NULL; }
+if (dr != NULL) { free(dr); dr = (double *) NULL; }
+
+return (0);
+}
+
+/*-----------------------------------------------------------------*/
+
+#if (PROTOTYPE)
+
+int polymake (struct polynomial *q,
+              int n, double cr[], double ci[])
+
+#else
+
+int polymake (q, n, cr, ci)
+struct polynomial *q;
+int    n;
+double cr[], ci[];
+
+#endif
+
+/* Purpose ...
+   -------
+   Put together the polynomial structure from the user supplied
+   coefficients.
+   The polynomial is defined as
+           n                       j
+   q(x) = sum (cr[j] + i ci[j]) * x
+          j=0
+
+   Input ...
+   -----
+   q     : pointer to a polynomial structure
+   n     : order of the polynomial
+   cr    : array containing real parts of the coefficients
+   ci    : array containing imaginary parts of the coefficients
+
+   Output ...
+   ------
+   none.
+
+   Version ... 1.0, July 1989
+   -------
+
+   This C code written by ...  Peter & Nigel,
+   ----------------------      Design Software,
+                               42 Gubberley St,
+                               Kenmore, 4069,
+                               Australia.
+*/
+
+{
+q->n  = n;
+q->cr = cr;
+q->ci = ci;
+return (0);
+}
+
+/*-----------------------------------------------------------------*/
+
+#if (PROTOTYPE)
+
+int polyeval (struct polynomial *q,
+              double xr,    double xi,
+              double *pr,   double *pi,
+              double *pdr,  double *pdi,
+              double *pddr, double *pddi,
+              double *errest )
+
+#else
+
+int polyeval (q, xr, xi, pr, pi, pdr, pdi, pddr, pddi, errest)
+struct polynomial *q;
+double xr, xi;
+double *pr, *pi, *pdr, *pdi, *pddr, *pddi;
+double *errest;
+
+#endif
+
+/* Purpose ...
+   -------
+   Evaluate a polynomial defined as
+           n                       j
+   q(x) = sum (cr[j] + i ci[j]) * x
+          j=0
+
+   Input ...
+   -----
+   q     : pointer to a polynomial structure
+   xr    : real part of x
+   xi    : imaginary part of x
+
+   Output ...
+   ------
+   pr + i pi     : polynomial value, q(x)
+   pdr + i pdi   : first derivative
+   pddr + i pddi : second derivative
+   errest        : estimate of the round-off error in evaluating q(x)
+
+   Version ... 1.0, July 1989
+   -------
+
+   This C code written by ...  Peter & Nigel,
+   ----------------------      Design Software,
+                               42 Gubberley St,
+                               Kenmore, 4069,
+                               Australia.
+
+   Reference ...
+   ---------
+   W.H. Press, B.P. Flannery, S.A. Teukolsky & W.T. Vetterling
+   "Numerical Recipes.  The art of scientific computing."
+   Cambridge University Press, 1986.
+
+*/
+
+{
+double fr, fi, fdr, fdi, fddr, fddi, abx, tr, ti;
+int    j, n;
+
+n = q->n;
+fr = q->cr[n];  fi = q->ci[n];
+*errest = cabslt(fr, fi);
+fdr = 0.0;  fdi = 0.0;
+fddr = 0.0;  fddi = 0.0;
+abx = cabslt(xr, xi);
+for (j = n-1; j >= 0; --j)
+   {
+   cmultn (xr, xi, fddr, fddi, &tr, &ti);
+   fddr = tr + fdr;  fddi = ti + fdi;        /* second derivative */
+   cmultn (xr, xi, fdr, fdi, &tr, &ti);
+   fdr = tr + fr;  fdi = ti + fi;            /* first derivative */
+   cmultn (xr, xi, fr, fi, &tr, &ti);
+   fr = tr + q->cr[j];  fi = ti + q->ci[j];  /* polynomial itself */
+   *errest = cabslt(fr, fi) + abx * (*errest);
+   }
+fddr *= 2.0;  fddi *= 2.0;   /* second derivative; factorial constant */
+
+*errest *= EPSILON;
+*pr = fr;    *pi = fi;
+*pdr = fdr;   *pdi = fdi;
+*pddr = fddr;  *pddi = fddi;
+
+return (0);
+}
+
+/*-----------------------------------------------------------------*/
+
+#if (PROTOTYPE)
+
+int polydiv (struct polynomial *q,
+             double ar, double ai)
+
+#else
+
+int polydiv (q, ar, ai)
+struct polynomial *q;
+double ar, ai;
+
+#endif
+
+/* Purpose ...
+   -------
+   Divide a polynomial
+           n                       j
+   q(x) = sum (cr[j] + i ci[j]) * x
+          j=0
+   by the term (x - a) where a = ar + i ai.
+
+   Input ...
+   -----
+   q     : pointer to a polynomial structure
+   xr    : real part of a
+   xi    : imaginary part of a
+
+   Output ...
+   ------
+   The polynomial q has been changed.  Its coefficients have been
+   adjusted and its order has been reduced by one.
+
+   Version ... 1.0, July 1989
+   -------
+
+   This C code written by ...  Peter & Nigel,
+   ----------------------      Design Software,
+                               42 Gubberley St,
+                               Kenmore, 4069,
+                               Australia.
+
+   Reference ...
+   ---------
+   W.H. Press, B.P. Flannery, S.A. Teukolsky & W.T. Vetterling
+   "Numerical Recipes.  The art of scientific computing."
+   Cambridge University Press, 1986.
+
+*/
+
+{
+int    j, n;
+double swapr, swapi, remr, remi;
+
+n = q->n;
+
+remr = q->cr[n];  remi = q->ci[n];
+q->cr[n] = 0.0;   q->ci[n] = 0.0;
+
+for (j = n-1; j >= 0; --j)
+   {
+   swapr = q->cr[j]; swapi = q->ci[j];
+   q->cr[j] = remr;  q->ci[j] = remi;
+   cmultn (remr, remi, ar, ai, &remr, &remi);
+   remr += swapr;    remi += swapi;
+   }
+
+--n;
+q->n = n;
+
+return (0);
+}
+
+/*-----------------------------------------------------------------*/
+
+#if (PROTOTYPE)
+
+int laguerre (struct polynomial *q,
+              double *xr,    double *xi,
+              double errtol, int polish, int *flag )
+
+#else
+
+int laguerre (q, xr, xi, errtol, polish, flag)
+struct polynomial *q;
+double *xr, *xi;
+double errtol;
+int    polish, *flag;
+
+#endif
+
+/* Purpose ...
+   -------
+   Find a root of the polynomial defined as
+           n                       j
+   q(x) = sum (cr[j] + i ci[j]) * x
+          j=0
+
+   Input ...
+   -----
+   q      : pointer to a polynomial structure
+   xr     : real part of x, the initial guess
+   xi     : imaginary part of x
+   errtol : relative error tolerance requested
+   polish : = 0 : iteration is stopped when errtol is achieved
+            = 1 : iteration is stopped when machine precision
+                  is achieved
+
+   Output ...
+   ------
+   xr + i xi  : current estimate of the root
+   flag       : status indicator
+                = 0,  normal return
+                = 1,  did not converge
+
+   Version ... 1.0, July 1989
+   -------
+
+   This C code written by ...  Peter & Nigel,
+   ----------------------      Design Software,
+                               42 Gubberley St,
+                               Kenmore, 4069,
+                               Australia.
+
+   Reference ...
+   ---------
+   W.H. Press, B.P. Flannery, S.A. Teukolsky & W.T. Vetterling
+   "Numerical Recipes.  The art of scientific computing."
+   Cambridge University Press, 1986.
+
+*/
+
+{
+double pr, pi, pdr, pdi, pddr, pddi;
+double dxold, dxr, dxi, errest;
+double x1r, x1i, a1r, a1i, a2r, a2i;
+double gr, gi, g2r, g2i, hr, hi;
+double sqre, sqim, tr, ti, cdx;
+int    iter, n;
+
+#define  MAXIT  100
+*flag = 0;
+n = q->n;
+
+dxold = cabslt (*xr, *xi);
+for (iter = 1; iter <= MAXIT; ++iter)
+   {
+   polyeval (q, *xr, *xi, &pr, &pi,
+             &pdr, &pdi, &pddr, &pddi, &errest);
+
+   if (cabslt(pr, pi) <= errest)
+      {  /* we have found the root */
+      dxr = 0.0;  dxi = 0.0;
+      return (0);
+      }
+   else
+      {  /* The generic case : apply Laguerre's formula */
+      /*  G = Pd / P  */
+      cdivsn (pdr, pdi, pr, pi, &gr, &gi);
+
+      /*  H = G*G - Pdd / P  */
+      cmultn (gr, gi, gr, gi, &g2r, &g2i);
+      cdivsn (pddr, pddi, pr, pi, &hr, &hi);
+      hr = g2r - hr;  hi = g2i - hi;
+
+      tr = (n-1) * (n * hr - g2r);
+      ti = (n-1) * (n * hi - g2i);
+      csqroot (tr, ti, &sqre, &sqim);
+      a1r = gr + sqre;  a1i = gi + sqim;
+      a2r = gr - sqre;  a2i = gi - sqim;
+      if (cabslt(a1r, a1i) < cabslt(a2r, a2i))
+         {
+         a1r = a2r;  a1i = a2i;
+         }
+      /* dx = n / a1 */
+      tr = (double) n;  ti = 0.0;
+      cdivsn (tr, ti, a1r, a1i, &dxr, &dxi);
+      }
+
+   x1r = *xr - dxr;  x1i = *xi - dxi;
+   if ( x1r == (*xr)  &&  x1i == (*xi) )
+      {
+      /* We have converged. */
+      return (0);
+      }
+
+   *xr = x1r;  *xi = x1i;
+   cdx = cabslt(dxr, dxi);
+
+   if (iter > 6 && cdx >= dxold)
+      {
+      /* have reached round-off limit */
+      return (0);
+      }
+
+   dxold = cdx;
+
+   if (!polish)
+     {
+     /* check user specified tolerance */
+     if ( cdx <= errtol * cabslt(*xr, *xi) ) return (0);
+     }
+
+   }
+
+/* If we reach this point, then we have not converged. */
+*flag = 1;
+return (0);
+}
+
+/*-----------------------------------------------------------------*/
+
+@

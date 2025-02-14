@@ -1,0 +1,60 @@
+head	1.1;
+access;
+symbols;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	98.08.08.11.36.05;	author peterj;	state Exp;
+branches;
+next	;
+
+
+desc
+@CMATH 1989 code
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/* cmplxd.c
+   Test program for the stand-alone complex number routines. */
+
+#include <stdio.h>
+#include "cmath.h"
+
+main ()
+{
+double xr, xi, yr, yi, zr, zi;
+
+printf ("\n\n  --- CMATH --- Design Software 1989\n");
+printf ("\nExercise complex number routines.\n\n");
+
+xr = 1.0;  xi = 2.0;
+yr = 3.0;  yi = 4.0;
+
+cdivsn (xr, xi, yr, yi, &zr, &zi);
+printf ("(%5.2f,%5.2f) / (%5.2f,%5.2f) = (%5.2f,%5.2f)\n",
+        xr, xi, yr, yi, zr, zi);
+
+cmultn (zr, zi, yr, yi, &xr, &xi);
+printf ("(%5.2f,%5.2f) * (%5.2f,%5.2f) = (%5.2f,%5.2f)\n",
+        zr, zi, yr, yi, xr, xi);
+
+csqroot (yr, yi, &zr, &zi);
+printf ("sqrt(%5.2f,%5.2f) = (%5.2f,%5.2f)\n",
+        yr, yi, zr, zi);
+cmultn (zr, zi, zr, zi, &xr, &xi);
+printf ("(%5.2f,%5.2f) * (%5.2f,%5.2f) = (%5.2f,%5.2f)\n",
+        zr, zi, zr, zi, xr, xi);
+
+yr = cabslt (xr, xi);
+printf ("abs(%5.2f,%5.2f) = %5.2f\n", xr, xi, yr);
+
+return (0);
+}
+@

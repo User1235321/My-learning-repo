@@ -1,0 +1,494 @@
+<HTML>
+<HEAD>
+   <TITLE>NM_LIB Contents</TITLE>
+</HEAD>
+
+<BODY>
+   <H2>NM_LIB Contents by Subject Area</H2>
+   <P>
+   (Note that this documentation is incomplete.)
+   </P>
+
+   <P>
+   <OL>
+      <LI> <A HREF="#interpolation">Interpolation and Differentiation</A>
+         <OL>
+            <LI> Interpolate, differentiate or integrate 
+                 using a cubic spline (<A HREF="./spline.html">spline</A>)
+            <LI> Interpolate or differentiate using a B-spline (bspline)
+            <LI> Interpolate, differentiate or integrate 
+                 using a Chebyshev polynomial (cheby)
+            <LI> Fit a cubic spline using least squares (fitspl)
+            <LI> Fit a polynomial using least squares (fitpoly)
+         </OL>
+
+      <LI> <A HREF="#matrix">Matrices and Linear Equations</A>
+         <OL>
+            <LI> Decompose a general matrix (decomp, solve)
+            <LI> Invert a general matrix (invert)
+            <LI> Decompose a banded matrix (bandfac, bandslv)
+            <LI> Solve a tridiagonal system of equations (tridiag, trisolve)
+            <LI> Compute the Eigenvalues of a general real matrix (qr)
+            <LI> Eigenvalues and Eigenvectors of a general matrix (qrv)
+         </OL>
+
+      <LI> <A HREF="#nonlinear">Nonlinear Equations</A>
+         <OL>
+            <LI> Solve a single nonlinear equation (zeroin)
+            <LI> Solve a set of nonlinear equations (zerov)
+            <LI> Find the roots of a polynomial (polyroot)
+         </OL>
+
+      <LI> <A HREF="#optimization">Optimization</A>
+         <OL>
+            <LI> Minimize a function using function values only (nelmin)
+            <LI> Minimize a well behaved function (conjgg)
+         </OL>
+
+      <LI> <A HREF="#quadrature">Quadrature</A>
+         <OL>
+            <LI> Fixed rule Gaussian quadrature (qk21)
+            <LI> Adaptive Gaussian quadrature (qags)
+            <LI> Adaptive Newton-Cotes quadrature (quanc8)
+            <LI> Integration over an infinite domain (qinf)
+         </OL>
+
+      <LI> <A HREF="#ODEs">Integration of Ordinary Differential Equations</A>
+         <OL>
+            <LI> Integrate a set of nonstiff ODE's (rkf45)
+            <LI> Integrate a set of stiff ODE's (stint1)
+         </OL>
+
+      <LI> <A HREF="#complex">Complex Arithmetic</A>
+         <OL>
+            <LI> Integrated package for COMPLEX arithmetic (COMPLEX)
+            <LI> Complex division (cdivsn)
+            <LI> Complex multiplication (cmultn)
+            <LI> Square-root of a complex number (csqroot)
+            <LI> Absolute value of a complex number (cabslt)
+         </OL>
+
+      <LI> <A HREF="#fourier">Fourier Transforms</A>
+         <OL>
+            <LI> Fast Fourier transform of a complex array (fft)
+            <LI> Discrete Fourier transform of a general length array (dft)
+         </OL>
+
+      <LI> <A HREF="#sorting">Sorting</A>
+         <OL>
+            <LI> Sort an array of numbers into ascending order (indexx)
+         </OL>
+
+      <LI> <A HREF="#house_keeping">House Keeping</A>
+         <OL>
+            <LI> Translate CMATH error codes to English text (cmathmsg)
+         </OL>
+   </OL>
+   </P>
+
+   <HR>
+
+   <H3><A NAME="interpolation">Interpolation and Differentiation</A></H3>
+   <P>
+   To interpolate a set of data points,  we  have  included  two
+   sets of routines based on splines (or  piecewise  polynomials)  as 
+   these  are  usually  better  behaved  than   high   order   global 
+   polynomials.
+   </P>
+
+
+   <H4>Cubic Splines</H4>
+   <P>
+   The routine <A HREF="./spline.html">spline()</A>
+   will fit a cubic spline to a  set  of  n 
+   data points (x , y ), j = 0 ... n-1.  The spline is defined as the 
+   set of cubic polynomial segments
+     S (x) = y  + b (x-x ) + c (x-x )  + d (x-x ) , 
+        x  < x < x   ,  j = 0 ... n-2.
+   The spline has continuous first and second derivatives.  Once  the 
+   coefficient vectors have been computed using spline(), the  spline 
+   function  S(x)  may  be  evaluated  at  any  point  in  the  range 
+   x t<xt<tx    using seval().  Also, the  derivative  dS/dx  may  be 
+   evaluated using deriv()  and  the  integral  i tS(x')tdx'  may  be 
+   evaluated using sinteg().
+   </P>
+
+
+   <H4>B-splines</H4>
+   <P>
+   The routine bspline() will fit an order k B-spline to  a  set 
+   of n data points (x ,ty ), jt=t0 ... n-1.  The spline  is  defined 
+   as the set of polynomial segments
+     P(u) =   S   P  B   (u)    ,
+   where P t=t(X ,tY ) are the B-spline "control points" and  B   (u) 
+   are the B-spline basis functions of order k for  the  knot  vector 
+   (u , u , ... u     ), u t<tu   .  The spline has continuous  first 
+   and second derivatives.  Once the coefficient  vectors  have  been 
+   computed  using  bspline(),  the  spline  function  P(u)  may   be 
+   evaluated  at  any  point  in  the  range  u t<tut<tu        using 
+   bseval().  The  derivatives  d P/du   and  hence  d y/dx   may  be 
+   evaluated using bsdcpnts() to define the derivative  B-spline  and 
+   then bseval() to evaluate it at any point.
+   </P>
+
+
+   <H4>Chebyshev Polynomials</H4>
+   <P>
+   Where you need to specify the precision of the  interpolating 
+   function, we provide some routines based on Chebyshev polynomials.  
+   These routines are useful when you wish to evaluate a function (or 
+   its derivative or integral) many times but each evaluation of  the 
+   original  function  is  expensive.  The  routine  cheby()  fits  a 
+   Chebyshev polynomial series to a user supplied function f(x)  over 
+   the interval [a,tb].  f(x) is a user supplied function coded in C.  
+   The polynomial is defined as
+     S(x) =  S c T (z) + - c     ,
+   where zt=t((x-a)-(b-x))/(b-a), c , jt=t0...n-1 are the  polynomial 
+   coefficients  and  T t=tcos(jtarccos(z)),  jt=t0...n-1   are   the 
+   Chebyshev polynomials.  The independent variable x must lie in the 
+   range at<txt<tb.  The routine cheby() can be used to evaluate  the 
+   polynomial series while the derivative of f  may  be  obtained  by 
+   first differentiating the coefficients using the routine  chebyd() 
+   and then evaluating the differentiated series with  cheby().   The 
+   integral itS(x')tdx' may be obtained similarly using chebyi()  and 
+   cheby().
+   </P>
+
+
+   <H4>Least Squares Splines</H4>
+   <P>
+   If your data points contain  some noise, you may wish to  fit 
+   a spline or polynomial that minimizes the sum of  the  squares  of 
+   the residuals (S(x )t-ty ) (i.e. a merit function).   The  routine 
+   fitspl() will fit a cubic spline to the  set  of  data  points  by 
+   using conjgg() to  directly  minimize  the  merit  function.  Once 
+   fitspl() computes the spline coefficients, the  routines  seval(), 
+   deriv() and sinteg() may be  used  to  evaluate  the  spline,  its 
+   derivative or its integral respectively.
+   </P>
+
+
+   <H4>Least Squares Polynomials</H4>
+   <P>
+   The routine fitpoly() fits (in the  least  squares  sense)  a 
+   Chebyshev polynomial series to the  data  by  solving  the  normal 
+   equations.  Once the polynomial  coefficients  are  computed,  the 
+   routine  cheby()  may  be  used  to   evaluate   the   polynomial.  
+   Integration and differentiation may be  performed  using  chebyi() 
+   and chebyd() as described above.
+   </P>
+
+
+   <H3><A NAME="matrix">Matrices and Linear Equations</A></H3>
+   <P>
+   We provide three routines for  the  solution  of  the  linear
+   algebraic system Ax=b where A is a matrix of order n and x and b 
+   are real vectors. 
+   </P> 
+
+   <H4>Direct Solution</H4>
+   <P>
+   For a general matrix, where all of the elements  are  stored, 
+   decomp() can be used to factorize A.  
+   Once A has been  decomposed, 
+   solve() may be used to compute the solution x for  any  number  of 
+   right-hand-side vectors b.   
+   The routine decomp() is based on 
+   Gaussian elimination with partial pivoting.  
+   It also supplies an estimate of the condition number of the matrix A.   
+   A large condition number indicates that the solution x will 
+   be sensitive to changes in the elements of A and/or b.
+   </P>
+
+
+   <H4>Banded Matrices</H4>
+   <P>
+   If the order of the matrix is large and its nonzero elements 
+   are located in a narrow band either side of the diagonal then it 
+   may be more efficient to store only this band of nonzero elements 
+   and use the routines bandfac() and bandslv() to factorize and 
+   solve the system.   
+   Note that bandfac() does not use partial pivoting.
+   </P>
+
+
+   <H4>Tridiagonal Matrices</H4>
+   <P>
+   In some cases, only one element either side of  the  diagonal 
+   is nonzero.  This may arise in the finite-difference  solution  of 
+   partial differential equations and  it  is  usually  efficient  to 
+   treat this system as a special case.  The routines  tridiag()  and 
+   trisolve() are provided for  the  factorization  and  solution  of 
+   these tridiagonal systems.
+   </P>
+
+
+   <H4>Matrix Inversion</H4>
+   <P>
+   Occasionally, you may want the inverse of a matrix.   
+   The routine invert() is provided to do this.  
+   It first factorizes A 
+   and then constructs the inverse one column at a time by solving 
+   Aa t=ti where a is the jth column of the inverse and i is the 
+   jth column of the identity matrix.
+   </P>
+
+
+   <H4>Eigenvalue Problem</H4>
+   <P>
+   The eigenvalue problem is defined as Axt=tlx where l  is  the 
+   eigenvalue and x is the corresponding  eigenvector.   The  routine 
+   qr() will compute all of the eigenvalues for a general real matrix 
+   while the routine qrv() will compute all of  the  eigenvalues  and 
+   corresponding eigenvectors of A.  The eigenvectors are returned by 
+   qrv()  packed  in  a  single  array  and  we  supply  the  routine 
+   qrvector() to extract the individual eigenvectors.   Although  the 
+   elements of A must be real, the eigenvalues and  the  elements  of 
+   the eigenvectors may be complex.
+   </P>
+
+   <H3><A NAME="nonlinear">Nonlinear Equations</A></H3>
+
+   <H4>Single Equation</H4>
+   <P>
+   The routine zeroin() may be used to solve a single  nonlinear 
+   (or transcendental) equation of the form f(x)t=t0.  The function f 
+   is a user supplied function coded in C and x  is  the  independent 
+   variable.  Given two points  (a,  b)  which  bracket  a  solution, 
+   zeroin() will iteratively improve an estimate of the solution.  If 
+   a and b do not  bracket  a  solution,  zeroin()  will  attempt  to 
+   bracket a solution itself.  If a solution can be  bracketed,  then 
+   convergence to a user specified tolerance is almost certain.
+   </P>
+
+
+   <H4>Simultaneous Equations</H4>
+   <P>
+   Solving the set of nonlinear equations f(x)t=t0 is not always 
+   straight  forward.   Here  we  have  n  scalar  functions   of   n 
+   independent variables.  Given an initial guess for  the  solution, 
+   zerov() will attempt  to  improve  the  guess  either  by  Newton- 
+   Raphson iteration or by minimizing the sum of the  square  of  the 
+   function residuals.  There are no  guarantees  with  this  routine 
+   but,  if  the  problem  is  not  difficult,  the  Newton-  Raphson 
+   iteration will converge rapidly.
+   </P>
+
+
+   <H4>Polynomial Equations</H4>
+   <P>
+   If f(x) is a polynomial, then a number of specialized methods 
+   are available to find some or all  of  the  roots  of  f(x).   The 
+   routine polyroot() uses Laguerre's method to find the roots of  an 
+   nth order polynomial 
+     f(x) = S  c x
+   where the polynomial coefficients, c  may be complex.   The  roots 
+   may be complex and are found iteratively, one at a time.   Once  a 
+   root is found, it is removed  from  the  polynomial  by  synthetic 
+   division.
+   </P>
+
+
+   <H3><A NAME="quadrature">Quadrature</A></H3>
+   <P>
+   We supply  one  fixed  and  two  adaptive  routines  for  the
+   integration of a user supplied function over  a  finite  interval.  
+   The problem to be solved is It=titf(x)tdx where x is the  variable 
+   of integration and a and b are the finite integration limits.  The 
+   function f is a user supplied function coded in C.
+   </P>
+
+
+   <H4>Newton-Cotes Quadrature</H4>
+   <P>
+   The routine quanc8() is an adaptive integrator  that  divides 
+   the interval into a number of steps  and  applies  an  eight-panel 
+   Newton-Cotes rule to compute an estimate for I.  The estimate  for 
+   I should satisfy a user specified error  tolerance.   However,  if 
+   f(x) is badly behaved at the end  points  (a,  b)  or  within  the 
+   interval, quanc8() may not be  able  achieve  the  user  specified 
+   tolerance.
+   </P>
+
+
+   <H4>Gaussian Quadrature</H4>
+   <P>
+   If the singular behaviour of f(x) can be limited to the  ends 
+   of the interval, the routine qags() may  be  able  to  provide  an 
+   estimate for I.  qags() is an  adaptive  routine  that  applies  a 
+   Gaussian rule  (qk21())  to  the  individual  steps  and  uses  an 
+   extrapolation technique to approach the limit of zero step size.
+   </P>
+
+   <P>
+   The routine qk21() applies a Gaussian quadrature rule of  the 
+   form I = S w x  to a single region.  Although qk21()  is  part  of 
+   the adaptive integrator qags(), it may be used directly.
+   </P>
+
+
+   <H4>Quadrature on an Infinite Domain</H4>
+   <P>
+   The routine qinf() may be used to compute integrals in  which 
+   one or  both  of  the  limits  are  infinite.   This  is  done  by 
+   transforming the independent variable so that the new  limits  are 
+   finite and then  calling  qags()  to  perform  this  finite  range 
+   integration.
+   </P>
+
+
+   <H3><A NAME="ODEs">Integration of Ordinary Differential Equations</A></H3>
+   <P>
+   We provide two routines  for  the  solution  of  first  order
+   ordinary differential equations (ODE's) of the form
+     -- = f(x, y)   , 
+   where x is the independent variable and y is the vector of  dependent 
+   variables.  The initial conditions y(xt=tx ) are to be supplied by 
+   the user.  
+   </P>
+
+   <P>
+   A set of second order (or higher) ODE's  may  be  transformed 
+   into an equivalent set of first order ODE's  by  introducing  some 
+   auxiliary variables.  For example the second order equation 
+     --- + a -- + b z = 0
+   may be transformed to the set of first order equations
+     --- = -b y  - a y      ,
+     --- = y                ,
+   where y  = z and y  = dz/dx.
+   </P>
+
+
+   <H4>Runge-Kutta Integrator</H4>
+   <P>
+   The routine rkf45() uses a Runge-Kutta-Fehlberg  4,5th  order 
+   method together with a step size selection algorithm to  integrate 
+   the set of ODE's from x   to  x   while  keeping  the  single-step 
+   truncation error within a user specified  tolerance.   rkf45()  is 
+   suitable for nonstiff or mildly stiff sets of ODE's where the time 
+   scales of the solution components are similar.
+   </P>
+
+   <H4>Stiff ODE integrator</H4>
+   <P>
+   The routine stint1() uses an implicit multi-step method.  The 
+   routine is suitable for the integration of stiff ODE's where there 
+   are rapidly decaying transients in the solution.  The  user  needs 
+   to supply an initial step size which stint1() may change  to  meet 
+   the specified error tolerance.  stint1() also needs a knowledge of 
+   the partial derivatives of f(x, y).  These may be supplied by  the 
+   user or they may be approximated using finite differences.
+   </P>
+
+
+   <H3><A NAME="optimization">Optimization</A></H3>
+   <P>
+   We provide two routines for the unconstrained optimization of
+   a user supplied (objective) function f(x) where x is a vector of n 
+   independent variables.  f(x) may be nonlinear.
+   </P>
+
+
+   <H4>Minimization without Derivatives</H4>
+   <P>
+   The routine nelmin() is a  versatile  routine  that  requires 
+   knowledge of the function  but  not  its  derivatives.   Given  an 
+   initial guess for the minimum, nelmin() sets up a "simplex" of n+1 
+   points that form the vertices of an n-dimensional polyhedron.  The 
+   vertices are moved so that  the  simplex  moves  away  from  large 
+   values of  f(x).   Although  the  routine  formally  minimizes  an 
+   unconstrained function, constraints may  be  included  as  penalty 
+   functions.  Although nelmin()  is  robust,  it  is  expensive  and 
+   should only be used for small n (say n < 5).
+   </P>
+
+   <H4>Minimization with Well-Behaved Derivatives</H4>
+   <P>
+   The routine conjgg() uses the conjugate  gradient  method  to 
+   find a minimum of f(x).   It  is  generally  more  efficient  than 
+   nelmin() but needs a well behaved function as it uses the function 
+   derivatives  to  select  its  search  directions.   The   function 
+   derivatives  may  be  supplied  by  the  user  or  they   may   be 
+   approximated by conjgg() using finite differences.
+   </P>
+
+
+   <H3><A NAME="fourier">Fourier Transforms</A></H3>
+   <P>
+   We supply two routines for the computation  of  the  discrete
+   Fourier   transform   of   a   complex   array   z t=tzr t+titzi , 
+   kt=t0...N-1, i t=t-1.  The forward transform is defined as
+     Z(n) = ------   S   z  . e             ,
+   while the inverse transform is defined as
+     z(k) = ------   S   Z  . e 
+   </P>             .
+
+   <H4>Power-of-2 transform</H4>
+   <P>
+   The routine fft() uses the Cooley-Tukey algorithm to  compute 
+   the fast Fourier transform of a complex array where the length  of 
+   the array is a power of two.  The routine will  compute  both  the 
+   forward and reverse transform.
+   </P>
+
+
+   <H4>General Length Transform</H4>
+   <P>
+   The routine dft() computes the discrete Fourier transform  of 
+   a general length array.  It uses fft() to efficiently perform  the 
+   convolutions in Fourier space.  The routine will compute both  the 
+   forward and reverse transform.
+   </P>
+
+
+   <H3><A NAME="complex">Complex Arithmetic</A></H3>
+   <P>
+   We provide two sets  of  routines  for  the  manipulation  of
+   complex numbers.  The routines cdivsn(),  cmultn(),  sqroot()  and 
+   cabslt() are intended to be used a stand-alone routines where  the 
+   user requires only a few complex operations.  They  are  coded  to 
+   avoid overflow of intermediate results and loss of precision.  The 
+   complex numbers are passed to and returned from  the  routines  as 
+   pairs of real numbers.
+   </P>
+
+   <P>
+   The file "complex.c" provides an integrated  set  of  complex 
+   number routines that operate in a stack-like environment  and  are 
+   intended for use in situations where a lot of  complex  arithmetic 
+   is performed.  Users familiar with Hewlett-Packard calculators  or 
+   Forth should feel comfortable with these routines.
+   </P>
+
+
+   <H3><A NAME="sorting">Sorting</A></H3>
+   <P>
+   Sorting an array of numbers into  ascending  order  is  often
+   useful in numerical work but the standard  library  supplied  with 
+   most C-compilers has only an integer sorting routine.  The routine 
+   indexx() will index an array of floating point  numbers  (of  type 
+   double) without changing their locations in the  array.   This  is 
+   useful if the indexed array is to be used as a key to access other 
+   arrays. (e.g. We can  sort  eigenvalues  and  their  corresponding 
+   eigenvectors.)
+   </P>
+
+   <H3><A NAME="house_keeping">House Keeping</A></H3>
+   <P>
+   We supply the routine cmathmsg()  to  translate  CMATH  error 
+   codes to short strings  of  English  text.   Most  CMATH  routines 
+   return an integer error flag.  This  flag  indicates  whether  the 
+   routine was successful or if it was not, why not.  We believe that 
+   the error message returned by cmathmsg() is easier to read and may 
+   save some of the time that would otherwise be spent looking up the 
+   error codes listed in this manual.
+   </P>
+
+   <HR>
+
+   <ADDRESS>
+      <B>NM_LIB</B> (C) P. A. Jacobs<BR>
+      Last Updated: 1-Mar-1998
+   </ADDRESS>
+</BODY>
+</HTML>

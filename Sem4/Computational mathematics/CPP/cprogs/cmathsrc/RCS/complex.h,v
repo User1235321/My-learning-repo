@@ -1,0 +1,171 @@
+head	1.1;
+access;
+symbols;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	98.08.08.11.36.05;	author peterj;	state Exp;
+branches;
+next	;
+
+
+desc
+@CMATH 1989 code
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/* complex.h
+   Header file for COMPLEX number routines.
+*/
+
+/************************************************/
+/*                                              */
+/*  CMATH.  Copyright (c) 1989 Design Software  */
+/*                                              */
+/************************************************/
+
+/* This C code written by ...  Peter & Nigel,
+   ----------------------      Design Software,
+                               42 Gubberley St,
+                               Kenmore, 4069,
+                               Australia.         */
+
+/*-----------------------------------------------------------------*/
+
+
+/* -------------------------------------------------
+   1. COMPLEX data structure is contained in cmath.h
+   ------------------------------------------------- */
+
+/* -------------------
+   2. data conversions
+   ------------------- */
+
+#if (PROTOTYPE)
+/* Full function prototypes ... */
+
+int    Cmplx (double x, double y, struct COMPLEX *z);
+double Creal (struct COMPLEX *z);
+double Cimag (struct COMPLEX *z);
+
+#else
+
+int    Cmplx();   /* convert the two real elements to a complex number */
+double Creal();   /* return the real part of z */
+double Cimag();   /* return the complex part of z */
+
+#endif
+
+/* -------------------
+   3. stack operations
+   ------------------- */
+
+#if (PROTOTYPE)
+
+int    Cinit (int n);
+int    Cend (void);
+int    Creset (void);
+int    Cpush (struct COMPLEX *z);
+int    Cpop (struct COMPLEX *z);
+int    Cpushr (double x);
+int    Cpopr (double *x);
+int    Cdrop (void);
+int    Cdup (void);
+int    Cswap (void);
+
+int    Cprint(int n);
+
+#else
+
+int    Cinit();   /* create a complex stack */
+int    Cend();    /* remove the complex stack */
+int    Creset();  /* reset the stack */
+int    Cpush();   /* push z onto the top of the stack */
+int    Cpop();    /* Pop the top element from the top of the stack and
+		     store as z */
+int    Cpushr();  /* push the real number x onto the stack */
+int    Cpopr();   /* pop the real number x from the top of the stack */
+int    Cdrop();   /* drop top element from stack */
+int    Cdup();    /* duplicate the top element of the stack */
+int    Cswap();   /* swap the top two elements of the stack */
+
+int    Cprint();  /* print the top n stack elements without consuming
+		     them (useful for debugging)  */
+
+#endif
+
+/* ------------------------
+   4. arithmetic operations
+   ------------------------ */
+
+#if (PROTOTYPE)
+
+int    Cadd (void);
+int    Csub (void);
+int    Cmult (void);
+int    Cdiv (void);
+int    Cinv (void);
+int    Cneg (void);
+int    Conjg (void);
+
+int    Cmag (double *x);
+int    Cpolar (void);
+int    Cart (void);
+
+#else
+
+int    Cadd();    /* pop the top two elements off the stack, add them
+		     and push the result back onto the stack */
+int    Csub();   /* subtract the second top element from the top */
+int    Cmult();  /* multiplicatiom */
+int    Cdiv();   /* divide the second top element by the top element */
+int    Cinv();   /* invert the top element */
+int    Cneg();   /* negate the top element */
+int    Conjg();  /* take the conjugate of the top element */
+
+int    Cmag();   /* returns the magnitude of the top element in x  */
+int    Cpolar(); /* convert the top element into polar coordinate form */
+int    Cart();   /* convert from polar to cartesian form */
+
+#endif
+
+/* ------------
+   5. functions
+   ------------ */
+
+#if (PROTOTYPE)
+
+int    Cpow (double y);
+int    Csqrt (void);
+
+int    Cexp (void);
+int    Clog (void);
+
+int    Csin (void);
+int    Ccos (void);
+int    Ctan (void);
+
+#else
+
+int    Cpow();  /* (top element)**r  */
+int    Csqrt(); /* square root of top element  */
+
+int    Cexp();  /* complex exponential */
+int    Clog();  /* natural logarithm */
+
+int    Csin();  /* complex sine */
+int    Ccos();  /* complex cosine */
+int    Ctan();  /* complex tangent */
+
+#endif
+
+/*-----------------------------------------------------------------*/
+
+@

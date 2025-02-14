@@ -1,0 +1,225 @@
+head	1.1;
+access;
+symbols;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	98.08.08.11.36.05;	author peterj;	state Exp;
+branches;
+next	;
+
+
+desc
+@CMATH 1989 code
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/* lsp.c
+   Least-squares polynomial using singular value decomposition
+   to directly decompose the design matrix.  */
+
+/************************************************/
+/*                                              */
+/*  CMATH.  Copyright (c) 1989 Design Software  */
+/*                                              */
+/************************************************/
+
+
+#include "cmath.h"
+#if (STDLIBH)
+#include <stdlib.h>
+#endif
+#include <stdio.h>
+#include <math.h>
+
+#ifndef NULL
+#define  NULL  0
+#endif
+
+
+#define  MINDX(i,j,rowsize)  (((i)-1) * (rowsize) + (j)-1)
+#define  VINDX(j)            ((j)-1)
+#define  MIN(a,b)            (((a) < (b)) ? (a) : (b))
+#define  MAX(a,b)            (((a) > (b)) ? (a) : (b))
+#define  SIGN(a,b)           (((b) >= 0.0) ? fabs(a) : -fabs(a))
+
+/*-----------------------------------------------------------------*/
+
+#if (PROTOTYPE)
+
+int lsp (int n, int m,
+         double x[], double y[], double c[],
+         double shift, double relerr, double *resid,
+         int *ierr)
+
+#else
+
+int lsp (n, m, x, y, c, shift, relerr, resid, ierr)
+int n; int m;
+double x[]; double y[]; double c[];
+double shift; double relerr; double *resid;
+int *ierr;
+
+#endif
+
+
+/* Purpose ...
+   -------
+   Given a set of m data points x and y,such that y = y(x),
+   the n coefficients c of a least squares polynomial are computed.
+   The polynomial is
+        y = c(1) + c(2)*z + c(3)*z**2 + ... + c(n)*z**(n-1)
+   where z = x - shift.
+
+   Input ...
+   -----
+   n      : number of coefficients in least squares
+            polynomial. i.e. the order of the polynomial is (n-1).
+   m      : number of data points.
+   x      : data points, x coordinate. x[0] ... x[m-1]
+   y      : data points, y coordinate. y[0] ... y[m-1]
+   shift  : origin shift for x.  A suitable centering value can improve
+            the accuracy of the result.
+   relerr : relative error of the data. (e.g) If the data is correct
+            to 3 significant figures then set relerr=0.001.
+            If data is exact, set relerr=0.0.
+
+   Output ...
+   ------
+   c      : coefficients of shifted least squares polynomial.
+            c[0] ... c[n-1]
+   resid  : square root of the sum of squares of the residuals.
+   ierr   : Status flag
+            ierr =  0, normal return
+                 =  k, if k th singular value has not been computed
+                       in 30 iterations.
+                 = -1, could not allocate memory for work arrays
+                 = -2, invalid user input
+
+   Workspace ...
+   ---------
+   Workspace of 3 * n * m + n double elements are allocated by lsp().
+
+   This C code written by ...  Peter & Nigel,
+   ----------------------      Design Software,
+                               42 Gubberley St,
+                               Kenmore, 4069,
+                               Australia.
+
+   Version ... 1.0, 13 nov 1989
+   -------
+
+   Notes ...
+   -----
+   (1) Adapted from the FORTRAN code by John D. Day,
+       Department of Mechanical Engineering
+       University of Queensland.
+*/
+
+{  /* begin function lsp() */
+
+int i, j;
+double *a, *u, *v, *sigma;
+double sigmax, tau, t, tt;
+
+*ierr = 0;
+if (n < 2 || m < 2 || x == NULL || y == NULL || c == NULL)
+   {
+   *ierr = -2;
+   return (0);
+   }
+
+/* allocate memory for work arrays */
+a = (double *) NULL;
+u = (double *) NULL;
+v = (double *) NULL;
+sigma = (double *) NULL;
+a = (double *) malloc (n * m * sizeof(double));
+if (a == NULL)
+   {
+   *ierr = -1;
+   goto LeaveLSP;
+   }
+u = (double *) malloc (n * m * sizeof(double));
+if (u == NULL)
+   {
+   *ierr = -1;
+   goto LeaveLSP;
+   }
+v = (double *) malloc (n * m * sizeof(double));
+if (v == NULL)
+   {
+   *ierr = -1;
+   goto LeaveLSP;
+   }
+sigma = (double *) malloc (n * sizeof(double));
+if (sigma == NULL)
+   {
+   *ierr = -1;
+   goto LeaveLSP;
+   }
+
+/* check relerr for minimum allowable value . */
+t = n * 1.0e-16;
+relerr = MAX(fabs(relerr), t);
+
+/* Set up design matrix. */
+
+for (i = 1; i <= m; ++i)
+   {
+   a[MINDX(i,1,n)] = 1.0;
+   for (j = 2; j <= n; ++j)
+      a[MINDX(i,j,n)] = (x[VINDX(i)] - shift) * a[MINDX(i,j-1,n)];
+   }
+
+/* decomposition. */
+
+svd (n, m, n, a, sigma, 1, u, 1, v, ierr);
+if (*ierr != 0) goto LeaveLSP;
+
+/* Find largest singular value,reset coefficients. */
+
+sigmax = 0.0;
+for (j = 1; j <= n; ++j)
+   {
+   c[VINDX(j)] = 0.0;
+   sigmax = MAX(sigmax, sigma[VINDX(j)]);
+   }
+
+/* absolute error tolerance. */
+tau = relerr * sigmax;
+
+/* find coefficients. */
+svdsolve (n, m, n, u, sigma, v, y, c, tau, ierr);
+if (*ierr != 0) goto LeaveLSP;
+
+/* Find square root of sum of squares of residuals. */
+t = 0.0;
+for (i = 1; i <= m; ++i)
+   {
+   tt = 0.0;
+   for (j = 1; j <= n; ++j) tt += c[VINDX(j)] * a[MINDX(i,j,n)];
+   t += (tt - y[VINDX(i)]) * (tt - y[VINDX(i)]);
+   }
+*resid = sqrt(t);
+
+LeaveLSP:
+/* clean up allocated memory. */
+if (a != NULL) { free(a); a = NULL; }
+if (u != NULL) { free(u); u = NULL; }
+if (v != NULL) { free(v); v = NULL; }
+if (sigma != NULL) { free(sigma); sigma = NULL; }
+
+return (0);
+}  /* end of function lsp() */
+
+
+
+@

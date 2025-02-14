@@ -1,0 +1,155 @@
+------------------------------------------------------------------
+Design Software                                              lsp()
+------------------------------------------------------------------
+
+
+1.0  Purpose.
+
+     Compute a  least-squares  polynomial  approximation  to  an 
+arbitrary set of data points.  The form of the polynomial is
+     y = c  + c z + c z  + ... + c   z     ,
+where z = x - x     .
+
+
+2.0  How to use the function.
+
+     lsp() is declared as 
+     
+     int lsp (n, m, x, y, c, shift, relerr, resid, flag)
+     int    n, m;
+     double x[], y[], c[], shift, relerr, *resid;
+     int    *flag;
+
+
+2.1  Parameter types.
+
+     n         : integer value
+     m         : integer value
+     x         : pointer to a vector of double values
+     y         : pointer to a vector of double values
+     c         : pointer to a vector of double values
+     shift     : double value
+     relerr    : double value
+     resid     : pointer to a double variable
+     flag      : pointer to an integer variable
+
+
+2.2  Input.
+
+     n         : The number of polynomial coefficients.  The order
+                 of the polynomial in n-1.
+     m         : The number of data points.  These are numbered
+                 0 ... m-1.
+     x         : x-coordinates of the data points.  There is no
+                 particular order required.
+     y         : y-coordinates of the data points.
+     shift     : The origin shift for x.  A suitable centering
+                 value can improve the accuracy of the result.
+     relerr    : The relative error of the data.  For example,
+                 if the data is correct to 3 significant figures
+                 then set relerr = 0.001.  If the data is exact
+                 set relerr = 0.0.
+
+2.3  Output.
+
+     lsp       : returns an unspecified integer value which should
+                 be ignored.
+     c         : The fitted polynomial coefficients, c[j], 
+                 j = 0...n-1.
+     resid     : The square root of the sum of the squares of the
+                 residuals.
+     flag      : A status indicator.
+                 flag =  0 : normal return
+                 flag >  0 : The singular value decomposition 
+                             failed.
+                 flag = -1 : could not allocate work space.
+                 flag = -2 : illegal user input
+                      (i.e. n < 2, n < 2, or NULL array pointers)
+
+
+2.4  Workspace.
+
+     Arrays  consisting  of  (3*n*m  +  n)  double  elements   are 
+allocated by lsp().
+
+
+3.0  Method.
+
+     The function lsp() first assembles the design matrix and then 
+decomposes it using svd() (singular value  decomposition).   There 
+is one equation for each of  the  m  data  points  and  n  unknown 
+coefficients, c[j], j = 0 ... n-1.
+
+
+4.0  Reference.
+
+G.E. Forsythe, M.A. Malcolm & C.B. Moler : "Computer  Methods  for 
+Mathematical Computations". Prentice-Hall, Englewood Cliffs, N.J., 
+1977.
+
+
+5.0  Example.
+
+     The following sample program fits a second  order  polynomial 
+to a generated set of data.
+
+
+/* lspd.c
+   Sample driver for lsp(), the least-squares polynomial */
+
+#include <math.h>
+#include <stdio.h>
+#include "cmath.h"
+
+main ()
+{
+double x[8], y[8], c[3], shift;
+double relerr, resid;
+int    i, mpoint, ncoeff, flag;
+
+mpoint = 8;
+ncoeff = 3;
+shift = 0.0;
+relerr = 1.0e-3;
+for (i = 0; i < mpoint; ++i)
+   {
+   x[i] = (double) i;
+   y[i] = 10.0 + 3.0 * x[i] + 0.9 * x[i] * x[i];
+   }
+
+printf ("\n\n  --- CMATH --- Design Software 1989\n");
+printf ("\nTest driver for lsp() (Least-squares polynomial).\n\n");
+
+lsp (ncoeff, mpoint, x, y, c, shift, relerr, &resid, &flag);
+printf ("%s\n", cmathmsg(LSP_C, flag));
+
+if (flag == 0)
+   {
+   printf ("\nFitted polynomial coefficients ... \n");
+   for (i = 0; i < ncoeff; ++i)
+      printf ("%8.3f ", c[i]);
+   printf ("\n\n");
+   printf ("correct coefficients ... 10.0, 3.0, 0.9\n");
+   }
+
+return (0);
+}  /* end of main */
+
+
+
+6.0  Program Results.
+
+  --- CMATH --- Design Software 1989
+
+Test driver for lsp() (Least-squares polynomial).
+
+lsp() : normal return
+
+Fitted polynomial coefficients ... 
+   10.00    3.000    0.900 
+
+correct coefficients ... 10.0, 3.0, 0.9
+
+
+
+

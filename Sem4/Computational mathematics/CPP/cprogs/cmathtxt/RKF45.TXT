@@ -1,0 +1,284 @@
+------------------------------------------------------------------
+Design Software                       rkf45(), rkfinit(), rkfend()
+------------------------------------------------------------------
+
+
+1.0  Purpose.
+
+     Integrate the  set  of  simultaneous,  first-order,  ordinary 
+differential equations (ODE's)
+     -- = f(x, y)      ,
+starting from the initial condition y(x ).  The  function  rkf45() 
+is designed to produce solutions of moderate accuracy for nonstiff 
+or mildly stiff sets of equations.  
+
+
+2.0  How to use the functions.
+
+     Before  using  rkf45(),  the  user  must  call  rkfinit()  to 
+allocate the workspace arrays.  rkf45() may then be called several 
+times to continue a solution over a number of time steps.  To free 
+the allocated workspace, call rkfend().  If the number of ODE's is 
+to be increased, then the workspace must be freed  using  rkfend() 
+and new workspace allocated using rkfinit().
+
+     The functions are declared as 
+
+     int rkfinit (n, fail)
+     int n, *fail;
+
+     int rkf45 (f, n, y, yp, x1, x2, relerr, abserr, h, 
+                nfe, maxfe, flag)
+     int    (*f)(), n;
+     double y[], yp[], *x1, x2, *relerr, abserr, *h;
+     int    *nfe, maxfe, *flag;
+
+     int rkfend ()
+
+
+2.1  Parameter types.
+
+     f         : pointer to a user supplied function
+                 int f (n, x, y, yp)
+                 int    n;
+                 double x, y[], yp[];
+                 {
+                 ...
+                 return;
+                 }
+     n         : integer value
+     y         : pointer to a vector of double elements
+     yp        : pointer to a vector of double elements
+     x1        : pointer to a double variable
+     x2        : double value
+     relerr    : pointer to a double variable
+     abserr    : double value
+     h         : pointer to a double variable
+     nfe       : pointer to an integer variable
+     maxfe     : integer value
+     flag      : pointer to an integer variable
+     fail      : pointer to an integer variable
+
+
+2.2  Input to rkfinit().
+
+     n         : The number of ODE's.
+
+
+2.3  Output from rkfinit().
+
+     rkfinit() : returns an unspecified integer value which should
+                 be ignored.
+     fail      : Status indicator
+                 fail = 0 : normal return
+                 fail = 1 : Could not allocate memory for 
+                            workspace.  
+                 fail = 2 : Illegal value for n. (n < 1)
+     Do not use rkf45() if fail is nonzero.
+
+
+2.4  Input to rkf45().
+
+     f         : User supplied function to evaluate the
+                 derivatives yp[i] = dy[i]/dx, i = 0 .. n-1.
+     n         : The number of ODE's.
+     y         : The starting values of y[i], i = 0 .. n-1, at x1.
+     x1        : The starting value of the independent variable.
+     x2        : The final value at which the solution is desired.
+                 x1 = x2 is allowed on the first call only, in 
+                 which case rkf45() returns with flag = 2 if
+                 continuation is possible.
+     relerr    : Relative error tolerance for the local error
+                 test.
+     abserr    : Absolute error tolerance for the local error
+                 test.  At each step the routine requires
+                 1local error1 < relerr * 1y1 + abserr
+                 for each component of the error vector and y.
+     flag      : Status indicator.  
+                 flag = 1 : Take as many steps as required to
+                    reach x2.  (Normally used)
+                 flag = -1 : Take a single step in the direction
+                    of x2.
+
+
+2.5  Output from rkf45().
+
+     y         : Solution vector at x1.
+     x1        : The independent variable; final value reached.
+     relerr    : The relative error tolerance will be changed if
+                 the user specifies too small a value.
+     h         : The next step size to be tried.
+     nfe       : The number of function evaluations used in the
+                 last call with flag = 1.
+     flag      : Integration status indicator.
+                 flag = 2 : Successful return.  Integration 
+                    reached x2.  This is the normal mode for
+                    continuing integration.  To continue, the
+                    user need only specify a new x2 and call
+                    rkf45() again.
+                 flag = -2 : A single step in the direction of 
+                    x2 was taken.  This is the normal mode for 
+                    continuing integration one step at a time.
+                 flag = 3 : Integration was not completed 
+                    because the relerr was too small.  relerr
+                    has been increased appropriately to 
+                    continue.
+                 flag = 4 : Integration was not completed because
+                    more than maxfe function evaluations were 
+                    needed.  This corresponds to approximately
+                    maxfe/6 steps.  The function counter has been
+                    reset to zero and another 100 function 
+                    evaluations will be allowed.
+                 flag = 5 : Integration was not completed because
+                    the solution approached zero, making a pure
+                    relative error test impossible.  To continue,
+                    the user must set abserr non-zero.  
+                 flag = 6 : Integration was not completed because
+                    the requested accuracy could not be achieved
+                    using the smallest allowable stepsize.  The
+                    user must increase relerr and/or abserr before
+                    continuing.  The value of flag needs to be 
+                    reset also.  This flag value may indicate
+                    a difficulty with the solution, such as a 
+                    step or singularity.
+                 flag = 7 : It is likely that rkf45() is 
+                    inefficient for solving this problem.  The 
+                    user should consider using a multistep method.
+                 flag = 8 : Invalid input parameters.
+                    n < 0, x1 = x2 and flag not +1 or -1,
+                    relerr or abserr < 0
+                    flag = 0, < -2 or > 8.
+
+
+2.6  Workspace for rkf45().
+
+     Workspace consisting of 5n double values is allocated internally.
+
+
+3.0  Method.
+
+     The  ODE  integrator  rkf45()  uses  a   Runge-Kutta-Fehlberg 
+4th-5th  order  formula  together  with  an   adaptive   step-size 
+algorithm.  It uses 6 function evaluations per step to  provide  a 
+5th order solution and an estimate of the local truncation error.
+
+
+4.0  References.
+
+G.E. Forsythe, M.A. Malcolm, & C.B. Moler  : "Computer Methods for 
+Mathematical Computations". Prentice-Hall, Englewood Cliffs,  N.J. 
+1977.
+
+L.F. Shampine, H.A. Watts & S.M. Davenport  :  "Solving  non-stiff 
+ordinary differential equations - the state  of  the  art."   SIAM 
+Review 18, 376-441, 1976.
+
+
+5.0  Example.
+
+     Integrate  d  1 y 1   1  998   1998 1 1 y  1 
+                dx 1 y     1 -999  -1999 1 1 y  1   ,
+from x = 0 to x = 2 starting with   1 y 1   1 1 1 
+                                    1 y     1 0 1   .
+
+The stiffness of this system causes rkf45()  to  take  many  small 
+steps.  Compare the result obtained here  with  that  produced  by 
+stint1() for a similar requested accuracy.
+
+/* rkf45d.c
+   Sample driver for the ODE integrator rkf45(). */
+
+#include <math.h>
+#include <stdio.h>
+#include "cmath.h"
+
+main ()
+{
+
+int     f();
+double  h, relerr, abserr, x1, x2;
+int     n, flag, nfe, maxfe, fail, step;
+double  y[2], yp[2];
+
+printf ("\n\n  --- CMATH --- Design Software 1989\n");
+printf ("\nExercise ODE solver rkf45().\n\n");
+
+n      = 2;
+flag   = 1;
+maxfe  = 5000;
+relerr = 1.0e-5;
+abserr = 1.0e-5;
+rkfinit (n, &fail);
+printf ("%s\n\n", cmathmsg(RKFINIT_C, fail));
+
+if (fail == 0)
+   {
+   y[0]   = 1.0;
+   y[1]   = 0.0;
+
+   printf ("       x      y[0]       y[1]\n");
+   printf ("----------------------------------\n");
+
+   for (step = 1; step <= 5; ++step)
+      {
+      x2 = 0.4 * step;
+      x1 = x2 - 0.4;
+      rkf45 (f, n, y, yp, &x1, x2, &relerr, abserr,
+             &h, &nfe, maxfe, &flag);
+      printf ("%10.6f %10.6f %10.6f \n", x1, y[0], y[1]);
+      if (flag != 2)
+         {
+         printf ("%s\n", cmathmsg(RKF45_C, flag));
+         break;
+         }
+      }
+
+   rkfend ();
+   printf ("\n%s\n", cmathmsg(RKF45_C, flag));
+   printf ("nfe         : %d\n", nfe);
+   printf ("step size   : %f\n", h);
+   printf ("\ncorrect answer : y[0] = 0.270671,  y[1] = -0.135335\n");
+   printf ("If rkf45() does not reach the final time, use ...\n");
+   printf ("y[0] = 2 * exp(-x),  y[1] = -exp(-x) \n");
+   }
+
+return (0);
+}
+
+
+
+int f (n, x, y, dydx)
+int    n;
+double x, y[], dydx[];
+{
+dydx[0] = 998.0 * y[0] + 1998.0 * y[1];
+dydx[1] = -999.0 * y[0] - 1999.0 * y[1];
+return (0);
+}
+
+
+6.0  Program Results.
+
+  --- CMATH --- Design Software 1989
+
+Exercise ODE solver rkf45().
+
+rkfinit() : normal return
+
+       x      y[0]       y[1]
+----------------------------------
+  0.400000   1.340642  -0.670322 
+  0.800000   0.898658  -0.449329 
+  1.200000   0.602388  -0.301194 
+  1.600000   0.403793  -0.201897 
+  2.000000   0.270671  -0.135335 
+
+rkf45() : normal return
+nfe         : 3385
+step size   : 0.007347
+
+correct answer : y[0] = 0.270671,  y[1] = -0.135335
+If rkf45() does not reach the final time, use ...
+y[0] = 2 * exp(-x),  y[1] = -exp(-x) 
+
+

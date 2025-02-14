@@ -1,0 +1,80 @@
+head	1.1;
+access;
+symbols;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	98.08.08.11.36.05;	author peterj;	state Exp;
+branches;
+next	;
+
+
+desc
+@CMATH 1989 code
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/* decompd.c
+   Sample driver for decomp() and solve().
+*/
+
+#include <math.h>
+#include <stdio.h>
+#include "cmath.h"
+
+#define mdim 10
+
+main ()
+{
+double a[mdim][mdim], b[mdim], cond;
+double det;
+int n, pivot[mdim], i, flag;
+
+n = 3;
+b[0]    = 5.0; b[1]    = 15.1; b[2]    = 10.0;
+
+a[0][0] = 1.0; a[0][1] = 2.0;  a[0][2] = 2.0;
+a[1][0] = 2.1; a[1][1] = 9.0;  a[1][2] = 4.0;
+a[2][0] = 1.0; a[2][1] = 7.0;  a[2][2] = 2.0;
+
+printf ("\n\n  --- CMATH --- Design Software 1989\n");
+printf ("\nTest driver for decomp() and solve().\n\n");
+decomp (n, mdim, a, &cond, pivot, &flag);
+if (flag != 0)
+   {
+   printf ("decomp could not allocate workspace\n");
+   goto ProgStop;
+   }
+if ((cond+1.0) == cond)
+   {
+   printf ("Singular Matrix\n");
+   goto ProgStop;
+   }
+solve (n, mdim, a, b, pivot);
+
+printf ("solution    =     [ ");
+for(i = 0; i < n; i++) printf ("%8.3f, ", b[i]);
+printf ("]\n");
+printf ("correct answer is [    1.000,    1.000,    1.000, ]\n");
+
+printf ("\n");
+printf ("condition number = %e\n", cond);
+
+det = pivot[n-1];
+for (i = 0; i < n; i++)
+   det = det * a[i][i];
+printf ("\nComputed determinant  = %f\n", det);
+printf ("determinant should be = 5.0\n");
+
+ProgStop:
+return (0);
+
+}
+@

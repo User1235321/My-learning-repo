@@ -1,0 +1,298 @@
+------------------------------------------------------------------
+Design Software                                  cheby(), chebyc()
+------------------------------------------------------------------
+
+
+1.0  Purpose.
+
+     Evaluate a Chebyshev series approximation to a function  over 
+the range [a, b].  The form of the polynomial series is
+     f(x) =   S  c  T (z)  +  c /2   ,
+where z = -----------------  , and T  = cos (j arccos(z)).
+
+An alternative expression for the set of polynomials is
+     T  = 1,  T  = x, T  = 2x  - 1, ... T  = 2xT    - T   , j > 1.
+The derivative or integral of the function may also be obtained.
+
+
+2.0  How to use the functions.
+
+     chebyc() is used to fit the series  coefficients,  c ,  to  a 
+user supplied function.  It is declared as
+     
+     chebyc (f, a, b, c, n, flag);
+     double (*f)(), a, b, c[];
+     int    n, *flag;
+
+If chebyc() successfully computes the coefficients,  then  cheby() 
+may be used to evaluate the series any number  of  times.   It  is 
+declared as
+
+     double cheby (x, a, b, c, m, flag)
+     double x, a, b, c[];
+     int    m, *flag;
+
+The routines chebyd() and chebyi() may be  used  to  evaluate  the 
+coefficients of  the  derivative  and  integral  of  the  original 
+series.  These routines are declared as 
+
+     int chebyd (a, b, c, cder, n, flag);
+     double a, b, c[], cder[];
+     int    n, *flag;
+
+     int chebyi (a, b, c, cint, n, flag);
+     double a, b, c[], cint[];
+     int    n, *flag;
+
+
+2.1  Parameter types.
+
+     f         : pointer to function returning a double value
+                 double f (x)
+                 double x;
+                 {
+                 return (double value);
+                 }
+     x         : double value
+     a         : double value
+     b         : double value
+     c         : pointer to a vector of double values
+     cder      : pointer to a vector of double values
+     cint      : pointer to a vector of double values
+     n         : integer value
+     m         : integer value
+     flag      : pointer to an integer variable
+
+
+2.2  Input to chebyc().
+
+     f         : The name of the user supplied function.
+     a         : Lower bound on x.
+     b         : Upper bound on x.
+                 Note that the series approximation is only valid
+                 over the range a < x < b.
+     n         : The number of coefficients to fit.  The value of
+                 n should be relatively large compared to the 
+                 number of coefficients that you wish to retain.
+
+
+2.3  Output from chebyc().
+
+     chebyc()  : returns an unspecified integer value which
+                 should be ignored.
+     c         : The series coefficients, c[0] ... c[n-1].  
+                 If the function is well behaved, then c[j], 
+                 for mt<tjt<tn, should be small.
+     flag      : flag = 0, normal return.
+                 flag = 1, invalid user input, e.g. n < 1,
+                           c == NULL, b == a.
+                 flag = 2, could not allocate memory for workspace
+
+
+2.4  Input to cheby().
+
+     x         : The independent variable, a < x < b.
+     a         : Lower bound on x.
+     b         : Upper bound on x.
+     c         : The Chebyshev series coefficients.
+     m         : The number of coefficients to use in the 
+                 series.  the value of m should be set so that
+                 the c[j], j > m, are small.
+
+
+2.5  Output from cheby().
+
+     cheby()   : returns a double value for f(x).
+     flag      : Status indicator
+                 flag = 0 : normal return.
+                 flag = 1 : invalid user input, b == a,
+                    x not in [a, b], m < 1, c == NULL.
+
+
+2.6  Input to chebyd().
+
+     a         : Lower bound on x.
+     b         : Upper bound on x.
+     c         : The series coefficients as returned by chebyc().
+     n         : The number of coefficients to use.
+
+
+2.7  Output from chebyd().
+
+     chebyd()  : returns an unspecified integer value which
+                 should be ignored.
+     cder      : The series coefficients, cder[0]...cder[n-1] 
+                 for the derivative of the original function.  
+     flag      : flag = 0, normal return.
+                 flag = 1, invalid user input, e.g. n < 1,
+                           c == NULL, b == a.
+
+
+2.6  Input to chebyi().
+
+     a         : Lower bound on x.
+     b         : Upper bound on x.
+     c         : The series coefficients as returned by chebyc().
+     n         : The number of coefficients to use.
+
+
+2.7  Output from chebyi().
+
+     chebyi()  : returns an unspecified integer value which
+                 should be ignored.
+     cint      : The series coefficients, cint[0]...cint[n-1] 
+                 for the integral of the original function.  
+                 The constant of integration has been chosen
+                 to give the integral a value of 0 at x = a.
+     flag      : flag = 0, normal return.
+                 flag = 1, invalid user input, e.g. n < 1,
+                           c == NULL, b == a.
+
+
+3.0  Method.
+
+     The  function  cheby()  fits  the  coefficients   using   the 
+summation 
+     c   =  -   S  f(z ) T (z )     ,  j = 0 .. n-1   ,
+where z t=tcos(p(k+0.5)/n), k = 0...n-1.  The series is  evaluated 
+by cheby() using a  recurrence  relation  due  to  Clenshaw.   The 
+transformation 
+     z = -----------------     ,
+is used to ensure -1 < z < 1.
+
+
+4.0  References.
+
+W.H. Press, B.P. Flannery, S.A.  Teukolsky  &  W.T.  Vetterling  : 
+"Numerical recipes. The art of scientific  computing."   Cambridge 
+University Press, 1986.
+
+C.W. Clenshaw : "A note on the  summation  of  Chebyshev  series." 
+MTAC 9, 118-120, 1955.
+
+
+5.0  Example.
+
+     Approximate the function f(x) = e  over the range 0 < x < 1.
+Use the expansion
+     e   =  1 + -- + -- + -- + ...   ,
+as the user supplied function.
+
+/* chebyd.c
+   Exercise the Chebyshev polynomial routines.  */
+
+#include <math.h>
+#include <stdio.h>
+#include "cmath.h"
+
+main ()
+{
+#define  ndim  60
+double a, b, c[ndim], cder[ndim], cint[ndim];
+double x, expx, df, fint;
+int    j, n, m, flag;
+#if (PROTOTYPE)
+double f(double x);
+#else
+double f();
+#endif
+
+printf ("\n\n  --- CMATH --- Design Software 1989\n");
+printf ("\nExercise the Chebyshev polynomial functions.\n");
+
+n = ndim;
+a = 0.0;
+b = 1.0;
+chebyc (f, a, b, c, n, &flag);                 /* fit coefficients */
+printf ("\n%s\n", cmathmsg(CHEBYC_C, flag));
+
+if (flag == 0)
+   {
+   printf ("\nChebyshev series coefficients for exp(x), 0 <= x <= 1\n");
+   printf ("  j       c[j]           j       c[j]\n");
+   for (j = 0; j < 20; j+=2)
+      printf ("%3d %16.10e,  %3d %16.10e\n", j, c[j], j+1, c[j+1]);
+
+   m = 15;
+   chebyd (a, b, c, cder, m, &flag);              /* differentiate    */
+   printf ("\n%s\n", cmathmsg(CHEBYD_C, flag));
+   chebyi (a, b, c, cint, m, &flag);              /* integrate        */
+   printf ("\n%s\n", cmathmsg(CHEBYI_C, flag));
+
+   printf ("\nSample evaluations ...\n");
+   printf ("     x       exp(x)    derivative   integral\n");
+   printf ("----------------------------------------------\n");
+   for (j = 0; j < 6; ++j)
+      {
+      x = 0.2 * (double) j;
+      expx = cheby (x, a, b, c, m, &flag);
+      df   = cheby (x, a, b, cder, m, &flag);
+      fint = cheby (x, a, b, cint, m, &flag);
+      printf ("%8.3f %11.6f %11.6f %11.6f\n", x, expx, df, fint);
+      }
+   }
+
+return (0);
+}
+
+
+double f (x)
+double x;
+{
+#define  kdim  30
+int j, k;
+double term[kdim], sum;
+
+/* evaluate individual terms for exp(x) */
+j = 0;
+term[0] = 1.0;
+do {
+   ++j;
+   term[j] = term[j-1] * x / (double) j;
+   } while ((term[j] > 0.01 * EPSILON) && j < kdim-1);
+
+/* now sum the terms from the smallest */
+sum = 0.0;
+for (k = j; k >= 0; --k) sum += term[k];
+
+return (sum);
+}
+
+
+6.0  Program Results.
+
+  --- CMATH --- Design Software 1989
+
+Exercise the Chebyshev polynomial functions.
+
+chebyc() : normal return
+
+Chebyshev series coefficients for exp(x), 0 <= x <= 1
+  j       c[j]           j       c[j]
+  0  3.506775309e+00,    1  8.503916538e-01
+  2  1.052086936e-01,    3  8.722104733e-03
+  4  5.434368312e-04,    5  2.711543491e-05
+  6  1.128132889e-06,    7  4.024558239e-08
+  8  1.256584334e-09,    9  3.488100435e-11
+ 10  8.714512799e-13,   11  2.009766051e-14
+ 12  2.615131780e-16,   13  2.233167355e-16
+ 14  1.836331290e-16,   15 -2.907649526e-16
+ 16 -4.289465195e-17,   17  3.346028605e-17
+ 18  3.538293790e-17,   19  4.798281275e-16
+
+chebyd() : normal return
+
+chebyi() : normal return
+
+Sample evaluations ...
+     x       exp(x)    derivative   integral
+----------------------------------------------
+   0.000     1.00000    1.000000    0.000000
+   0.200    1.221403    1.221403    0.221403
+   0.400    1.491825    1.491825    0.491825
+   0.600    1.822119    1.822119    0.822119
+   0.800    2.225541    2.225541    1.225541
+   1.000    2.718282    2.718282    1.718282
+
+
+

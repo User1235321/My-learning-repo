@@ -1,0 +1,412 @@
+head	1.1;
+access;
+symbols;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	98.08.08.11.36.05;	author peterj;	state Exp;
+branches;
+next	;
+
+
+desc
+@CMATH 1989 code
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/* dft.c
+   Discrete Fourier Transform.   */
+
+/************************************************/
+/*                                              */
+/*  CMATH.  Copyright (c) 1989 Design Software  */
+/*                                              */
+/************************************************/
+
+#include "cmath.h"
+#if (STDLIBH)
+#include <stdlib.h>
+#endif
+#include <stdio.h>
+#include <math.h>
+
+#ifndef NULL
+#define  NULL  0
+#endif
+
+#ifndef PI
+#define  PI  3.14159265358979323846
+#endif
+
+/*-----------------------------------------------------------------*/
+
+#if (PROTOTYPE)
+
+int dft (int n, int n2,
+         double zr[], double zi[],
+         double wr[], double wi[],
+         int direct, int *flag)
+
+#else
+
+int dft (n, n2, zr, zi, wr, wi, direct, flag)
+int    n, n2;
+double zr[], zi[], wr[], wi[];
+int    direct, *flag;
+
+#endif
+
+/* Purpose ...
+   -------
+   Compute the discrete Fourier transform (the inverse
+   transform) of the complex array z[k] = zr[k] + i zi[k],
+   k = 0 ... N-1.  (i = sqrt(-1).)
+
+   The forward transform is defined as
+                1     N-1
+      Z(n) = -------  sum  z[k] . exp(2ikn/N)
+             sqrt(N)  k=0
+
+   while the inverse transform is
+                1     N-1
+      z(k) = -------  sum  Z[n] . exp(-2ikn/N)
+             sqrt(N)  n=0
+
+
+   Input ...
+   -----
+   n      : The number of elements in the arrays.
+   n2     : The working size of the ffts used in the convolution.
+            n2 must be an integer power of two and less than 2**15.
+            n2 >= 2 * n.
+            We assume 16-bit integers.
+            The user must ensure that n does not exceed the addressing
+            capacity of the compiler or computer (esp. MS-DOS machines)
+   zr     : real part of the complex array
+   zi     : imaginary part of the complex array
+   wr     : real part of the transformed Chirp function
+   wi     : imaginary part of the transformed Chirp function
+   direct : Direction of transform.
+            = +1, Forward transform computed
+            = -1, Inverse transform computed
+
+   Output ...
+   ------
+   zr     : The real part of the Fourier transform if direct = 1,
+            or the Inverse transform if direct = -1.
+   zi     : Imaginary part.
+   flag   : Status indicator.
+            = 0,  normal return
+            = 1,  illegal user input.  e.g. n < 2, n2 > 2**14,
+                  zi == NULL, zr == NULL, wr == NULL, wi == NULL
+            = 2,  n2 not an integer power of 2 or n2 < 2 * n
+            = 3,  direct not +1 or -1
+
+   Version ... 1.0, August 1989
+   -------
+
+   This C code written by ...  Peter & Nigel,
+   ----------------------      Design Software,
+                               42 Gubberley St,
+                               Kenmore, 4069,
+                               Australia.
+
+   References ...
+   ----------
+   D.M. Monro & J.L. Branch : "The Chirp discrete Fourier transform
+   of general length."  Applied Statistics
+
+   L.R. Rabiner, R.W. Schaffer & C.M. Rader (1969) : "The Chirp
+   Z-transform and its applications."  Bell Systems Technical Journal
+   vol 48, 1249-1292.
+
+   Notes ...
+   -----
+   (1) The ordering of the z arrays (for even n) are as follows.
+       (D is the time interval for sampling.)
+
+       index   time domain    frequency domain
+                   t =               f =
+       ----------------------------------------
+         0              0               0
+         1              D            1/ND
+         2             2D            2/ND
+         ....
+         N/2-1   (N/2-1)D      (N/2-1)/ND
+         N/2       (N/2)D          +-1/2D
+         N/2+1   (N/2+1)D     -(N/2-1)/ND
+         ....
+         N-2       (N-2)D           -2/ND
+         N-1       (N-1)D           -1/ND
+
+*/
+
+{    /* begin dft()  */
+int    j, fftflag;
+double t, tr, ti;
+
+*flag = 0;
+if (n < 4 || n2 > 16384 || zr == NULL || zi == NULL ||
+    wr == NULL || wi == NULL)
+   {
+   *flag = 1;
+   return (0);
+   }
+
+if (direct != 1 && direct != -1)
+   {
+   *flag = 3;
+   return (0);
+   }
+
+if (n2 < 2 * n)
+   {
+   *flag = 2;
+   return (0);
+   }
+
+/* Multiply by the Chirp function in the time domain. */
+chirpmult (n, zr, zi, direct);
+/* Zero fill the remainder of the arrays. */
+for (j = n; j < n2; ++j)
+   {
+   zr[j] = 0.0;
+   zi[j] = 0.0;
+   }
+
+/* Fourier transform the chirped series. */
+fft (n2, zr, zi, 1, &fftflag);
+if (fftflag != 0)
+   {
+   *flag = 2;  /* we assume that the only possible error here
+                  is that n2 was not a power of two */
+   return (0);
+   }
+
+/* Convolve by frequency domain multiplication with (wr, wi). */
+for (j = 0; j < n2; ++j)
+   {
+   t = wi[j];
+   if (direct < 0) t = -t;
+   tr = zr[j] * wr[j] - zi[j] * t;
+   ti = zr[j] * t + zi[j] * wr[j];
+   zr[j] = tr;  zi[j] = ti;
+   }
+
+/* Inverse fourier transform. Should not need to check flag. */
+fft (n2, zr, zi, -1, &fftflag);
+
+/* multiply by Chirp function. */
+chirpmult (n, zr, zi, direct);
+
+/* Finally scale the transform. */
+t = 1.0 / sqrt((double) n);
+t *= sqrt((double) n2);
+for (j = 0; j < n; ++j)
+   {
+   zr[j] *= t;
+   zi[j] *= t;
+   }
+
+return (0);
+}  /* end of dft() */
+
+/*-----------------------------------------------------------------*/
+
+#if (PROTOTYPE)
+
+int chirpmult (int n, double zr[], double zi[], int direct)
+
+#else
+
+int chirpmult (n, zr, zi, direct)
+int    n;
+double zr[], zi[];
+int    direct;
+
+#endif
+
+/* Purpose ...
+   -------
+   Multiply the time series by the Chirp function.
+   This is a service routine to dft().
+
+   Input ...
+   -----
+   n      : The number of elements in the arrays.
+   zr     : real part of the complex time series
+   zi     : imaginary part of the complex time series
+   direct : Direction of transform.
+            = +1, Forward transform computed
+            = -1, Inverse transform computed
+
+   Output ...
+   ------
+   zr, zi : time series for use in dft()
+
+   Version ... 1.0, August 1989
+   -------
+
+   This C code written by ...  Peter & Nigel,
+   ----------------------      Design Software,
+                               42 Gubberley St,
+                               Kenmore, 4069,
+                               Australia.
+
+   Reference ...
+   ---------
+   D.M. Monro & J.L. Branch : "The Chirp discrete Fourier transform
+   of general length."  Applied Statistics
+
+*/
+
+{  /* begin chirpmult() */
+int    j;
+double tc, t, tr, ti, z;
+
+tc = PI / (double) n;
+for (j = 0; j < n; ++j)
+   {
+   z = (double) j;
+   z = z * z * tc;
+   tr = cos(z);
+   ti = -sin(z);
+   if (direct < 0) ti = -ti;
+   t = zr[j];
+   zr[j] = t * tr - zi[j] * ti;
+   zi[j] = t * ti + zi[j] * tr;
+   }
+
+return (0);
+}  /* end of chirpmult() */
+
+/*------------------------------------------------------------------*/
+
+#if (PROTOTYPE)
+
+int chirp (int n, int n2, double wr[], double wi[], int *flag)
+
+#else
+
+int chirp (n, n2, wr, wi, flag)
+
+int    n, n2;
+double wr[], wi[];
+int    *flag;
+
+#endif
+
+/* Purpose ...
+   -------
+   Compute the discrete Fourier transform of the Chirp
+   function for use by dft().  This routine must be called
+   before using dft().
+
+   Input ...
+   -----
+   n      : The number of elements in the arrays.
+   n2     : The working size of the ffts used in the convolution.
+            n2 must be an integer power of two and less than 2**15.
+            n2 >= 2 * n.
+            The user must ensure that n does not exceed the addressing
+            capacity of the compiler or computer (esp. MS-DOS machines)
+
+   Output ...
+   ------
+   wr     : real part of the transformed Chirp function
+   wi     : imaginary part of the transformed Chirp function
+            Note.  Once setup, these arrays may be used for any number
+            of calls to dft() whth the same size transforms.
+   flag   : Status indicator.
+            = 0,  normal return
+            = 1,  illegal user input.  e.g. n < 2, n2 > 2**14,
+                  wr == NULL, wi == NULL
+            = 2,  n2 not an integer power of 2 or not large
+                  enough.
+
+   Version ... 1.0, August 1989
+   -------
+
+   This C code written by ...  Peter & Nigel,
+   ----------------------      Design Software,
+                               42 Gubberley St,
+                               Kenmore, 4069,
+                               Australia.
+
+   References ...
+   ----------
+   D.M. Monro & J.L. Branch : "The Chirp discrete Fourier transform
+   of general length."  Applied Statistics
+
+   L.R. Rabiner, R.W. Schaffer & C.M. Rader (1969) : "The Chirp
+   Z-transform and its applications."  Bell Systems Technical Journal
+   vol 48, 1249-1292.
+
+*/
+
+{  /* begin chirp() */
+int    i, j, fftflag;
+double z, tc;
+
+*flag = 0;
+if (n < 2 || n2 > 16384 || wr == NULL || wi == NULL)
+   {
+   *flag = 1;
+   return (0);
+   }
+
+if (n2 < 2 * n)
+   {
+   *flag = 2;
+   return (0);
+   }
+
+tc = PI / (double) n;
+
+/* Set up bottom of Chirp function and copy it into
+   the top segment.  It is an even function and will
+   indexx as ...
+   j = 0  1  2  3     ...      n2 -3  n2-2  n2-1
+   k = 0  1  2  3     ...          3     2     1
+   */
+wr[0] = 1.0;
+wi[0] = 0.0;
+for (j = 1; j < n; ++j)
+   {
+   z = (double) j;
+   z = z * z * tc;
+   wr[j] = cos(z);
+   wi[j] = sin(z);
+
+   i = n2 - j;
+   wr[i] = wr[j];
+   wi[i] = wi[j];
+   }
+
+/* Clear the rest in between. */
+for (j = n; j < i; ++j)
+   {
+   wr[j] = 0.0;
+   wi[j] = 0.0;
+   }
+
+/* Fourier transform the Chirp function. */
+fft (n2, wr, wi, 1, &fftflag);
+if (fftflag != 0)
+   {
+   *flag = 2;  /* we assume that n2 was not a power of two */
+   return (0);
+   }
+
+return (0);
+}  /* end of chirp() */
+
+/*------------------------------------------------------------------*/
+@

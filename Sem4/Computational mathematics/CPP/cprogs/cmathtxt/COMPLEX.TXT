@@ -1,0 +1,325 @@
+------------------------------------------------------------------
+Design Software                            COMPLEX number routines
+------------------------------------------------------------------
+
+
+1.0  Purpose.
+
+     This  set  of  numerical  routines  is   provided   for   the 
+manipulation of COMPLEX numbers in a stack-like environment.   The 
+routines work in much the same way as the stack operations on  the 
+Hewlett-Packard calculators.
+
+     Although not as convenient as the complex operators found  in 
+FORTRAN, the stack operation has the advantage that  the  routines 
+have a simple calling convention (usually just the  routine  name) 
+with little parameter passing.  
+
+
+2.0  Use of the Routines.
+
+     The storage of complex quantities is  based  on  the  COMPLEX 
+structure which has real and imaginary components.   For  example, 
+the user may declare z and t as COMPLEX variables using
+     struct COMPLEX z, t;
+where  the  structure  COMPLEX  is  defined  in  the  header  file 
+"complex.h".   This  header  file  needs  to  be  included   after 
+"cmath.h"  in  the  user's  program.   The  real   and   imaginary 
+components of z may be accessed as  z.re  and  z.im  respectively.  
+Note that they are double values.
+
+     Workspace is provided in the array Zstack which is used as  a 
+last-in-first-out stack of  COMPLEX  quantities.   This  stack  is 
+generally hidden from the user's program as interface routines are 
+available to push items onto and pull items off the stack.   These 
+routines will also check for stack  overflow  and  underflow,  but 
+they will not check to see if a COMPLEX stack exists.  
+
+     Routines such as add and multiply pop their operands off  the 
+top of the stack (i.e. the items most  recently  pushed  onto  the 
+stack) perform the  appropriate  operation  and  then  push  their 
+result back  onto  the  stack.   Complicated  expressions  may  be 
+evaluated by pushing operands onto the stack, calling  a  sequence 
+of functions to perform the desired operations (while intermediate 
+results are left on the stack) and then popping the  final  result 
+off the stack and storing it as a COMPLEX variable.
+
+     The library consists  of  the  following  routines.   In  the 
+description, note that the top element is represented by  z1,  the 
+second top element by z2 and so forth.  The expression 
+     z1 J z1 + z2 
+means that the top element is added to the second top element  and 
+the result is stored as the top element of  the  stack.   In  most 
+arithmetic operations, the operands  are  consumed  (i.e.  removed 
+from the stack) and the result is left as the top element.
+
+
+2.1  Data Conversion.
+
+Cmplx(x, y, *z) : set the complex variable z = x + iy
+                  Input ...
+                  x : double value
+                  y : double value
+                  z : pointer to a COMPLEX quantity
+                  Return Value ... 0
+
+x = Creal(*z)   : return the real part of z
+                  Input ...
+                  z : pointer to a COMPLEX quantity
+                  Return Value ... z->re (double value)
+
+y = Cimag(*z)   : return the imaginary part of z
+                  Input ...
+                  z : pointer to a COMPLEX quantity
+                  Return Value ... z->im (double value)
+
+
+2.2  Stack Operations.
+
+Cinit(n)        : allocate memory for an n element stack 
+                  Input ...
+                  n : integer value
+                  Return Value ...
+                  0 : successful allocation
+                  1 : could not allocate memory for COMPLEX stack
+
+Cend()          : free the memory occupied by the stack
+
+Creset ()       : reset the complex stack
+
+Cpush(*z)       : z1 J z  (an element is added to the stack)
+                  Input ...
+                  z : pointer to a COMPLEX quantity
+                  Return Value ...
+                  0 : successful
+                  1 : stack overflow (i.e. the stack was full)
+
+Cpop(*z)        : z J z1  (an element is removed from the stack)
+                  Input ...
+                  z : pointer to a COMPLEX quantity
+                  Return Value ...
+                  0 : successful
+                  1 : stack underflow (i.e. the stack was empty)
+
+Cpushr(x)       : z1 J x + i0.0
+                  Input ...
+                  x : double value
+                  Return Value ...
+                  0 : successful
+                  1 : stack overflow
+
+Cpopr(*x)       : pop the real part of z1 into x
+                  Input ...
+                  x : pointer to a double variable
+                  Return Value ...
+                  0 : successful
+                  1 : stack underflow
+                  (Note that z1 is consumed.)
+
+Cdrop()         : drop z1 from the stack
+                  Return Value ...
+                  0 : successful
+                  1 : stack already empty
+
+Cdup()          : duplicate z1 so that z2 = z1
+                  Return Value ...
+                  0 : successful
+                  1 : stack overflow or underflow
+
+Cswap()         : swap the top two elements, z1 and z2
+                  Return Value ...
+                  0 : successful
+                  1 : less than two elements on the stack
+
+Cprint(n)       : print the top n elements of the stack
+                  Input ...
+                  n : integer value
+                  (Note that Cprint(n) does not affect the stack.)
+
+
+2.3  Arithmetic Operations.
+
+Cadd()          : z1 J z1 + z2  
+                  (Note that the operands are consumed and the
+                  result is left on top of the stack.)
+                  Return Value ...
+                  0 : successful
+                  1 : less than two elements on the stack
+
+Csub()          : z1 J z2 - z1
+                  Return Value ...
+                  0 : successful
+                  1 : less than two elements on the stack
+
+Cneg()          : z1 J -z1
+                  Return Value ...
+                  0 : successful
+                  1 : stack underflow
+
+Conjg()         : z1 J conjugate of z1
+                  Return Value ...
+                  0 : successful
+                  1 : stack underflow
+
+Cmult()         : z1 J z2 * z1
+                  Return Value ...
+                  0 : successful
+                  1 : less than two elements on the stack
+
+Cinv()          : z1 J 1.0 / z1
+                  Return Value ...
+                  0 : successful
+                  1 : stack underflow, small or zero divisor
+
+Cdiv()          : z1 J z2 / z1
+                  Return Value ...
+                  0 : successful
+                  1 : stack underflow, small or zero divisor
+
+Cmag(*x)        : the magnitude of z1 is stored as x 
+                  Input ...
+                  x : pointer to a double variable
+                  Return Value ...
+                  0 : successful
+                  1 : stack underflow
+                  (Note that z1 is consumed.)
+
+Cart()          : z1 is converted from polar to cartesian form
+                  z1.re = magnitude,  z1.im = angle in radians
+                  Return Value ...
+                  0 : successful
+                  1 : stack underflow
+
+Cpolar()        : z1 is converted from cartesian to polar form
+                  z1.re = magnitude,  z1.im = angle in radians
+                  Return Value ...
+                  0 : successful
+                  1 : stack underflow or overflow
+
+
+2.4  Complex Functions.
+
+Csqrt()         : z1 J square root of z1
+                  Return Value ...
+                  0 : successful
+                  1 : stack underflow or overflow, zero magnitude
+
+Cexp()          : z1 J e
+                  Return Value ...
+                  0 : successful
+                  1 : stack underflow
+
+Clog()          : z1 J ln(z1)
+                  Return Value ...
+                  0 : successful
+                  1 : stack underflow or overflow, small or zero 
+                      magnitude.
+
+Cpow(y)         : z1 J z1
+                  Input ...
+                  y : double value
+                  Return Value ...
+                  0 : successful
+                  1 : stack underflow or overflow
+
+Csin()          : z1 J sin(z1)
+                  Return Value ... 0
+
+Ccos()          : z1 J cos(z1)
+                  Return Value ... 0
+
+Ctan()          : z1 J tan(z1)
+                  Return Value ... 
+                  0 : probably successful
+                  1 : small cosine value
+
+
+3.0  References.
+
+1.  D. Gedeon  :  "Complex  math  in  Pascal".   Byte  July  1987, 
+121-128.
+2.   J.H.  Wilkinson  &  C  Reinsch  :  Handbook   for   Automatic 
+Computation II : Linear Algebra.  Springer-Verlag 1971.
+
+
+4.0  Sample Application
+
+     Evaluate  e ,  zt=t0.1-0.2i  using  both  Taylor  series  and 
+trancendental function calls.  For the Taylor series, we use
+     e   =  S  --  =  1 + z + -- + -- + ...     ,
+but truncate the series at 10 terms.  The general relation between 
+terms is 
+    term  = term    * z / n           , 
+where term  = 1.0.
+
+
+/* complexd.c
+   Exercise the complex number routines.
+*/
+
+#include <math.h>
+#include <stdio.h>
+
+#include "cmath.h"
+#include "complex.h"
+
+main ()
+{
+struct COMPLEX z, term, expz;
+double n;
+int    i;
+
+printf ("\n\n  --- CMATH --- Design Software 1989\n");
+printf ("\nSample driver for the COMPLEX number routines.\n");
+
+Cinit (5);                  /* A stack of five elements */
+Creset ();                  /* Clear stack              */
+
+Cmplx (0.1, -0.2, &z);      /* z = 0.1 - i 0.2          */
+
+Cmplx (1.0, 0.0, &term);    /* term0 = 1.0              */
+Cpush (&term);              /* start of summation       */
+
+/* now evaluate 10 terms in the Taylor series */
+for (i = 1; i < 10; ++i)
+   {
+   /* update term(n) = term(n-1) * z / n */
+   Cpush (&term);  Cpush (&z); Cmult ();
+   n = (double) i; Cpushr (n); Cdiv ();
+
+   Cdup (); Cpop (&term);   /* record term              */
+   Cadd ();                 /* update summation         */
+   }
+Cpop (&expz);
+
+printf ("\nTaylor series expansion ...\n");
+printf ("exp(%f+i(%f)) = %f+i(%f)\n", z.re, z.im, expz.re, expz.im);
+
+printf ("\nLibrary call ...\n");
+Cpush (&z);
+Cexp ();
+Cpop (&expz);
+printf ("exp(%f+i(%f)) = %f+i(%f)\n", z.re, z.im, expz.re, expz.im);
+
+Cend();
+return (0);
+}
+
+
+
+5.0  Program Results.
+
+
+  --- CMATH --- Design Software 1989
+
+Sample driver for the COMPLEX number routines.
+
+Taylor series expansion ...
+exp(0.100000+i(-0.200000)) = 1.083141+i(-0.219564)
+
+Library call ...
+exp(0.100000+i(-0.200000)) = 1.083141+i(-0.219564)
+
+
+
+

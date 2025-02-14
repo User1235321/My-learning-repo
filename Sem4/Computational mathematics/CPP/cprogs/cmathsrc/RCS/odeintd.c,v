@@ -1,0 +1,80 @@
+head	1.1;
+access;
+symbols;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	98.08.08.11.36.05;	author peterj;	state Exp;
+branches;
+next	;
+
+
+desc
+@CMATH 1989 code
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/* odeintd.c
+   driver for ODEINT.C */
+
+#include <math.h>
+#include <stdio.h>
+#include "cmath.h"
+int odeint ();
+
+main ()
+{    /* --- begin driver odeintd --- */
+
+int test();             /* our test function */
+double eps, h1, hmin, x1, x2;
+int nbad, nok;
+#define n 2
+double ystart[n];
+double w1[n], w2[n], w3[n];
+double w4[n], w5[n], w6[n];
+double w7[n], w8[n], w9[n];
+int flag;
+
+x1 = 0.0;
+x2 = 10.0;
+ystart[0] = 0.0;
+ystart[1] = 0.0;
+
+eps = 1.0e-4;
+h1 = 1.0;
+hmin = 0.0;
+odeint (test, ystart, n, x1, &x2, eps, h1, hmin, &nok, &nbad,
+        w1, w2, w3, w4, w5, w6, w7, w8, w9, &flag);
+
+printf ("\n");
+printf ("successful steps : %d \n",nok);
+printf ("bad steps : %d \n",nbad);
+printf ("return flag : %d\n", flag);
+printf ("\n");
+printf ("       x    y[0]       y[1]\n");
+printf ("%f %f %f \n", x2, ystart[0], ystart[1]);
+printf ("\n");
+printf ("correct answer : y[0] = 1.0,  y[1] = 2.0\n");
+
+return (0);
+}
+
+
+
+int test(x, y, dydx)
+double x;
+double y[];
+double dydx[];
+{
+dydx[0] = 1.0 - y[0] * y[0];
+dydx[1] = 2.0 - y[1] * y[1] + 2.0 * y[0] * (y[1] - y[0]);
+return (0);
+}
+@

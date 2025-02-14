@@ -1,0 +1,254 @@
+------------------------------------------------------------------
+Design Software                         spline(), seval(), deriv()
+------------------------------------------------------------------
+
+
+1.0  Purpose.
+
+     Interpolate, differentiate or integrate a set of data  points 
+(x ,y ), (x ,y ), ... (x   ,y   ) using a cubic spline.  The  user 
+may set the slope at either end point.
+
+
+2.0  How to use the functions.
+
+     The function spline() receives and  returns  all  information 
+via its formal arguments.  It is declared as
+     
+     int spline (n, e1, e2, s1, s2, x, y, b, c, d, flag)
+     int    n, e1, e2;
+     double s1, s2, x[], y[], b[], c[], d[];
+     int    *flag;
+
+If spline() successfully computes the coefficients, then the 
+interpolation function seval() may be used.  It is declared as
+
+     double seval (n, xx, x, y, b, c, d, last)
+     int    n;
+     double xx, x[], y[], b[], c[], d[];
+     int    *last;
+
+The differentiation function deriv() is declared as
+
+     double deriv (n, xx, x, b, c, d, last)
+     int    n;
+     double xx, x[], b[], c[], d[];
+     int    *last;
+
+and the integration function sinteg() is declared as
+
+     double sinteg (n, xx, x, y, b, c, d, last)
+     int    n;
+     double xx, x[], y[], b[], c[], d[];
+     int    *last;
+
+
+2.1  Parameter types.
+
+     n         : integer value
+     e1        : integer value
+     e2        : integer value
+     s1        : double value
+     s2        : double value
+     x         : pointer to a vector of double values
+     xx        : double value
+     y         : pointer to a vector of double values
+     b         : pointer to a vector of double values
+     c         : pointer to a vector of double values
+     d         : pointer to a vector of double values
+     flag      : pointer to an integer variable
+     last      : pointer to an integer variable
+     Note that all arrays must contain at least n elements.
+
+2.2  Input to spline().
+
+     n         : The number of knots.  These are numbered 0 .. n-1.
+     e1        : e1=0 use natural end condition at x , ignore s1
+                 e1=1 use slope s1 at x
+     e2        : e2=0 use natural end condition at x   , ignore s2
+                 e2=1 use slope s2 at x
+     s1        : slope (dydx) at x
+     s2        : slope (dydx) at x
+     x         : vector of x (abscissa) values, x , x , ... x   .
+                 Note that these values must be strictly in 
+                 increasing order.
+     y         : vector of y (ordinate) values, y , y , ... y
+
+
+2.3  Output from spline().
+
+     b, c, d   : vectors of spline coefficients such that
+                 f(x) = y  + b w + c w  + d w
+                 where w = x - x  and x  < x < x   .
+     flag      : flag = 0, normal return.
+                 flag = 1, n < 2, cannot interpolate.
+                 flag = 2, x  are not in ascending order
+
+
+2.4  Input to seval().
+
+     n         : The number of knots.
+     xx        : The abscissa at which the spline is to be
+                 evaluated.
+     x         : vector of abscissa values (as for spline())
+     y         : vector of ordinate values (     "         )
+     b, c, d   : vectors of spline coefficients as computed 
+                 by spline()
+     last      : The segment that was last used to evaluate
+                 the spline.  On the first call, set last to any
+                 reasonable value (preferably your best guess).
+
+
+2.5  Output from seval().
+
+     seval     : The value of the spline function at xx.
+     last      : The segment in which xx lies.
+
+
+2.6  Input to deriv().
+
+     n         : The number of knots.
+     xx        : The abscissa at which the derivative is to be
+                 evaluated.
+     x         : vector of abscissa values (as for spline())
+     b, c, d   : vectors of spline coefficients as computed 
+                 by spline()
+     last      : The segment that was last used to evaluate
+                 the spline.  On the first call, set last to
+                 any reasonable value.
+
+
+2.7  Output from deriv().
+
+     deriv     : The value of the derivative of spline the
+                 function at xx.
+     last      : The segment in which xx lies.
+
+
+2.8  Input to sinteg().
+
+     n         : The number of knots.
+     xx        : The abscissa at which the integral is to be
+                 evaluated.
+     x         : vector of abscissa values (as for spline())
+     y         : vector of ordinate values (     "         )
+     b, c, d   : vectors of spline coefficients as computed 
+                 by spline()
+     last      : The segment that was last used to evaluate
+                 the spline.  On the first call, set last to any
+                 reasonable value (preferably your best guess).
+
+
+2.9  Output from sinteg().
+
+     sinteg    : The value of the integral of the spline function 
+                 at xx.  The integration constant is selected so
+                 that the integral is zero at xx = x .
+     last      : The segment in which xx lies.
+
+
+3.0  Method.
+
+     Piecewise cubic polynomial segments are defined as
+     f(x) = wy    + wy  + h   ((w  - w)s    + (w  - w)s )   ,
+where 
+     h  = x    - x        ,
+     w = (x - x ) / h     ,
+     w = 1 - w            .
+A set of simultaneous equations in s are set  up  by  forcing  the 
+cubic polynomial  pieces  to  have  continuous  first  derivatives 
+between adjacent segments and setting the two end conditions.  The 
+end condition at either x or x    may be either  (1)  the  natural 
+condition where the third derivative of the cubic  spline  at  the 
+end point equals that of the unique cubic that passes through  the 
+last four knots or (2) a user specified slope.
+
+
+4.0  Reference
+
+     G.E. Forsythe,  M.A.  Malcolm,  &  C.B.  Moler   :  "Computer 
+Methods for Mathematical Computations".  Prentice-Hall,  Englewood 
+Cliffs, N.J. 1977.
+
+
+5.0  Example.
+
+     Fit a spline to y = e  for  x  =  0.0,  0.1,...1.0  and  then 
+evaluate the spline function, its derivative and its integral at a 
+few sample points.
+
+
+/* splined.c
+   Sample driver for the cubic spline routines. */
+
+#include <stdio.h>
+#include <math.h>
+#include "cmath.h"
+
+main()
+{
+#define ndim 20
+double x[ndim], y[ndim];
+double b[ndim], c[ndim], d[ndim];
+double xx, f, dfdxx, intfx;
+int    n, i, last, flag;
+
+printf ("\n\n  --- CMATH --- Design Software 1989\n");
+printf ("\nSample driver for spline(), seval() & deriv()\n\n");
+printf ("Fit a spline to f(x) = e**x, x = 0, 0.1, ... 1.0.\n");
+
+n = 11;
+for (i = 0; i < n; ++i)
+   {
+   x[i] = 0.1 * (double) i;
+   y[i] = exp(x[i]);
+   }
+
+spline (n, 1, 1, 1.0, exp(1.0), x, y, b, c, d, &flag);
+printf ("%s\n\n", cmathmsg (SPLINE_C, flag));
+
+if (flag == 0)
+   {
+   printf ("Now evaluate spline and derivative at sample points ...\n");
+   printf ("\n     x           f          dfdx       integral\n");
+   printf ("--------------------------------------------------\n");
+
+   last = 0;
+   xx   = x[n-1];
+   while (xx >= x[0])
+      {
+      f     = seval (n, xx, x, y, b, c, d, &last);
+      dfdxx = deriv (n, xx, x, b, c, d, &last);
+      intfx = 1.0 + sinteg(n, xx, x, y, b, c, d, &last);
+      printf ("%10.5f  %10.5f  %10.5f  %10.5f\n", xx, f, dfdxx, intfx);
+      xx   -= 0.25;
+      }
+   }
+
+return (0);
+}  /* end of splined() */
+
+
+
+6.0  Program Results.
+
+  --- CMATH --- Design Software 1989
+
+Sample driver for spline(), seval() & deriv()
+
+Fit a spline to f(x) = e**x, x = 0, 0.1, ... 1.0.
+spline() : normal return
+
+Now evaluate spline and derivative at sample points ...
+
+     x           f          dfdx       integral
+--------------------------------------------------
+   1.00000     2.71828     2.71828     2.71828
+   0.75000     2.11700     2.11700     2.11700
+   0.50000     1.64872     1.64872     1.64872
+   0.25000     1.28403     1.28403     1.28403
+   0.00000     1.00000     1.00000     1.00000
+
+
+
+

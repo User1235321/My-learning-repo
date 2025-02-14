@@ -1,0 +1,434 @@
+head	1.1;
+access;
+symbols;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	98.08.08.11.36.05;	author peterj;	state Exp;
+branches;
+next	;
+
+
+desc
+@CMATH 1989 code
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/* cheby.c
+   Chebyshev polynomial routines.  */
+
+/************************************************/
+/*                                              */
+/*  CMATH.  Copyright (c) 1989 Design Software  */
+/*                                              */
+/************************************************/
+
+#include "cmath.h"
+#if (STDLIBH)
+#include <stdlib.h>
+#endif
+#include <stdio.h>
+#include <math.h>
+
+#ifndef NULL
+#define  NULL  0
+#endif
+
+#ifndef PI
+#define  PI  3.14159265358979323846
+#endif
+
+/*-----------------------------------------------------------------*/
+
+#if (PROTOTYPE)
+
+int chebyc (double (*f)(double x), double a, double b, double c[],
+           int n, int *flag)
+
+#else
+
+int chebyc (f, a, b, c, n, flag)
+double (*f)(), a, b, c[];
+int    n, *flag;
+
+#endif
+
+/* Purpose ...
+   -------
+   Fit the Chebyshev polynomial coefficients to a user defined
+   function.  The approximation to the function in [a, b] is
+   the series
+
+          n-1
+   F(x) = sum c[j] Tj(z)  +  c[0]/2
+          j=1
+
+   where z = 2 * (x - (b+a)/2) / (b-a) and Tj(z) is the jth
+   Chebyshev polynomial.  Note that -1 <= z <= +1.
+
+   Input ...
+   -----
+   f      : user defined function f(x)
+   a      : lower bound of x
+   b      : upper bound of x
+   n      : number of coefficients to fit
+
+   Output ...
+   ------
+   c[]    : array of coefficients c[0] ... c[n-1]
+   flag   : error indicator
+            = 0, normal return
+            = 1, invalid user input, n < 1, c == NULL, b == a
+            = 2, could not allocate workspace
+
+   Workspace ...
+   ---------
+   fvector : array of n double variables.
+
+   Version ... 1.0, Sept 1989
+   -------
+
+   This C code written by ...  Peter & Nigel,
+   ----------------------      Design Software,
+                               42 Gubberley St,
+                               Kenmore, 4069,
+                               Australia.
+
+   Reference ...
+   ---------
+   W.H. Press et al: "Numerical Recipes, The art of scientific
+   computing." Cambridge University Press, 1986.
+
+   Notes ...
+   -----
+   (1) The coefficients should be fitted with n large (say 30 - 50)
+       and then the summation truncated at m terms where c[j] is
+       small for all j > m.
+*/
+
+/*-----------------------------------------------------------------*/
+
+{  /* begin chebyc() */
+int j, k;
+double *fvector, bma, bpa, z, sum;
+
+*flag = 0;
+bma = 0.5 * (b - a);
+bpa = 0.5 * (b + a);
+
+if (c == NULL || n < 1 || b == a)
+   {
+   *flag = 1;
+   return (0);
+   }
+
+fvector = NULL;
+fvector = (double *) malloc(n * sizeof(double));
+if (fvector == NULL)
+   {
+   *flag = 2;
+   return(0);
+   }
+
+/* evaluate the user function at the n points required to
+   fit the coefficients */
+for (k = 0; k < n; ++k)
+   {
+   z = cos(PI * (k + 0.5) / n);
+   fvector[k] = (*f) (z * bma + bpa);
+   }
+
+for (j = 0; j < n; ++j)
+   {
+   sum = 0.0;
+   for (k = 0; k < n; ++k)
+      sum += fvector[k] * cos (PI * j * (k + 0.5) / n);
+   c[j] = 2.0 * sum / n;
+   }
+
+if (fvector != NULL) { free(fvector); fvector = NULL; }
+return (0);
+}
+
+/*-----------------------------------------------------------------*/
+
+#if (PROTOTYPE)
+
+double cheby (double x, double a, double b, double c[],
+              int m, int *flag)
+
+#else
+
+double cheby (x, a, b, c, m, flag)
+double x, a, b, c[];
+int    m, *flag;
+
+#endif
+
+/* Purpose ...
+   -------
+   Evaluate the Chebyshev polynomial series using the coefficients
+   fitted by chebyc().  The approximation to the function in [a, b]
+   is the series
+
+          n-1
+   F(x) = sum c[j] Tj(z)  +  c[0]/2
+          j=1
+
+   where z = 2 * (x - (b+a)/2) / (b-a) and Tj(z) is the jth
+   Chebyshev polynomial.  Note that -1 <= z <= +1.
+
+   Input ...
+   -----
+   x      : independent variable a <= x <= b
+   a      : lower bound of x
+   b      : upper bound of x
+   c[]    : array of coefficients c[0] ... c[n-1]
+   m      : number of coefficients to use
+
+   Output ...
+   ------
+   cheby  : returns a double values for F(x)
+   flag   : error indicator
+            = 0, normal return
+            = 1, invalid user input, m < 1, c == NULL, b == a,
+                 x not in range [a, b]
+
+   Version ... 1.0, Sept 1989
+   -------
+
+   This C code written by ...  Peter & Nigel,
+   ----------------------      Design Software,
+                               42 Gubberley St,
+                               Kenmore, 4069,
+                               Australia.
+
+   Reference ...
+   ---------
+   W.H. Press et al: "Numerical Recipes, The art of scientific
+   computing." Cambridge University Press, 1986.
+
+*/
+
+/*-----------------------------------------------------------------*/
+
+{  /* begin cheby() */
+int j;
+double z, z2, save, d, dd;
+
+*flag = 0;
+if (c == NULL || m < 1 || b == a || ((x-a) * (x-b)) > 4.0 * EPSILON)
+   {
+   *flag = 1;
+   return (0);
+   }
+
+d = 0.0;
+dd = 0.0;
+/* transform independent variable */
+z = ((x - a) - (b - x)) / (b -a);
+z2 = 2.0 * z;
+for (j = m-1; j > 0; --j)     /* apply Clenshaw's recurrence */
+   {
+   save = d;
+   d = z2 * d - dd + c[j];
+   dd = save;
+   }
+/* Note that first coefficient is different */
+save = z * d - dd + 0.5 * c[0];
+return (save);
+}
+
+/*-----------------------------------------------------------------*/
+
+#if (PROTOTYPE)
+
+int chebyd (double a, double b, double c[], double cder[],
+            int n, int *flag)
+
+#else
+
+int chebyd (a, b, c, cder, n, flag)
+double a, b, c[], cder[];
+int    n, *flag;
+
+#endif
+
+/* Purpose ...
+   -------
+   Differentiate a Chebyshev polynomial series.
+   The approximation to the function in [a, b] is the series
+
+          n-1
+   F(x) = sum c[j] Tj(z)  +  c[0]/2
+          j=1
+
+   where z = 2 * (x - (b+a)/2) / (b-a) and Tj(z) is the jth
+   Chebyshev polynomial.  Note that -1 <= z <= +1.
+
+   Input ...
+   -----
+   a      : lower bound of x
+   b      : upper bound of x
+   n      : number of coefficients 0 ... n-1
+   c[]    : coefficients for the original function
+
+   Output ...
+   ------
+   cder[] : array of coefficients for the derivative
+   flag   : error indicator
+            = 0, normal return
+            = 1, invalid user input, n < 1, c == NULL, b == a
+
+   Version ... 1.0, Oct 1989
+   -------
+
+   This C code written by ...  Peter & Nigel,
+   ----------------------      Design Software,
+                               42 Gubberley St,
+                               Kenmore, 4069,
+                               Australia.
+
+   Reference ...
+   ---------
+   W.H. Press et al: "Numerical Recipes, The art of scientific
+   computing." Cambridge University Press, 1986.
+
+   Notes ...
+   -----
+*/
+
+/*-----------------------------------------------------------------*/
+
+{  /* begin chebyd() */
+int j;
+double con;
+
+*flag = 0;
+if (c == NULL || n < 1 || b == a)
+   {
+   *flag = 1;
+   return (0);
+   }
+
+/* n-1 and n-2 are special cases */
+cder[n-1] = 0.0;
+cder[n-2] = 2.0 * (n-1) * c[n-1];
+
+if (n > 2)
+   {
+   for (j = n-3; j >= 0; --j)
+      /* apply eqn 5.7.2 */
+      cder[j] = cder[j+2] + 2.0 * (j+1) * c[j+1];
+   }
+
+/* normalize to interval [a, b] */
+con = 2.0 / (b - a);
+for (j = 0; j < n; ++j) cder[j] *= con;
+
+return (0);
+}
+
+/*-----------------------------------------------------------------*/
+
+#if (PROTOTYPE)
+
+int chebyi (double a, double b, double c[], double cint[],
+            int n, int *flag)
+
+#else
+
+int chebyi (a, b, c, cint, n, flag)
+double a, b, c[], cint[];
+int    n, *flag;
+
+#endif
+
+/* Purpose ...
+   -------
+   Integrate a Chebyshev polynomial series.
+   The approximation to the function in [a, b] is the series
+
+          n-1
+   F(x) = sum c[j] Tj(z)  +  c[0]/2
+          j=1
+
+   where z = 2 * (x - (b+a)/2) / (b-a) and Tj(z) is the jth
+   Chebyshev polynomial.  Note that -1 <= z <= +1.
+
+   Input ...
+   -----
+   a      : lower bound of x
+   b      : upper bound of x
+   n      : number of coefficients 0 ... n-1
+   c[]    : coefficients for the original function
+
+   Output ...
+   ------
+   cint[] : array of coefficients for the integral
+   flag   : error indicator
+            = 0, normal return
+            = 1, invalid user input, n < 1, c == NULL, b == a
+
+   Version ... 1.0, Oct 1989
+   -------
+
+   This C code written by ...  Peter & Nigel,
+   ----------------------      Design Software,
+                               42 Gubberley St,
+                               Kenmore, 4069,
+                               Australia.
+
+   Reference ...
+   ---------
+   W.H. Press et al: "Numerical Recipes, The art of scientific
+   computing." Cambridge University Press, 1986.
+
+   Notes ...
+   -----
+*/
+
+/*-----------------------------------------------------------------*/
+
+{  /* begin chebyi() */
+int j;
+double con, sum, sgn;
+
+*flag = 0;
+if (c == NULL || n < 1 || b == a)
+   {
+   *flag = 1;
+   return (0);
+   }
+
+con = 0.25 * (b - a);      /* scale factor to normalize range */
+sum = 0.0;                 /* accumulates the constant of integration */
+sgn = 1.0;                 /* always + or - 1 */
+
+for (j = 1; j < n-1; ++j)
+   {
+   /* apply eqn 5.7.1 */
+   cint[j] = con * (c[j-1] - c[j+1]) / j;
+   sum += sgn * cint[j];
+   sgn = -sgn;
+   }
+
+/* special case of eqn 5.7.1 for n-1 */
+cint[n-1] = con * c[n-2] / (n - 1);
+sum += sgn * cint[n-1];
+
+/* set the constant of integration */
+cint[0] = 2.0 * sum;
+
+return (0);
+}
+
+/*-----------------------------------------------------------------*/
+@

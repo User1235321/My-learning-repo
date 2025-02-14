@@ -1,0 +1,83 @@
+head	1.1;
+access;
+symbols;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	98.08.08.11.36.05;	author peterj;	state Exp;
+branches;
+next	;
+
+
+desc
+@CMATH 1989 code
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/* svdd.c
+   Sample driver for svd() and svdsolve().
+*/
+
+#include <math.h>
+#include <stdio.h>
+#include "cmath.h"
+
+#define  n   3
+#define  m   4
+#define  nm  n
+#define  INDX(i, j)  (i) * nm + (j)
+#define  MAX(a,b)    (((a) > (b)) ? (a) : (b))
+
+main ()
+{
+static double a[n * m], b[m], x[n];
+static double sigma[n], u[n * m], v[n * m];
+int    i, j, flag;
+double sigmax, tol;
+
+b[0] = 5.0;
+b[1] = 13.0;
+b[2] = 10.0;
+b[3] = 9.0;
+
+a[INDX(0,0)] = 1.0;   a[INDX(0,1)] = 2.0;    a[INDX(0,2)] = 2.0;
+a[INDX(1,0)] = 0.0;   a[INDX(1,1)] = 9.0;    a[INDX(1,2)] = 4.0;
+a[INDX(2,0)] = 1.0;   a[INDX(2,1)] = 7.0;    a[INDX(2,2)] = 2.0;
+a[INDX(3,0)] = 1.0;   a[INDX(3,1)] = 6.0;    a[INDX(3,2)] = 2.0;
+
+printf ("\n\n  --- CMATH --- Design Software 1989\n");
+printf ("\nTest driver for svd() and svdsolve().\n\n");
+
+svd (n, m, n, a, sigma, 1, u, 1, v, &flag);
+printf ("%s\n", cmathmsg(SVD_C, flag));
+
+if (flag == 0)
+   {
+   printf ("\nThe singular values are ...\n");
+   for (j = 0; j < n; ++j) printf ("%10.3e\n", sigma[j]);
+   printf ("\n");
+
+   /* Find largest singular value. */
+   sigmax = 0.0;
+   for (j = 0; j < n; ++j) sigmax = MAX(sigmax, sigma[j]);
+   tol = 1.0e-9 * sigmax;
+
+   svdsolve (n, m, n, u, sigma, v, b, x, tol, &flag);
+   printf ("%s\n\n", cmathmsg(SVDSOLVE_C, flag));
+
+   printf ("Solution    =     [ ");
+   for(i = 0; i < n; i++) printf ("%8.3f, ", x[i]);
+   printf ("]\n");
+   printf ("Correct answer is [    1.000,    1.000,    1.000, ]\n");
+   }
+
+return (0);
+}
+@

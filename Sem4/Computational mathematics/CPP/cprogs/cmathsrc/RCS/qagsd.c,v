@@ -1,0 +1,73 @@
+head	1.1;
+access;
+symbols;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	98.08.08.11.36.05;	author peterj;	state Exp;
+branches;
+next	;
+
+
+desc
+@CMATH 1989 code
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/* qagsd.c
+   Program to exercise the automatic integrator qags. */
+
+#include <math.h>
+#include <stdio.h>
+#include "cmath.h"
+
+main ()
+{  /* begin driver */
+
+double a, errest, b, epsabs, epsrel, f(), result;
+int    flag, nfe;
+double temp;
+
+/* a and b are the integration limits. */
+a = 0.0;
+b = 1.0;
+/* epsabs and epsrel determine the accuracy requirement. */
+epsabs = 0.0;
+epsrel = 1.0e-12;
+
+printf ("\n\n  --- CMATH --- Design Software 1989\n");
+printf ("\nCall the adaptive quadrature routine qags ...\n");
+
+qags (f, a, b, epsabs, epsrel, &result, &errest, &nfe, &flag);
+printf ("%s\n\n", cmathmsg(QAGS_C, flag));
+
+printf ("integral approximation         = %20.12e\n", result);
+printf ("estimate of absolute error     = %9.2e\n", errest);
+printf ("number of function evaluations = %5d\n", nfe);
+
+printf ("\nThe correct answer is ...\n");
+temp = 4.0 * atan(1.0);
+temp = -(temp * temp) / 6.0;
+printf ("-pi**2 / 6.0                   = %20.12e\n", temp);
+
+return (0);
+}  /* end of main */
+
+
+
+double f (x)          /*  user supplied function.  */
+double x;
+
+{
+double temp;
+temp = log(x) / (1.0 - x);
+return (temp);
+}
+@

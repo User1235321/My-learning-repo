@@ -1,0 +1,270 @@
+------------------------------------------------------------------
+Design Software                                  qrv(), qrvector()
+------------------------------------------------------------------
+
+
+1.0  Purpose.
+
+     Compute the eigenvalues, l, and eigenvectors, x,  defined  by 
+Axt=tlx, where A is a general real matrix.  The values of l and  x 
+may be complex.
+
+
+2.0  How to use the function.
+
+     The function qrv() is used to compute all of the  eigenvalues 
+and associated eigenvectors.  It is declared as 
+     
+     int qrv (ndim, n, A, wr, wi, Z, flag)
+     int    ndim, n;
+     double *A, wr[], wi[], *Z;
+     int    *flag;
+
+The function qrvector() may be used to extract  eigenvectors  from 
+the packed matrix as returned by qrv().  It is declared as
+
+     int qrvector (k, ndim, n, Z, wr, wi, vr, vi, flag)
+     int    k, ndim, n;
+     double *Z, wr[], wi[], vr[], vi[];
+     int    *flag;
+
+
+2.1  Parameter types.
+
+     ndim      : integer value
+     n         : integer value
+     A         : pointer to an array of double values with
+                 dimension A[dim*ndim], ndim > n.
+     wr        : pointer to an array of double values with 
+                 dimension wr[ndim], ndim > n.
+     wi        : pointer to an array of double values with 
+                 dimension wi[ndim], ndim > n.
+     Z         : pointer to an array of double values.
+                 dimension Z[ndim*ndim].
+     flag      : pointer to an integer variable
+     k         : integer value
+     vr        : pointer to an array of double values with 
+                 dimension vr[ndim], ndim > n.
+     vi        : pointer to an array of double values with 
+                 dimension vi[ndim], ndim > n.
+
+
+2.2  Input to qrv().
+
+     ndim      : The dimension of the rows of A in the calling 
+                 program.  qrv() accesses the elements of A as
+                 A[i*ndim + j].
+     n         : The order of the matrix A.  n < ndim.
+     A         : The matrix to be analysed.
+
+
+2.3  Output from qrv().
+
+     qrv()     : returns an unspecified integer value which should
+                 be ignored.
+     A         : The contents of A are changed by qrv().
+     wr        : The real parts of the eigenvalues, l.  
+                 The eigenvalues are not in any particular order
+                 however complex conjugate pairs will appear 
+                 together with the value having the positive
+                 imaginary part appearing first.
+     wi        : The imaginary parts of the eigenvalues, l.
+     Z         : A packed matrix of eigenvectors.  Use qrvector()
+                 to extract individual eigenvectors.  If you wish
+                 to extract them yourself, here are the packing
+                 details ...
+                 If wi[j] is 0.0 (i.e. real eigenvalue), then 
+                 Z[i][j] i = 0...n-1 is the corresponding 
+                 eigenvector.  
+                 If wi[j] is not 0.0 (i.e. complex eigenvalue),
+                 then Z[i][j] and Z[i][j+1], i = 0...n-1, are
+                 the real and imaginary parts of the eigenvector
+                 corresponding to the eigenvalue with positive 
+                 imaginary part.  The conjugate of this 
+                 eigenvector corresponds to the conjugate of this
+                 eigenvalue, but is not included in Z[].  It may
+                 however be obtained from qrvector().
+     flag      : A status indicator.
+                 flag =  0, normal return.
+                 flag = -1, could not allocate memory for work
+                            space
+                 flag = -2, incorrect user input. e.g. n > ndim,
+                            n < 1, *A == NULL, *Z == NULL ...
+                 flag >  0, more than 30 iterations were required
+                            to determine an eigenvalue.  The 
+                            eigenvalues in wr, wi are correct for
+                            flag, flag+1, ... n-1, but no vectors
+                            are computed.
+
+
+2.4  Input to qrvector().
+
+     k         : Index of eigenvector to extract.
+     ndim      : The dimension of the rows of A in the calling 
+                 program.
+     n         : The order of the matrix A.  n < ndim.
+     Z         : Packed eigenvector matrix as returned by qrv().
+     wr        : Real parts of the eigenvalues as returned by qrv()
+     wi        : Imaginary parts of the eigenvalues.
+
+
+2.5  Output from qrvector().
+
+     vr        : Real part of the kth eigenvector.
+     vi        : Imaginary part of the kth eigenvector.
+     flag      : Status indicator.
+                 flag = 0, normal return.
+                 flag = 1, invalid user input. (e.g. n < 1,
+                           k < 0, k > n, ndim < 1, n > ndim,
+                           NULL array pointer.
+                 flag = 2, could not locate the complex
+                           conjugate of the kth eigenvalue.
+
+
+2.6  Workspace.
+
+     Arrays of n double elements and n integer elements  are  used 
+internally by qrv().
+
+
+3.0  Method.
+
+     qrv()  first  balances  the  matrix,  A,  and  isolates   any 
+eigenvalues if possible (function balanc()).  It then  converts  A 
+to upper Hessenberg form (elmhes() and  eltran())  and  determines 
+the eigenvalues using the qr method.
+
+
+4.0  References
+
+     B.T. Smith, J.M. Boyle, J.J. Dongarra, Y. Ikebe, V.C.  Klema, 
+C.B. Moler  :  "Matrix  Eigensystem  routines  -  EISPACK  guide."  
+Lecture Notes in Computer Science, V.6, Springer-Verlag (1976).
+
+     G. Peters & J.H Wilkinson : "Eigenvectors of real and complex 
+matrices by LR and QR triangularizations."  Num. Math 16,  181-204 
+(1970).
+
+
+5.0  Example.
+
+     Find the eigenvalues and eigenvectors of the matrix
+
+                u                       o
+                1 4.0  -5.0   0.0   3.0 1
+                1 0.0   4.0  -3.0  -5.0 1
+                1 5.0  -3.0   4.0   0.0 1
+                1 3.0   0.0   5.0   4.0 1
+                m                       .
+
+and then check that they satisfy the eigenvalue problem  given  in 
+section 1.0.
+
+/* qrvd.c
+   Sample driver for qrv() and qrvector().
+*/
+
+#include <math.h>
+#include <stdio.h>
+#include "cmath.h"
+
+main ()
+{
+#define  nm  4
+#define  INDX(i, j)  (i) * nm + (j)
+static double a[nm * nm], z[nm * nm], wr[nm], wi[nm];
+static double a2[nm * nm], vr[nm], vi[nm];
+double t, RHSr, RHSi, LHSr, LHSi, r;
+int    n, flag, i, j, k;
+
+printf ("\n\n  --- CMATH --- Design Software 1989\n");
+printf ("\nSample program for qrv() eigenvalue solver.\n");
+
+n  = 4;
+a[INDX(0,0)] =  4.0;  a[INDX(0,1)] = -5.0;
+a[INDX(0,2)] =  0.0;  a[INDX(0,3)] =  3.0;
+a[INDX(1,0)] =  0.0;  a[INDX(1,1)] =  4.0;
+a[INDX(1,2)] = -3.0;  a[INDX(1,3)] = -5.0;
+a[INDX(2,0)] =  5.0;  a[INDX(2,1)] = -3.0;
+a[INDX(2,2)] =  4.0;  a[INDX(2,3)] =  0.0;
+a[INDX(3,0)] =  3.0;  a[INDX(3,1)] =  0.0;
+a[INDX(3,2)] =  5.0;  a[INDX(3,3)] =  4.0;
+
+/* keep a copy of matrix a */
+for (i = 0; i < n; ++i)
+   for (j = 0; j < n; ++j) a2[INDX(i,j)] = a[INDX(i,j)];
+
+qrv (nm, n, a, wr, wi, z, &flag);
+printf ("\n%s\n", cmathmsg(QRV_C, flag));
+
+if (flag == 0)
+   {
+   for (j = 0; j < n; ++j)
+      {
+      printf ("\nEigenvalue... (%6.2f, %6.2f)\n",wr[j], wi[j]);
+
+      printf ("Eigenvector...\n");
+      qrvector (j, nm, n, z, wr, wi, vr, vi, &flag);
+      if (flag != 0) printf ("%s\n", cmathmsg (QRVECTOR_C, flag));
+      for (i = 0; i < n; ++i)
+         printf ("(%6.2f, %6.2f) ",vr[i], vi[i]);
+      printf ("\n");
+
+      /* return to eigenvalue definition and compute error
+         in eigenvector */
+      r = 0.0;
+      for (k = 0; k < n; ++k)
+         {
+         LHSr = 0.0;  LHSi = 0.0;
+         for (i = 0; i < n; ++i)
+            {
+            LHSr += a2[INDX(k,i)] * vr[i];
+            LHSi += a2[INDX(k,i)] * vi[i];
+            }
+         cmultn (wr[j], wi[j], vr[k], vi[k], &RHSr, &RHSi);
+         t = cabslt ((LHSr - RHSr), (LHSi - RHSi));
+         r = (t > r) ? t : r;     /* select maximum value */
+         }
+      printf ("Maximum residual = %10.2e\n", r);
+      }
+
+   printf ("\nCorrect eigenvalues 12.0, 1.0+-5i & 2.0\n");
+   }
+
+return (0);
+}  /* end of main() */
+
+
+6.0  Program Results.
+
+  --- CMATH --- Design Software 1989
+
+Sample program for qrv() eigenvalue solver.
+
+qrv() : normal return
+
+Eigenvalue... ( 12.00,   0.00)
+Eigenvector...
+(  0.56,   0.00) ( -0.56,   0.00) (  0.56,   0.00) (  0.56,   0.00) 
+Maximum residual =    1.4e-14
+
+Eigenvalue... (   1.0,   5.00)
+Eigenvector...
+(  0.22,   0.80) (  0.80,  -0.22) (  0.80,  -0.22) ( -0.22,  -0.80) 
+Maximum residual =    1.3e-14
+
+Eigenvalue... (   1.0,  -5.00)
+Eigenvector...
+(  0.22,  -0.80) (  0.80,   0.22) (  0.80,   0.22) ( -0.22,   0.80) 
+Maximum residual =    1.3e-14
+
+Eigenvalue... (  2.00,   0.00)
+Eigenvector...
+(  0.37,   0.00) (  0.37,   0.00) ( -0.37,   0.00) (  0.37,   0.00) 
+Maximum residual =    4.2e-15
+
+Correct eigenvalues 12.0, 1.0+-5i & 2.0
+
+
+
+

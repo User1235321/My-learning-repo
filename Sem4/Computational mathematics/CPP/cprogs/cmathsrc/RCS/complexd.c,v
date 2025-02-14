@@ -1,0 +1,75 @@
+head	1.1;
+access;
+symbols;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	98.08.08.11.36.05;	author peterj;	state Exp;
+branches;
+next	;
+
+
+desc
+@CMATH 1989 code
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/* complexd.c
+   Exercise the complex number routines.
+*/
+
+#include <math.h>
+#include <stdio.h>
+
+#include "cmath.h"
+#include "complex.h"
+
+main ()
+{
+struct COMPLEX z, term, expz;
+double n;
+int    i;
+
+printf ("\n\n  --- CMATH --- Design Software 1989\n");
+printf ("\nSample driver for the COMPLEX number routines.\n");
+
+Cinit (5);                  /* A stack of five elements */
+Creset ();                  /* Clear stack              */
+
+Cmplx (0.1, -0.2, &z);      /* z = 0.1 - i 0.2          */
+
+Cmplx (1.0, 0.0, &term);    /* term0 = 1.0              */
+Cpush (&term);              /* start of summation       */
+
+/* now evaluate 10 terms in the Taylor series */
+for (i = 1; i < 10; ++i)
+   {
+   /* update term(n) = term(n-1) * z / n */
+   Cpush (&term);  Cpush (&z); Cmult ();
+   n = (double) i; Cpushr (n); Cdiv ();
+
+   Cdup (); Cpop (&term);   /* record term              */
+   Cadd ();                 /* update summation         */
+   }
+Cpop (&expz);
+
+printf ("\nTaylor series expansion ...\n");
+printf ("exp(%f+i(%f)) = %f+i(%f)\n", z.re, z.im, expz.re, expz.im);
+
+printf ("\nLibrary call ...\n");
+Cpush (&z);
+Cexp ();
+Cpop (&expz);
+printf ("exp(%f+i(%f)) = %f+i(%f)\n", z.re, z.im, expz.re, expz.im);
+
+Cend();
+return (0);
+}
+@

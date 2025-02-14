@@ -1,0 +1,64 @@
+head	1.1;
+access;
+symbols;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	98.08.08.11.36.05;	author peterj;	state Exp;
+branches;
+next	;
+
+
+desc
+@CMATH 1989 code
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/* indexxd.c
+   Sample driver for heap-sort function indexx().
+   */
+
+#include <stdio.h>
+#include <math.h>
+#include "cmath.h"
+#if (STDLIBH)
+#include <stdlib.h>
+#endif
+
+main ()
+{
+double vector[20], avg;
+int ivect[20], jj, nelem;
+
+printf ("\n\n  --- CMATH --- Design Software 1989\n");
+printf ("\nTrial for heap sort routine indexx()\n");
+
+nelem = 16;
+srand (1);
+avg = 0.0;
+for (jj = 0; jj < nelem; ++jj)
+   {
+   vector[jj] = (double) rand();
+   avg += vector[jj];
+   }
+avg /= (double) nelem;
+for (jj = 0; jj < nelem; ++jj)
+   vector[jj] = floor(50.0 * (vector[jj] / avg));
+
+indexx (nelem, vector, ivect);
+
+printf ("\n Unsorted      Sorted\n");
+printf ("------------------------\n");
+for (jj = 0; jj < nelem; ++jj)
+   printf ("%7.1f     %7.1f\n", vector[jj], vector[ivect[jj]]);
+
+return (0);
+}
+@

@@ -1,0 +1,131 @@
+------------------------------------------------------------------
+Design Software                                           indexx()
+------------------------------------------------------------------
+
+
+1.0  Purpose.
+
+     Index the elements of the array x such that x[indx[j]] is  in 
+ascending order.  That is x[indx[j-1]] < x[indx[j]], j = 1...n-1.
+
+
+2.0  How to use the function.
+
+     The indexing function is declared as 
+     
+     int indexx (n, x, indx)
+     int    n;
+     double x[];
+     int    indx[];
+
+
+2.1  Parameter types.
+
+     n         : integer value
+     x         : pointer to a vector of double values with
+                 dimension x[ndim], ndim > n
+     indx      : pointer to a vector of integer values with
+                 dimension indx[ndim], ndim > n
+
+
+2.2  Input.
+
+     n         : Number of elements in x.
+     x         : The vector of values to be indexed,
+                 x[j], j = 0 ... n-1.
+
+
+2.3  Output.
+
+     indexx()  : returns an unspecified integer value which
+                  should be ignored.
+     indx      : The vector of element indices.
+                 x[indx[j-1]] < x[indx[j]],  j = 1 ... n-1.
+     Note that the contents of x are unchanged.
+
+
+3.0  Method.
+
+     indexx() uses the heap-sort algorithm as described  in  Press 
+et al.
+
+
+4.0  Reference
+
+W.H. Press, B.P. Flannery, S.A. Teukolsky  &  W.T.  Vetterling   : 
+"Numerical Recipes. The art of  scientific  computing."  Cambridge 
+University Press, Cambridge, 1986.
+
+
+5.0  Example.
+
+/* indexxd.c
+   Sample driver for heap-sort function indexx().
+   */
+
+#include <stdio.h>
+#include <math.h>
+#include "cmath.h"
+#if (STDLIBH)
+#include <stdlib.h>
+#endif
+
+main ()
+{
+double vector[20], avg;
+int ivect[20], jj, nelem;
+
+printf ("\n\n  --- CMATH --- Design Software 1989\n");
+printf ("\nTrial for heap sort routine indexx()\n");
+
+nelem = 16;
+srand (1);
+avg = 0.0;
+for (jj = 0; jj < nelem; ++jj)
+   {
+   vector[jj] = (double) rand();
+   avg += vector[jj];
+   }
+avg /= (double) nelem;
+for (jj = 0; jj < nelem; ++jj)
+   vector[jj] = floor(50.0 * (vector[jj] / avg));
+
+indexx (nelem, vector, ivect);
+
+printf ("\n Unsorted      Sorted\n");
+printf ("------------------------\n");
+for (jj = 0; jj < nelem; ++jj)
+   printf ("%7.1f     %7.1f\n", vector[jj], vector[ivect[jj]]);
+
+return (0);
+}
+
+
+6.0  Program Results.
+
+  --- CMATH --- Design Software 1989
+
+Trial for heap sort routine indexx()
+
+ Unsorted      Sorted
+------------------------
+    1.0         0.0
+    0.0         1.0
+   49.0         4.0
+    4.0         6.0
+   52.0        15.0
+   31.0        28.0
+   78.0        31.0
+   28.0        40.0
+  102.0        49.0
+  138.0        52.0
+   40.0        64.0
+   64.0        78.0
+   15.0        82.0
+  102.0       102.0
+   82.0       102.0
+    6.0       138.0
+
+
+
+

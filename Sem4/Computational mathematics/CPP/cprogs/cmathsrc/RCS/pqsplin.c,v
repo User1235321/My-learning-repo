@@ -1,0 +1,152 @@
+head	1.1;
+access;
+symbols;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	98.08.08.11.36.05;	author peterj;	state Exp;
+branches;
+next	;
+
+
+desc
+@CMATH 1989 code
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/* pqsplin.c
+   Periodic quadratic spline routine.
+
+*/
+
+int PQSplin (y, v, n, flag, d, lastc, lastr)
+double y[];
+double v[];
+int    n;
+int    *flag;
+double d[], lastc[], lastr[];
+
+/* Purpose ...
+   -------
+   Fit a quadratic spline to the periodic data vector y where
+   y[0] = y[n].  The data points are assumed to be equally
+   spaced and in ascending order of x (the independent variable).
+
+   Input ...
+   -----
+   y -- vector of data points with y[0] = y[n]
+   n -- number of data points y[0] .. y[n]
+
+   Output ...
+   ------
+   v -- vector of break points such that subinterval j is
+	defined on v[j-1], y[j], v[j] and v[0] = v[n].
+	The equation on each subinterval is
+	s(e) = a * e * e + b * e + y[j]
+	where e = 2 (x - x[j]) / h
+	      h = x[j+1] - x[j]
+	      a = (v[j-1] - 2 y[j] + v[j]) / 2
+	      b = (v[j] - v[j-1]) / 2
+              x is the independent variable (not explicitly used)
+   flag -- = 0, normal return
+	   = 1, y[0] != y[n].  If this occurs the routine will still
+                fit a spline using y[0]
+           = 2, n < 3.  There is not much point in fitting a periodic
+                spline to this vector.
+
+   Workspace ...
+   ---------
+   d, lastr, lastc -- internal workspace with same
+                      dimensions as y[] and v[]
+
+   Version ... 1.0, march 1988
+   -------     1.1, may   1988
+
+   Notes ...
+   -----
+   (1) Written by
+       P.A. Jacobs    Department of Mechanical Engineering
+		      University of Queensland
+   (2) Uses the function fabs() from the standard math library.
+
+*/
+{  /* begin function pqsplin ... */
+int j;
+double ratio, offdiag;
+
+*flag = 0;
+if (n < 3) { *flag = 2; return; }
+if (fabs(y[0] - y[n]) > 1.0e-10) *flag = 1;  /* continue on ... */
+
+/* The unknown v[j], j = 0 .. n-1 are determined by solving the
+   set of linear equations thet force the derivative s'(x) to be
+   continuous at each of the v[j] breakpoints.  */
+
+/* --- set up matrix and right-hand-side ---
+   This is a "nearly" tridiagonal matrix of order n-1.
+   It is symmetric.  */
+
+offdiag = 0.25;
+for (j = 0; j < n; ++j)
+   {
+   d[j] = 1.5;             /* diagonal              */
+   lastc[j] = 0.0;         /* last column in matrix */
+   lastr[j] = 0.0;         /* last row in matrix    */
+   }
+lastc[0] = 0.25;
+lastr[0] = 0.25;
+lastc[n-2] = offdiag;
+lastr[n-2] = offdiag;
+lastr[n-1] = d[n-1];
+
+/* --- right-hand side --- */
+for (j = 0; j < n-1; ++j)  v[j] = y[j+1] + y[j];
+v[n-1] = y[0] + y[n-1];
+
+/* --- reduce matrix to an upper triangular system using
+   Gaussian elimination without pivoting ---            */
+
+for (j = 1; j < n-1; ++j)
+   {
+   /* use row j-1 to eliminate the lower off-diagonal on
+      row j (but not for j = n-1 yet).
+      The upper diagonal is left unchanged except for
+      element b[n-2] which corresponds to lastc[n-2].
+   */
+   ratio = offdiag / d[j-1];
+   d[j] -= offdiag * ratio;
+   lastc[j] -= lastc[j-1] * ratio;
+   v[j] -= v[j-1] * ratio;
+   }
+/* remember that the last upper-offdiagonal has a new value */
+
+for (j = 0; j < n-1; ++j)
+   {
+   /* eliminate the off-diagonal elements in the last row */
+   ratio = lastr[j] / d[j];
+   if (j != n-2) lastr[j+1] -= offdiag * ratio;  /* only once */
+   lastr[n-1] -= lastc[j] * ratio;
+   v[n-1] -= v[j] * ratio;
+   }
+d[n-1] = lastr[n-1];  /* update the last diagonal element */
+
+/* --- back substitution --- */
+
+v[n-1] = v[n-1] / d[n-1];                          /* last row */
+v[n-2] = (v[n-2] - lastc[n-2] * v[n-1]) / d[n-2];  /* 2nd last */
+for (j = n-3; j >= 0; --j)
+   {  /* solve for row j */
+   v[j] = (v[j] - lastc[j] * v[n-1] - offdiag * v[j+1]) / d[j];
+   }
+
+v[n] = v[0];
+return;
+}  /* ... end of function pqsplin */
+@

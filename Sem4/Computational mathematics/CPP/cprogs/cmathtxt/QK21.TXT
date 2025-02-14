@@ -1,0 +1,142 @@
+------------------------------------------------------------------
+Design Software                                 qk21(), qk21init()
+------------------------------------------------------------------
+
+
+1.0  Purpose.
+
+     Compute the integrals It=ti tf(x)tdx  (with  error  estimate) 
+and Jt=ti t1f(x)1tdx, where f(x) is a user defined function.   The 
+integration limits a and b are finite.  Although this  routine  is 
+part of the qags() adaptive integrator, it may be safely  used  by 
+the user for fixed rule quadrature.
+
+
+2.0  How to use the function.
+
+     The function qk21init() must  be  called  first  to  set  the 
+integration coefficients.  qk21() may then be called any number of 
+times.  Both are defined as integer  functions  and  all  data  is 
+passed via the parameter list.  They are declared as
+
+     int qk21init ()
+and
+     int qk21 (f, a, b, result, abserr, resabs, resasc)
+     double (*f)(), a, b, *result, *abserr, *resabs, *resasc;
+
+
+2.1  Parameter types.
+
+     f         : pointer to a function returning a double value
+                 double f (x)
+                 double x;
+                 {
+                 ...
+                 return (double value);
+                 }
+     a         : double value
+     b         : double value
+     result    : pointer to a double variable
+     abserr    : pointer to a double variable
+     resabs    : pointer to a double variable
+     resasc    : pointer to a double variable
+
+
+2.2  Input.
+
+     f         : The name of the user defined function f(x).
+     a         : The lower limit of integration.
+     b         : The upper limit of integration.
+
+
+2.3  Output.
+
+     Both qk21init() and qk21() return unspecified integer values
+     which should be ignored.
+     result    : An approximation to the integral I.
+     abserr    : An estimate of the absolute error in I.
+     resabs    : An approximation to the integral J.
+     resasc    : An approximation to i  1f - I/(b-a)1 dx.
+
+
+3.0  Method
+
+     The result is computed by applying the 21-point Kronrod  rule 
+as described in Piessens et al.
+
+
+4.0  Reference
+
+R. Piessens,  E.  de  Doncker-Kapenga,  C.W.  Uberhuber  and  D.K. 
+Kahaner:   "QUADPACK:   A   subroutine   package   for   automatic 
+integration." Springer  Series  in  Computational  Mathematics  1. 
+(1983).
+
+
+5.0  Example.
+                                    2
+     Compute I = i  ------- dx =   -      .
+
+
+/* qk21d.c
+   Program to exercise the fixed rule integrator qk21(). */
+
+#include <stdio.h>
+#include <math.h>
+#include "cmath.h"
+
+main ()
+{  /* begin qk21d */
+
+double a, abserr, b, resasc, resabs, userf(), result;
+double t;
+
+/* a and b are the integration limits. */
+a = 0.0;
+b = 1.0;
+
+printf ("\n\n  --- CMATH --- Design Software 1989\n");
+printf ("\nCall fixed rule quadrature routines.\n");
+printf ("qk21init() and qk21() ...\n");
+
+qk21init ();
+qk21 (userf, a, b, &result, &abserr, &resabs, &resasc);
+
+printf ("\nIntegral approximation     = %20.12e\n", result);
+printf ("Estimate of absolute error = %9.2e\n", abserr);
+t = 4.0 * atan(1.0);  /* pi */
+t = -(t * t) / 6.0;
+printf ("Correct answer             = %20.12e (-pi**2 / 6.0)\n\n", t);
+printf ("resabs = %20.12e,  resasc = %20.12e\n", resabs, resasc);
+
+return (0);
+}  /* end of qk21d */
+
+
+
+double userf (x)         /*  user supplied function.  */
+double x;
+
+{
+double t;
+t = log(x) / (1.0 - x);
+return (t);
+}
+
+
+6.0  Program Results.
+
+  --- CMATH --- Design Software 1989
+
+Call fixed rule quadrature routines.
+qk21init() and qk21() ...
+
+Integral approximation     =   -1.64408095723e+00
+Estimate of absolute error =   5.3e-01
+Correct answer             =   -1.64493406685e+00 (-pi**2 / 6.0)
+
+resabs =    1.64408095723e+00,  resasc =    5.25784222385e-01
+
+
+
+
