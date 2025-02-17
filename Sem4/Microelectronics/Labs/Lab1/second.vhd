@@ -13,87 +13,55 @@ entity second is
     Q : out std_logic_vector (7 downto 0);
     Get : out std_logic;
     Synchro : out std_logic;
-    num : out integer range 0 to 7;
-	--
-	rstrOUT : out std_logic_vector (1 downto 0);
-	getOut : out std_logic
+    qq : out integer range 0 to 7
   );
 end second;
 
 architecture behav of second is
-function rstr (r : std_logic; s : std_logic; q : std_logic) return std_logic is
-begin
-  if s = '0'  then
-    if r = '0' then
-      return q;
-		else
-      return '0';
-		end if;
-	else
-      return '1';
-	end if;
-end rstr;
-
 type array_type is array (7 downto 0) of std_logic_vector(7 downto 0);
-signal seventhDff : std_logic_vector (7 downto 0) := "00000000";
-signal dffArr: array_type;
-signal get1 : std_logic := '0';
-signal rstrQ : std_logic_vector (1 downto 0) := "00";
-signal qq : integer range 0 to 7 := 0;
-signal aeb : std_logic := '0';
+signal dffArr : array_type;
+--signal num : integer range 0 to 8 := 0;
+signal over : std_logic;
+
 
 begin
-  process(DATA, KKS, CLK, Query, dffArr, get1, rstrQ, seventhDff, qq)
+  process(CLK)
+  variable num: integer;
   begin
-    --frame offset
-    if rising_edge(CLK) then
-      seventhDff <= dffArr(7);
+    if ((CLK'event) and (CLK = '1')) then
+      --num <= num + 1;
+      num:= num + 1;
+      if (num = 8) then
+        over <= '0';
+        --num <= 1;
+        num := 1;
+      end if;
+
+      --compare
+      if (KKS = dffArr(7)) then
+        --num <= 1;
+        num := 1;
+        Synchro <= '1';
+      else
+        Synchro <= '0';
+      end if;
+
+      --dff block
       for i in 7 downto 1 loop
         dffArr(i) <= dffArr(i - 1);
       end loop;
 
-      --Mux
-      if (get1 = '1') then
+      if (((Query = '1') and (dffArr(7) = KKS)) or (over = '1')) then
+        if (over = '0') then
+          over <= '1';
+        end if;
         dffArr(0) <= DATA;
       else
-        dffArr(0) <= seventhDff;
+        dffArr(0) <= dffArr(7);
       end if;
     end if;
-
-    --compare
-    aeb <= '1';
-    for i in 7 downto 0 loop
-      if (seventhDff(i) /= KKS(i)) then
-        aeb <= '0';
-      end if;
-    end loop;
-
-    --Counter and rstr block
-    if (aeb = '1') then
-      qq <= 0;
-		rstrQ(0) <= rstr('0', Query, rstrQ(0));
-    	rstrQ(1) <= rstr('0', (rstrQ(0) and aeb), rstrQ(1));
-    	get1 <= rstrQ(1);
-    elsif rising_edge(CLK) then
-      if (qq < 7) then
-        qq <= qq + 1;
-        rstrQ(0) <= rstr('0', Query, rstrQ(0));
-    	rstrQ(1) <= rstr('0', (rstrQ(0) and aeb), rstrQ(1));
-    	get1 <= rstrQ(1);
-      else
-        qq <= 0;
-        rstrQ(0) <= rstr('1', Query, rstrQ(0));
-    	rstrQ(1) <= rstr('1', (rstrQ(0) and aeb), rstrQ(1));
-    	get1 <= rstrQ(1);
-      end if;
-    end if;
-
-    --Output
-    Get <= get1;
-    Synchro <= aeb;
-    Q <= dffArr(7);
-    num <= qq;
-	--
-	rstrOUT <= rstrQ;
   end process;
+  Get <= over;
+  Q <= dffArr(7);
+  --qq <= num;
 end behav;
