@@ -22,7 +22,6 @@
 *.snf
 *.DLS
 *.sym
-*.scf
 
 #Quartus2
 *.done
@@ -33,7 +32,6 @@
 *.tan.*
 *.qws
 *.qpf
-*.vwf
 *.bsf
 db
 cmp_state.ini
