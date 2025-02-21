@@ -6,18 +6,17 @@
 
 int main()
 {
-  size_t n[] = {3, 6, 9};
+  size_t n[] = {2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};
 
-  std::cout << std::fixed << std::setprecision(8);
-  for (size_t q = 0; q < 3; ++q)
+  for (size_t q = 0; q < 11; ++q)
   {
     std::vector< double > b(n[q] * n[q]);
     fillMatrix(b);
-    std::cout << "Standart matrix " << n[q] << 'x' << n[q] << ":\n";
+    std::cout << "\033[1;32mStandart matrix " << n[q] << 'x' << n[q] << ":\033[1;0m\n";
     printMatrix(b, std::cout);
 
     std::vector< double > antiB(antiMatrix(b));
-    std::cout << "Anti matrix:\n";
+    std::cout << "\033[1;33mAnti matrix:\033[1;0m\n";
     printMatrix(antiB, std::cout);
 
     std::vector< double > r(multiMatrix(b, antiB));
@@ -25,9 +24,9 @@ int main()
     {
       r[i * n[q] + i] -= 1;
     }
-    std::cout << "R matrix:\n";
+    std::cout << "\033[1;34mR matrix:\033[1;0m\n";
     printMatrix(r, std::cout);
-    std::cout << "Norm of R: " << calcNorm(r) << "\n\n";
+    std::cout << "\033[1;35mNorm of R: " << calcNorm(r) << "\033[1;0m\n\n";
   }
   return 0;
 }

@@ -28,7 +28,6 @@ find:
 	find -name "*.tan.*"
 	find -name "*.qws"
 	find -name "*.qpf"
-	find -name "*.vwf"
 	find -name "*.bsf"
 	find -name "db"
 	find -name "cmp_state.ini"
@@ -75,7 +74,6 @@ clear:
 	find -name "*.tan.*" -delete
 	find -name "*.qws" -delete
 	find -name "*.qpf" -delete
-	find -name "*.vwf" -delete
 	find -name "*.bsf" -delete
 	find -name "cmp_state.ini" -delete
 

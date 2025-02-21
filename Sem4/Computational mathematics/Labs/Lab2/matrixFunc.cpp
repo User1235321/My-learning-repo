@@ -1,6 +1,7 @@
 #include "matrixFunc.hpp"
 
 #include <cmath>
+#include <iomanip>
 
 extern "C" {
   int decomp_(int *ndim, int *n, double *a, double *cond, int *ipvt, double *work);

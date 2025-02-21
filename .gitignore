@@ -47,3 +47,8 @@ cmp_state.ini
 #Other files
 *.o
 *.t
+
+#Old sems
+Sem1/
+Sem2/
+Sem3/
