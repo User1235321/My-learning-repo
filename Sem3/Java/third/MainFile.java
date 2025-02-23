@@ -7,7 +7,10 @@ public class MainFile
 {
   public static double average(List< Integer > numbers)
   {
-    return numbers.stream().mapToInt(Integer::intValue).average().orElse(0);//List.stream.IntStream.OptionalDouble.double
+    return numbers.stream()
+      .mapToInt(Integer::intValue)
+      .average()
+      .orElse(0);
   }
 
   public static List< String > prefixStrings(List< String > strings)
@@ -28,12 +31,16 @@ public class MainFile
 
   public static < T > T getLast(Collection< T > collection)
   {
-    return collection.stream().reduce((first, second) -> second).orElse(null);
+    return collection.stream()
+    .reduce((first, second) -> second)
+    .orElse(null);
   }
 
   public static int sumOfEven(List < Integer > numbers)
   {
-    return Arrays.stream(numbers.stream().mapToInt(i->i).toArray())
+    return Arrays.stream(numbers.stream()
+        .mapToInt(i -> i)
+        .toArray())
       .filter(n -> ((n % 2) == 0))
       .sum();
   }

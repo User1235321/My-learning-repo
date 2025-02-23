@@ -28,7 +28,7 @@ public class MainFile
     }
     catch (InputMismatchException err)
     {
-      System.out.println("Bad point input. Programm ended");
+      System.err.println("Bad point input. Programm ended");
       return;
     }
     System.out.println("All points are input, you can move hero by commands: walk, horse, fly. To end programm print exit");
