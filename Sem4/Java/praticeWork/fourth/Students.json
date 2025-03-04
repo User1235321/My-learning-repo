@@ -1,0 +1,23 @@
+[
+  {
+    "id_": 0,
+    "name_": "Ivan",
+    "age_": 18,
+    "course_": 1,
+    "grade_": 4
+  },
+  {
+    "id_": 1,
+    "name_": "Igor",
+    "age_": 21,
+    "course_": 3,
+    "grade_": 3
+  },
+  {
+    "id_": 2,
+    "name_": "Innokentii",
+    "age_": 40,
+    "course_": 1,
+    "grade_": 5
+  }
+]
