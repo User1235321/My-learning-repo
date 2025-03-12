@@ -115,22 +115,6 @@ applicable agreement for further details.
 		(line (pt 78 12)(pt 82 8)(line_width 1))
 	)
 )
-(pin
-	(output)
-	(rect 624 168 800 184)
-	(text "OUTPUT" (rect 1 0 39 10)(font "Arial" (font_size 6)))
-	(text "outAddr1[7 ..0]" (rect 90 0 163 12)(font "Arial" ))
-	(pt 0 8)
-	(drawing
-		(line (pt 0 8)(pt 52 8)(line_width 1))
-		(line (pt 52 4)(pt 78 4)(line_width 1))
-		(line (pt 52 12)(pt 78 12)(line_width 1))
-		(line (pt 52 12)(pt 52 4)(line_width 1))
-		(line (pt 78 4)(pt 82 8)(line_width 1))
-		(line (pt 82 8)(pt 78 12)(line_width 1))
-		(line (pt 78 12)(pt 82 8)(line_width 1))
-	)
-)
 (symbol
 	(rect 296 -16 472 160)
 	(text "LPM_DFF" (rect 19 0 88 16)(font "Arial" (font_size 10)))
@@ -515,7 +499,7 @@ applicable agreement for further details.
 		(line (pt 112 112)(pt 112 16)(line_width 1))
 		(line (pt 16 112)(pt 16 16)(line_width 1))
 	)
-	(annotation_block (parameter)(rect 496 312 672 400))
+	(annotation_block (parameter)(rect 624 232 800 320))
 )
 (connector
 	(pt 272 232)
@@ -535,6 +519,11 @@ applicable agreement for further details.
 (connector
 	(pt 264 56)
 	(pt 296 56)
+	(bus)
+)
+(connector
+	(pt 272 344)
+	(pt 480 344)
 	(bus)
 )
 (connector
@@ -566,6 +555,33 @@ applicable agreement for further details.
 	(pt 264 88)
 )
 (connector
+	(pt 480 344)
+	(pt 480 256)
+	(bus)
+)
+(connector
+	(pt 472 240)
+	(pt 496 240)
+	(bus)
+)
+(connector
+	(pt 480 256)
+	(pt 496 256)
+	(bus)
+)
+(connector
+	(pt 496 272)
+	(pt 488 272)
+)
+(connector
+	(pt 488 272)
+	(pt 488 352)
+)
+(connector
+	(pt 488 352)
+	(pt 280 352)
+)
+(connector
 	(pt 280 72)
 	(pt 280 248)
 )
@@ -574,55 +590,11 @@ applicable agreement for further details.
 	(pt 280 352)
 )
 (connector
-	(pt 272 344)
-	(pt 480 344)
-	(bus)
-)
-(connector
-	(pt 280 352)
-	(pt 496 352)
-)
-(connector
-	(pt 480 344)
-	(pt 480 256)
-	(bus)
-)
-(connector
-	(pt 496 352)
-	(pt 496 272)
-)
-(connector
-	(pt 480 256)
-	(pt 496 256)
-	(bus)
-)
-(connector
 	(pt 472 64)
 	(pt 624 64)
-	(bus)
-)
-(connector
-	(pt 480 176)
-	(pt 624 176)
-	(bus)
-)
-(connector
-	(pt 480 240)
-	(pt 480 176)
-	(bus)
-)
-(connector
-	(pt 472 240)
-	(pt 480 240)
-	(bus)
-)
-(connector
-	(pt 480 240)
-	(pt 496 240)
 	(bus)
 )
 (junction (pt 272 232))
 (junction (pt 280 72))
 (junction (pt 288 88))
 (junction (pt 280 248))
-(junction (pt 480 240))
