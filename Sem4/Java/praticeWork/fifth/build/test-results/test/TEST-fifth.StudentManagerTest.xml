@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="fifth.StudentManagerTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2025-03-11T14:28:55" hostname="debian" time="0.017">
+  <properties/>
+  <testcase name="testFindAndRemoveRealStudent" classname="fifth.StudentManagerTest" time="0.015"/>
+  <testcase name="testRemoveStudentFromEmpty" classname="fifth.StudentManagerTest" time="0.0"/>
+  <testcase name="testRemoveUnrealStudent" classname="fifth.StudentManagerTest" time="0.0"/>
+  <testcase name="testFindStudentFromEmpty" classname="fifth.StudentManagerTest" time="0.0"/>
+  <testcase name="testFindUnrealStudenty" classname="fifth.StudentManagerTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

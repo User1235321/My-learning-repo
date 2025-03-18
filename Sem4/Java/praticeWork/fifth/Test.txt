@@ -1,0 +1,1 @@
+ID: 2; Name: Innokentii; Age: 40; Course: 1; Grade: 5
