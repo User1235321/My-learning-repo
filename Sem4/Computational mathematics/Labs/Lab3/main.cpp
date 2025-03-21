@@ -81,6 +81,5 @@ int main()
     xMax = std::max(xMax, std::max(std::abs(std::abs(xStart2[0]) - std::abs(xStart[0])), std::abs(std::abs(xStart2[1]) - std::abs(xStart[1]))));
   }
   std::cout << "min: " << xMin << "; max: " << xMax << '\n';
-  //dell
   return 0;
 }

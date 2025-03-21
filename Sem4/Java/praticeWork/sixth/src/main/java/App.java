@@ -50,8 +50,7 @@ public class App
       List< Quotes > obj2 = new Gson().fromJson(response2.body().toString(), listType);
       for (int i = 0; i < obj2.size(); ++i)
       {
-        String result2 = obj2.get(i).getQuote();
-        System.out.println(i + ": " + result2);
+        System.out.println(i + ". " + obj2.get(i).getAuthor() + ": "+ obj2.get(i).getQuote());
       }
     }
     catch(IOException e)
