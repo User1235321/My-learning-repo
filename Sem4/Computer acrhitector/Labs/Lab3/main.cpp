@@ -10,7 +10,7 @@ void func()
 }
 int main()
 {
-  size_t threadsNumber = 2;
+  size_t threadsNumber = 4;
   omp_set_num_threads(threadsNumber);
   #pragma omp parallel for
   for (int i = 0; i < 100; i++)
@@ -25,13 +25,13 @@ int main()
       #pragma omp section
       for (int i = 0; i < 10; i++)
       {
-        std::cout << 1;
+        std::cout << "f ";
         func();
       }
       #pragma omp section
       for (int i = 0; i < 20; i++)
       {
-        std::cout << 2;
+        std::cout << "s ";
         func();
       }
     }
@@ -41,7 +41,7 @@ int main()
   #pragma omp barrier
   for (int i = 0; i < 10; i++)
   {
-    std::cout << 3;
+    std::cout << "bar ";
     func();
   }
 

@@ -1,7 +1,7 @@
 build:
 	clear
 	grep -n -r "dell"
-	g++ "$n"/*.cpp -o "$n"/main -mavx
+	g++ "$n"/*.cpp -o "$n"/main -I/usr/local/include -L/usr/local/lib -lfmod -lfmodstudio -mavx -fopenmp
 run:
 	make build n=""$n""
 	./"$n"/main
