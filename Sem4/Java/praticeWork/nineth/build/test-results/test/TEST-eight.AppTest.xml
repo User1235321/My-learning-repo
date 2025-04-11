@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="eight.AppTest" tests="10" skipped="0" failures="0" errors="0" timestamp="2025-04-01T14:32:55" hostname="debian" time="0.029">
+  <properties/>
+  <testcase name="negativeDesposite" classname="eight.AppTest" time="0.003"/>
+  <testcase name="drawBiggerThanSum" classname="eight.AppTest" time="0.001"/>
+  <testcase name="goodPrintToFile" classname="eight.AppTest" time="0.02"/>
+  <testcase name="zeroDesposite" classname="eight.AppTest" time="0.001"/>
+  <testcase name="testGoodAge" classname="eight.AppTest" time="0.0"/>
+  <testcase name="zeroDraw" classname="eight.AppTest" time="0.0"/>
+  <testcase name="goodDesposite" classname="eight.AppTest" time="0.0"/>
+  <testcase name="testBadAge" classname="eight.AppTest" time="0.002"/>
+  <testcase name="goodPrint" classname="eight.AppTest" time="0.001"/>
+  <testcase name="goodDraw" classname="eight.AppTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
