@@ -12,7 +12,7 @@ int main()
 
   cv::VideoWriter oVideoWriter("/home/pavel/Desktop/PolikekWorks/My-learning-repo/Sem4/Computer acrhitector/Labs/Lab5/video.avi",
                                 cv::VideoWriter::fourcc('M','J','P','G'),
-                                30,
+                                24,
                                 cv::Size(static_cast< int >(cap.get(cv::CAP_PROP_FRAME_WIDTH)), static_cast< int >(cap.get(cv::CAP_PROP_FRAME_HEIGHT))),
                                 true);
 

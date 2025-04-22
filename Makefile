@@ -91,7 +91,7 @@ clear:
 push:
 	make clear
 	git status
-	git add Sem3/
+	git add Sem4/
 	git status
 	git commit -m "$c"
 	git push
