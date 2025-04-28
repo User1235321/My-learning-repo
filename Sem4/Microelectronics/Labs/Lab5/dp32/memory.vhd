@@ -44,7 +44,7 @@ BEGIN
         X"1009_0001", -- r9(i) = 1;
         X"000A_0900", -- r10(j) = r9(i);
         -- other variable
-        X"100B_0007", -- r11(number of elements) = 7;
+        X"100B_0008", -- r11(number of elements) = 8;
         X"100C_0000", -- r12(valToSwap/j - 1) = 0;
         X"100D_0000", -- r13(M[j - 1]) = 0;
         X"100E_0000", -- r14(M[j]) = 0;
@@ -57,15 +57,16 @@ BEGIN
               X"300D_0C00", -- r13 = M[r12(j - 1)]
               X"300E_0A00", -- r14 = M[r10(j)]
               X"010C_0D0E", -- r12(valToSwap) = r13(M[j - 1]) - r14(M[j])
-              X"500A_0006", -- если r12 < 0, выходим из local for
+              X"500A_0005", -- если r12 < 0, выходим из local for
               -- swap
               X"310D_0A00", -- M[r10(j)] = r13
+              X"110C_0A01", -- r12 = r10(j) - 1
               X"310E_0C00", -- M[r12(j - 1)] = r14
             X"110A_0A01", -- --r10(j);
-            X"5001_00F7", -- если j != 0, возращаемся в начало local for
+            X"5001_00F6", -- если j != 0, возращаемся в начало local for
           X"1009_0901", -- ++r9(i);
-          X"010C_0B09", -- r12 = r11(number of elements) - r9(i)
-          X"5001_00F3", -- если r12 != 0, возращаемся в начало main for
+          X"010C_0B09", -- r12 = r11(number of elements) - r9(i) + 1
+          X"5001_00F1", -- если r12 != 0, возращаемся в начало main for
 
         --End of programm, save data to registers
         X"3001_0000", -- r1 = M[0]
@@ -77,8 +78,8 @@ BEGIN
         X"3007_0006", -- r7 = M[6]
         X"3008_0007", -- r8 = M[7]
 
-        OTHERS => X"00000000"
-        );
+        X"100F_0010", -- r15 = 16 (end of programm)
+		OTHERS => X"0000_0000");
 	BEGIN
 		--
 		-- put d_bus and reply into initial state
