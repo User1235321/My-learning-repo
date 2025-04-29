@@ -51,19 +51,24 @@ begin
         done <= '0';
         blocking <= '0';
         localArr := inArr;
+        i := 0;
+        j := 0;
       elsif (blocking = '0') then
-        for i in 0 to (elementsNum - 2) loop
-          j := i;
-          while ((j >= 0) and (localArr(j) > localArr(j + 1))) loop
-              temp := localArr(j);
-              localArr(j) := localArr(j + 1);
-              localArr(j + 1) := temp;
-              j := j - 1;
-          end loop;
-        end loop;
-        done <= '1';
-        outArr <= localArr;
-        blocking <= '0';
+        if (i < (elementsNum - 1)) then
+          if ((j >= 0) and (localArr(j) > localArr(j + 1))) then
+            temp := localArr(j);
+            localArr(j) := localArr(j + 1);
+            localArr(j + 1) := temp;
+            j := j - 1;
+          else
+            j := i + 1;
+            i := i + 1;
+          end if;
+        else
+          done <= '1';
+          outArr <= localArr;
+          blocking <= '0';
+        end if;
       end if;
       working <= blocking;
     end if;
