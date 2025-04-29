@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="eleventh.AppTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2025-04-29T14:30:37" hostname="debian" time="3.562">
+  <properties/>
+  <testcase name="virtualThreadPiTest" classname="eleventh.AppTest" time="1.803"/>
+  <testcase name="threadPiTest" classname="eleventh.AppTest" time="1.757"/>
+  <system-out><![CDATA[Pi = 3.1423652
+Время выполнения: 1793
+Pi = 3.142286
+Время выполнения: 1756
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
