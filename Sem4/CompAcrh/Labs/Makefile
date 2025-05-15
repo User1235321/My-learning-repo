@@ -1,7 +1,7 @@
 build:
 	clear
 	grep -n -r "dell"
-	g++ $n/*.cpp -o $n/main $f
+	g++ $n/src/*.cpp -o $n/main $f
 run:
 	make build n="$n" flags="$f"
 	./$n/main
