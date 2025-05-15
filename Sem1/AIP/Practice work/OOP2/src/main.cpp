@@ -2,7 +2,7 @@
 #include <cstddef>
 #include <ctime>
 #include <limits>
-#include "Point.h"
+#include "point.h"
 #include "pointFunction.hpp"
 
 int main()

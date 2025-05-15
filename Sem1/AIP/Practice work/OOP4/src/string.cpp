@@ -1,4 +1,4 @@
-#include "String.h"
+#include "string.h"
 
 rebdev::String::String():
   size_(0),

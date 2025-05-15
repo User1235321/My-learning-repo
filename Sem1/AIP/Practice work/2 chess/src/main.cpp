@@ -1,5 +1,5 @@
 #include <iostream>
-#include "Figure.hpp"
+#include "figure.hpp"
 
 int main()
 {

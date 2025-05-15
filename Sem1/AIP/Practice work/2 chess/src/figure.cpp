@@ -1,4 +1,4 @@
-#include "Figure.hpp"
+#include "figure.hpp"
 
 bool figure::operator()() const
 {
