@@ -9,7 +9,7 @@ void ImpulseGen::on_tick()
         return;
     }
 
-    if(count_left.read() > 1)
+    if(count_left.read() > 0)
     {
         if(impulses)
         {
