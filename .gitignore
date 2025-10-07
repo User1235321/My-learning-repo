@@ -44,6 +44,12 @@ cmp_state.ini
 #Java (bullshit)
 *.class
 
+#Visual Studio
+.vs
+x64
+*.sln
+*.vcxproj*
+
 #Other files
 *.o
 *.t
@@ -52,3 +58,4 @@ cmp_state.ini
 Sem1/
 Sem2/
 Sem3/
+Sem4/
