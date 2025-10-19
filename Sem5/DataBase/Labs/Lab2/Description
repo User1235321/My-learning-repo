@@ -1,0 +1,41 @@
+sales:
+  Не на все товары есть заявки
+  На некоторые товары несколько заявок
+warehouses:
+  Первый склад сильно меньше
+  На первом храняться самые популярные товары
+  Некоторые товары хранятся на обоих складах, некоторые нет
+
+goods:
+  Товары:
+    Процессор BINTEL приоритет 1
+    Процессор AMV приоритет 1
+    Видеокарта NVIDIO приоритет 1
+    Видеокарта RAZEN приоритет 1
+    Материнская плата ASPAPER приоритет 2
+    Материнская плата TERABYTE приоритет 2
+    Оперативная память ARDOR WORKING приоритет 2
+    Оперативная память QUEENSTON приоритет 2
+    Мышь ARDOR WORKING приоритет 3
+    Мышь GOGITECH приоритет 3
+    Клавиатура ARDOR WORKING приоритет 3
+    Клавиатура BEXP приоритет 3
+    Наушники ARDOR WORKING приоритет 4
+    Наушники EARTHPODS приоритет 4
+    Монитор ARDOR WORKING приоритет 3
+    Монитор MSA приоритет 3
+
+Команда для полного вывода таблицы:
+
+SELECT
+
+goods.id, goods.name, goods.priority,
+sales.id as SALES_id, sales.good_count as SALES_good_count, sales.create_date,
+warehouse1.id as WAREHOUSE1_id, warehouse1.good_count as WAREHOUSE1_good_count,
+warehouse2.id as WAREHOUSE2_id, warehouse2.good_count as WAREHOUSE2_good_count FROM goods
+
+LEFT JOIN sales ON goods.id = sales.good_id
+LEFT JOIN warehouse1 ON goods.id = warehouse1.good_id
+LEFT JOIN warehouse2 ON goods.id = warehouse2.good_id
+
+ORDER BY goods.id;
