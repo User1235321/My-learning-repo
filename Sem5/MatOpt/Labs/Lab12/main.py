@@ -1,146 +1,126 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-# Коэффициенты функции
-a = 605.45
-b = 326.7
-c = 51.05
-d = 11.8
-e = 11.8
+def relaxation_gd(lambda_val, alpha=0.01):
+    return 1 - alpha * lambda_val
 
-# Матрица Гессе
-H = np.array([[2*a, b],
-              [b, 2*c]])
+def relaxation_newton(lambda_val):
+    return 0
 
-def f(x):
-    return a*x[0]**2 + b*x[0]*x[1] + c*x[1]**2 + d*x[0] + e*x[1]
+def relaxation_levenberg(lambda_val, h):
+    return (h - lambda_val) / (h + lambda_val)
 
-def grad_f(x):
-    return np.array([2*a*x[0] + b*x[1] + d,
-                     b*x[0] + 2*c*x[1] + e])
-
-# Точка минимума
-A = np.array([[2*a, b],
-              [b, 2*c]])
-b_vec = np.array([-d, -e])
-x_min = np.linalg.solve(A, b_vec)
-
-# Функция релаксации метода Левенберга
-def relaxation_function_Levenberg(lambd, alpha):
-    """Функция релаксации метода Левенберга"""
-    return lambd / (lambd + alpha)
-
-# Реализация метода Левенберга
-def levenberg_method(x0, alpha=1000, max_iter=3):
-    """Метод Левенберга"""
-    x = x0.copy()
-    trajectory = [x.copy()]
+def plot_relaxation_function_k18():
+    k = 18
+    h = k / (k + 10)
     
-    for i in range(max_iter):
-        g = grad_f(x)
-        
-        # Матрица для метода Левенберга: H + αI
-        H_lev = H + alpha * np.eye(2)
-        
-        # Решение системы (H + αI)*direction = g
-        direction = np.linalg.solve(H_lev, g)
-        
-        # Обновление точки
-        x_new = x - direction
-        trajectory.append(x_new.copy())
-        x = x_new
+    lambda_left = np.linspace(-10, -h-0.01, 200)
+    R_left = relaxation_levenberg(lambda_left, h)
     
-    return np.array(trajectory)
+    lambda_right = np.linspace(-h+0.01, 10, 400)
+    R_right = relaxation_levenberg(lambda_right, h)
+    
+    plt.figure(figsize=(12, 8))
+    
+    plt.plot(lambda_left, R_left, 'b-', linewidth=3)
+    plt.plot(lambda_right, R_right, 'b-', linewidth=3, label=rf'$R(\lambda) = \frac{{{h:.3f}-\lambda}}{{{h:.3f}+\lambda}}$')
+    
+    plt.axvline(x=-h, color='red', linestyle='--', linewidth=2, alpha=0.7, label=rf'Асимптота $\lambda = -h = -{h:.3f}$')
+    plt.axhline(y=0, color='black', linestyle=':', linewidth=1, alpha=0.5)
+    plt.axhline(y=1, color='green', linestyle='--', linewidth=1.5, alpha=0.5)
+    plt.axhline(y=-1, color='orange', linestyle='--', linewidth=1.5, alpha=0.5)
+    plt.axvline(x=h, color='purple', linestyle=':', linewidth=2, alpha=0.7, label=rf'$R=0$ при $\lambda = h = {h:.3f}$')
+    
+    mask_relax = (lambda_right > 0) & (np.abs(R_right) < 1)
+    if np.any(mask_relax):
+        plt.fill_between(lambda_right[mask_relax], -1, 1, alpha=0.15, color='green', label='Область релаксационности (|R|<1)')
+    
+    plt.xlabel(r'$\lambda$')
+    plt.ylabel(r'$R(\lambda)$')
+    plt.title(f'Функция релаксации для k={k} (h={h:.6f})')
+    plt.xlim(-10, 10)
+    plt.ylim(-10, 10)
+    plt.grid(True, alpha=0.3, linestyle='--')
+    plt.legend(loc='upper right')
+    
+    plt.plot(0, 1, 'ro', markersize=10, label=r'$R(0)=1$')
+    plt.plot(h, 0, 'go', markersize=10, label=rf'$R({h:.2f})=0$')
+    
+    plt.tight_layout()
+    plt.show()
+    
+    return h
 
-# Вычисление траектории метода Левенберга
-x0 = np.array([0.0, 0.0])
-trajectory_lev = levenberg_method(x0, alpha=1000, max_iter=3)
+def plot_paraboloid_relaxation():
+    m = 0.1
+    M = 10.0
+    h = 18/28
+    
+    lambda_vals = np.linspace(m, M, 500)
+    
+    plt.figure(figsize=(12, 8))
+    
+    R_gd = relaxation_gd(lambda_vals, alpha=2/(m+M))
+    R_newton = np.zeros_like(lambda_vals)
+    R_levenberg = relaxation_levenberg(lambda_vals, h)
+    
+    plt.plot(lambda_vals, R_gd, 'r-', linewidth=3, label=f'ПГС (α={2/(m+M):.3f})')
+    plt.plot(lambda_vals, R_newton, 'g--', linewidth=3, label='Метод Ньютона')
+    plt.plot(lambda_vals, R_levenberg, 'b-', linewidth=3, label=f'Метод Левенберга (h={h:.3f})')
+    
+    plt.axhline(y=0, color='k', linestyle=':', alpha=0.5)
+    plt.axhline(y=1, color='r', linestyle='--', alpha=0.3, label='R=1')
+    plt.axhline(y=-1, color='r', linestyle='--', alpha=0.3, label='R=-1')
+    plt.axvline(x=m, color='purple', linestyle=':', alpha=0.7, label=rf'$m = {m}$')
+    plt.axvline(x=M, color='orange', linestyle=':', alpha=0.7, label=rf'$M = {M}$')
+    
+    plt.fill_between(lambda_vals, -1, 1, alpha=0.1, color='green', label='Область релаксационности (|R|<1)')
+    
+    plt.xlabel(r'$\lambda$')
+    plt.ylabel(r'$R(\lambda)$')
+    plt.title('Анализ скорости сходимости на параболоиде')
+    plt.grid(True, alpha=0.3)
+    plt.legend(loc='best')
+    
+    plt.tight_layout()
+    plt.show()
+    
+    return m, M
 
-print("Точка минимума:", x_min)
-print("\nСобственные значения матрицы Гессе:")
-eigenvals = np.linalg.eigvals(H)
-for i, eigval in enumerate(eigenvals):
-    print(f"λ{i+1} = {eigval:.4f}")
+def analyze_methods():
+    k = 18
+    h = k / (k + 10)
+    
+    print(f"Параметры для k={k}: h={h:.6f}")
+    print("Функция релаксации: R(λ) = (h-λ)/(h+λ)")
+    print()
+    print("Сравнение методов для данной задачи:")
+    print()
+    print("1. Простой градиентный спуск (ПГС):")
+    print("   - Проблема: R(λ) ≈ 1 для малых λ → очень медленная сходимость")
+    print("   - Чувствителен к выбору шага α")
+    print("   - Не подходит для овражных функций")
+    print()
+    print("2. Метод Ньютона:")
+    print("   - R(λ) = 0 → мгновенная сходимость в теории")
+    print("   - Проблема: неустойчив при λ → 0 (вырожденный гессиан)")
+    print("   - Требует вычисления и обращения гессиана")
+    print()
+    print("3. Метод Левенберга (для k=18):")
+    print(f"   - h = {h:.6f} → автоматическая регуляризация")
+    print("   - |R(λ)| < 1 при λ > 0 → гарантированная сходимость")
+    print(f"   - R(h) = 0 → оптимальная сходимость при λ = {h:.3f}")
+    print("   - Устойчив к вырожденному гессиану")
+    print()
+    print("ВЫВОД ДЛЯ k=18:")
+    print("Лучший метод - Левенберг-Маркуардт, потому что:")
+    print("1. Обеспечивает устойчивость благодаря hE в знаменателе")
+    print("2. Автоматически адаптируется к разным λ")
+    print("3. Не требует ручного подбора шага как ПГС")
+    print("4. Работает с овражными функциями лучше метода Ньютона")
+    print("5. Гарантирует сходимость для любых λ > 0")
 
-print("\nТраектория метода Левенберга:")
-for i, point in enumerate(trajectory_lev):
-    print(f"Шаг {i}: ({point[0]:.6f}, {point[1]:.6f})")
-
-# Создаем фигуру с двумя субплогами
-fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 6))
-
-# Первый субплот: траектория метода Левенберга
-x1_range = np.linspace(-2, 2, 400)
-x2_range = np.linspace(-2, 2, 400)
-X1, X2 = np.meshgrid(x1_range, x2_range)
-Z = f([X1, X2])
-
-levels = np.linspace(np.min(Z), np.max(Z), 30)
-contour = ax1.contour(X1, X2, Z, levels=levels, colors='blue', alpha=0.6, linewidths=0.8)
-ax1.clabel(contour, inline=True, fontsize=8)
-
-# Отображение траектории
-ax1.plot(trajectory_lev[:, 0], trajectory_lev[:, 1], 'go-', markersize=8, linewidth=2, label='Метод Левенберга')
-
-# Подписи координат
-for i, (x, y) in enumerate(trajectory_lev):
-    ax1.annotate(f'Шаг {i}\n({x:.3f}, {y:.3f})', (x, y), 
-                xytext=(10, 10), textcoords='offset points',
-                fontsize=9, alpha=0.9,
-                bbox=dict(boxstyle='round,pad=0.3', facecolor='lightgreen', alpha=0.7))
-
-ax1.plot(x_min[0], x_min[1], 'b*', markersize=15, label=f'Минимум ({x_min[0]:.3f}, {x_min[1]:.3f})')
-ax1.set_xlabel('x₁')
-ax1.set_ylabel('x₂')
-ax1.set_title('Метод Левенберга (3 итерации)')
-ax1.grid(True, alpha=0.3)
-ax1.axis('equal')
-ax1.set_xlim(-2, 2)
-ax1.set_ylim(-2, 2)
-ax1.legend()
-
-# Второй субплот: график функции релаксации метода Левенберга
-lambda_values = np.linspace(0, 2500, 500)
-
-# Область релаксационности
-ax2.axhspan(0, 1, alpha=0.2, color='green', label='Область релаксационности')
-
-# Функции релаксации для различных значений параметра α
-alpha_values = [100, 500, 1000, 2000]
-colors = ['red', 'blue', 'orange', 'purple']
-
-for i, alpha in enumerate(alpha_values):
-    R_lev = [relaxation_function_Levenberg(l, alpha) for l in lambda_values]
-    ax2.plot(lambda_values, R_lev, color=colors[i], linewidth=2, label=f'МЛ, α={alpha}')
-
-# Вертикальные линии для собственных значений
-for i, eigval in enumerate(eigenvals):
-    ax2.axvline(x=eigval, color='red', linestyle='--', linewidth=2,
-                label=f'λ{i+1} = {eigval:.1f}')
-
-# Горизонтальная линия R=1
-ax2.axhline(y=1, color='black', linestyle='-', linewidth=1, alpha=0.5)
-
-ax2.set_xlabel('λ')
-ax2.set_ylabel('R(λ)')
-ax2.set_title('Функция релаксации метода Левенберга')
-ax2.grid(True, alpha=0.3)
-ax2.set_ylim(-0.1, 1.5)
-ax2.set_xlim(0, 2500)
-ax2.legend()
-
-plt.tight_layout()
-plt.show()
-
-# Анализ сходимости и работоспособности метода
-print("\nАнализ метода Левенберга:")
-print("Функция релаксации: R(λ) = λ/(λ + α)")
-print("Условие релаксационности: |R(λ)| < 1 для всех λ > 0")
-print("Преимущества:")
-print("- Сочетает устойчивость градиентного спуска и скорость метода Ньютона")
-print("- Автоматически адаптируется к овражной структуре функции")
-print("- Устойчив к плохой обусловленности матрицы Гессе")
-print("Недостатки:")
-print("- Требует подбора параметра α")
-print("- Вычислительная сложность сравнима с методом Ньютона")
-print("\nВывод: Метод Левенберга эффективен для задач с плохо обусловленной матрицей Гессе")
+if __name__ == "__main__":
+    h = plot_relaxation_function_k18()
+    m, M = plot_paraboloid_relaxation()
+    analyze_methods()
