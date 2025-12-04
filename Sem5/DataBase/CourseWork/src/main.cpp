@@ -6,6 +6,7 @@
 #include "MainWindow.h"
 #include "DatabaseManager.h"
 #include "ConfigManager.h"
+#include "AuthManager.h"
 
 int main(int argc, char *argv[]) {
     QApplication app(argc, argv);
@@ -16,6 +17,18 @@ int main(int argc, char *argv[]) {
         QMessageBox::critical(nullptr, "Ошибка", "Не удалось загрузить конфигурационный файл");
         return 1;
     }
+    
+    // Загрузка хешей из конфига
+    std::string adminHash = config.getValue("Users", "AdminHash");
+    std::string userHash = config.getValue("Users", "UserHash");
+    
+    if (adminHash.empty() || userHash.empty()) {
+        QMessageBox::critical(nullptr, "Ошибка", "Не удалось загрузить хеши паролей из конфигурации");
+        return 1;
+    }
+    
+    // Установка хешей в AuthManager
+    AuthManager::loadHashesFromConfig(adminHash, userHash);
     
     // Подключение к БД
     std::string host = config.getValue("Database", "Host");
@@ -35,8 +48,11 @@ int main(int argc, char *argv[]) {
         return 0;
     }
     
-    // Запуск главного окна
-    MainWindow mainWindow(loginDialog.isAdmin());
+    // Получаем имя пользователя из LoginDialog
+    QString username = loginDialog.getUsername();
+    
+    // Запуск главного окна с передачей имени пользователя
+    MainWindow mainWindow(username.toStdString(), loginDialog.isAdmin());
     mainWindow.show();
     
     return app.exec();

@@ -287,6 +287,9 @@ CMakeFiles/WholesaleFirm.dir/WholesaleFirm_autogen/mocs_compilation.cpp.o: \
  /usr/include/x86_64-linux-gnu/qt5/QtWidgets/qmainwindow.h \
  /usr/include/x86_64-linux-gnu/qt5/QtWidgets/qtabwidget.h \
  /usr/include/x86_64-linux-gnu/qt5/QtGui/qicon.h \
+ /usr/include/x86_64-linux-gnu/qt5/QtWidgets/QLabel \
+ /usr/include/x86_64-linux-gnu/qt5/QtWidgets/qlabel.h \
+ /usr/include/x86_64-linux-gnu/qt5/QtWidgets/qframe.h \
  /home/pavel/Desktop/PolikekWorks/My-learning-repo/Sem5/DataBase/CourseWork/build/WholesaleFirm_autogen/UVLADIE3JM/moc_SalesDialog.cpp \
  /home/pavel/Desktop/PolikekWorks/My-learning-repo/Sem5/DataBase/CourseWork/build/WholesaleFirm_autogen/UVLADIE3JM/../../../src/SalesDialog.h \
  /home/pavel/Desktop/PolikekWorks/My-learning-repo/Sem5/DataBase/CourseWork/build/WholesaleFirm_autogen/UVLADIE3JM/moc_WarehouseDialog.cpp \

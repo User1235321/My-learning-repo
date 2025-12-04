@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QLabel>
 
 class QTabWidget;
 class QTableView;
@@ -11,7 +12,7 @@ class MainWindow : public QMainWindow {
     Q_OBJECT
 
 public:
-    MainWindow(bool isAdmin = true, QWidget* parent = nullptr);
+    MainWindow(const std::string& username, bool isAdmin = true, QWidget* parent = nullptr);
 
 private slots:
     void showGoods();
@@ -30,6 +31,7 @@ private:
     void loadSales();
     void loadWarehouse();
     
+    std::string username;
     bool adminMode;
     QTabWidget* tabWidget;
     QTableView* goodsTable;
@@ -38,6 +40,7 @@ private:
     QStandardItemModel* goodsModel;
     QStandardItemModel* salesModel;
     QStandardItemModel* warehouseModel;
+    QLabel* userLabel;  // Метка для отображения имени пользователя
 };
 
 #endif

@@ -9,6 +9,14 @@ public:
     static bool verifyPassword(const std::string& password, const std::string& hash);
     static bool authenticateUser(const std::string& username, const std::string& password);
     static bool isAdmin(const std::string& username);
+    
+    // Метод для загрузки хешей из конфигурации
+    static void loadHashesFromConfig(const std::string& adminHash, const std::string& userHash);
+
+private:
+    static std::string adminHash_;
+    static std::string userHash_;
+    static bool hashesLoaded_;
 };
 
 #endif

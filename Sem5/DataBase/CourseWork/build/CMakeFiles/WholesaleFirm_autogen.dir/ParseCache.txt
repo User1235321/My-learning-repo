@@ -985,7 +985,10 @@
  mdp:/usr/include/x86_64-linux-gnu/qt5/QtGui/qtguiglobal.h
  mdp:/usr/include/x86_64-linux-gnu/qt5/QtGui/qtransform.h
  mdp:/usr/include/x86_64-linux-gnu/qt5/QtGui/qwindowdefs.h
+ mdp:/usr/include/x86_64-linux-gnu/qt5/QtWidgets/QLabel
  mdp:/usr/include/x86_64-linux-gnu/qt5/QtWidgets/QMainWindow
+ mdp:/usr/include/x86_64-linux-gnu/qt5/QtWidgets/qframe.h
+ mdp:/usr/include/x86_64-linux-gnu/qt5/QtWidgets/qlabel.h
  mdp:/usr/include/x86_64-linux-gnu/qt5/QtWidgets/qmainwindow.h
  mdp:/usr/include/x86_64-linux-gnu/qt5/QtWidgets/qsizepolicy.h
  mdp:/usr/include/x86_64-linux-gnu/qt5/QtWidgets/qtabwidget.h

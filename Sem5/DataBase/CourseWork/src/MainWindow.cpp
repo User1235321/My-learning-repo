@@ -16,8 +16,11 @@
 #include <QMessageBox>
 #include <QHeaderView>
 #include <QStandardItemModel>
+#include <QHBoxLayout>
 
-MainWindow::MainWindow(bool isAdmin, QWidget* parent) : QMainWindow(parent), adminMode(isAdmin) {
+MainWindow::MainWindow(const std::string& username, bool isAdmin, QWidget* parent) 
+    : QMainWindow(parent), username(username), adminMode(isAdmin) {
+    
     setWindowTitle("Оптовая фирма - Система управления");
     setMinimumSize(1000, 600);
     
@@ -30,7 +33,27 @@ void MainWindow::setupUI() {
     QWidget* centralWidget = new QWidget(this);
     setCentralWidget(centralWidget);
     
-    QVBoxLayout* layout = new QVBoxLayout(centralWidget);
+    QVBoxLayout* mainLayout = new QVBoxLayout(centralWidget);
+    
+    // Создаем панель с информацией о пользователе
+    QHBoxLayout* infoLayout = new QHBoxLayout();
+    
+    // Добавляем метку с именем пользователя
+    userLabel = new QLabel();
+    userLabel->setText(QString("Пользователь: %1").arg(QString::fromStdString(username)));
+    userLabel->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    userLabel->setStyleSheet("QLabel { padding: 5px; font-weight: bold; }");
+    
+    // Добавляем метку с режимом (админ/пользователь)
+    QLabel* modeLabel = new QLabel();
+    modeLabel->setText(adminMode ? "Режим: Администратор" : "Режим: Пользователь");
+    modeLabel->setStyleSheet("QLabel { padding: 5px; font-weight: bold; color: blue; }");
+    
+    infoLayout->addWidget(modeLabel);
+    infoLayout->addStretch();  // Добавляем растягивающее пространство
+    infoLayout->addWidget(userLabel);
+    
+    mainLayout->addLayout(infoLayout);
     
     // Создаем вкладки
     tabWidget = new QTabWidget(this);
@@ -71,10 +94,10 @@ void MainWindow::setupUI() {
     warehouseLayout->addWidget(warehouseTable);
     tabWidget->addTab(warehouseTab, "Склады");
     
-    layout->addWidget(tabWidget);
+    mainLayout->addWidget(tabWidget);
     
     // Статус бар
-    statusBar()->showMessage(adminMode ? "Режим: Администратор" : "Режим: Пользователь");
+    statusBar()->showMessage("Готово");
 }
 
 void MainWindow::setupMenu() {

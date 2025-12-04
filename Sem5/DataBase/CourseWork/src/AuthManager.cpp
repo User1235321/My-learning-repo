@@ -4,8 +4,12 @@
 #include <QString>
 #include <iostream>
 
+// Инициализация статических переменных
+std::string AuthManager::adminHash_;
+std::string AuthManager::userHash_;
+bool AuthManager::hashesLoaded_ = false;
+
 std::string AuthManager::hashPassword(const std::string& password) {
-    // Используем SHA256 для хеширования пароля
     QByteArray hash = QCryptographicHash::hash(
         QByteArray::fromStdString(password), 
         QCryptographicHash::Sha256
@@ -14,26 +18,32 @@ std::string AuthManager::hashPassword(const std::string& password) {
 }
 
 bool AuthManager::verifyPassword(const std::string& password, const std::string& hash) {
-    // Хешируем введенный пароль и сравниваем с хранимым хешем
     std::string hashedPassword = hashPassword(password);
     return hashedPassword == hash;
+}
+
+void AuthManager::loadHashesFromConfig(const std::string& adminHash, const std::string& userHash) {
+    adminHash_ = adminHash;
+    userHash_ = userHash;
+    hashesLoaded_ = true;
+    std::cout << "Hashes loaded from config" << std::endl;
 }
 
 bool AuthManager::authenticateUser(const std::string& username, const std::string& password) {
     std::cout << "Debug: Trying to login with username: '" << username << "'" << std::endl;
     
-    // Для демонстрации - статические хеши
-    // В реальном приложении эти хеши должны браться из базы данных или конфига
-    std::string adminHash = "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918"; // admin
-    std::string userHash = "04f8996da763b7a969b1028ee3007569eaf3a635486ddab211d512c85b9df8fb"; // user123
+    if (!hashesLoaded_) {
+        std::cerr << "Error: Password hashes not loaded from config!" << std::endl;
+        return false;
+    }
     
     if (username == "admin") {
-        if (verifyPassword(password, adminHash)) {
+        if (verifyPassword(password, adminHash_)) {
             std::cout << "Debug: Admin login successful" << std::endl;
             return true;
         }
     } else if (username == "user") {
-        if (verifyPassword(password, userHash)) {
+        if (verifyPassword(password, userHash_)) {
             std::cout << "Debug: User login successful" << std::endl;
             return true;
         }
