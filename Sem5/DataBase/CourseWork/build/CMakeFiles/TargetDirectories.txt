@@ -1,0 +1,8 @@
+/home/pavel/Desktop/PolikekWorks/My-learning-repo/Sem5/DataBase/CourseWork/build/CMakeFiles/WholesaleFirm.dir
+/home/pavel/Desktop/PolikekWorks/My-learning-repo/Sem5/DataBase/CourseWork/build/CMakeFiles/edit_cache.dir
+/home/pavel/Desktop/PolikekWorks/My-learning-repo/Sem5/DataBase/CourseWork/build/CMakeFiles/rebuild_cache.dir
+/home/pavel/Desktop/PolikekWorks/My-learning-repo/Sem5/DataBase/CourseWork/build/CMakeFiles/list_install_components.dir
+/home/pavel/Desktop/PolikekWorks/My-learning-repo/Sem5/DataBase/CourseWork/build/CMakeFiles/install.dir
+/home/pavel/Desktop/PolikekWorks/My-learning-repo/Sem5/DataBase/CourseWork/build/CMakeFiles/install/local.dir
+/home/pavel/Desktop/PolikekWorks/My-learning-repo/Sem5/DataBase/CourseWork/build/CMakeFiles/install/strip.dir
+/home/pavel/Desktop/PolikekWorks/My-learning-repo/Sem5/DataBase/CourseWork/build/CMakeFiles/WholesaleFirm_autogen.dir
