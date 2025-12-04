@@ -1,5 +1,7 @@
 #include <QApplication>
 #include <QMessageBox>
+#include <QCryptographicHash>
+#include <QByteArray>
 #include "LoginDialog.h"
 #include "MainWindow.h"
 #include "DatabaseManager.h"

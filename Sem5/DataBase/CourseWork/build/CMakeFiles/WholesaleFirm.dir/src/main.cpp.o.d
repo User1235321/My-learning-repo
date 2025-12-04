@@ -291,6 +291,10 @@ CMakeFiles/WholesaleFirm.dir/src/main.cpp.o: \
  /usr/include/x86_64-linux-gnu/qt5/QtGui/qfontinfo.h \
  /usr/include/x86_64-linux-gnu/qt5/QtWidgets/qsizepolicy.h \
  /usr/include/x86_64-linux-gnu/qt5/QtGui/qkeysequence.h \
+ /usr/include/x86_64-linux-gnu/qt5/QtCore/QCryptographicHash \
+ /usr/include/x86_64-linux-gnu/qt5/QtCore/qcryptographichash.h \
+ /usr/include/x86_64-linux-gnu/qt5/QtCore/QByteArray \
+ /usr/include/x86_64-linux-gnu/qt5/QtCore/qbytearray.h \
  /home/pavel/Desktop/PolikekWorks/My-learning-repo/Sem5/DataBase/CourseWork/src/LoginDialog.h \
  /usr/include/x86_64-linux-gnu/qt5/QtWidgets/QDialog \
  /usr/include/x86_64-linux-gnu/qt5/QtWidgets/qdialog.h \

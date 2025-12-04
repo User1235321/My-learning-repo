@@ -306,4 +306,14 @@ CMakeFiles/WholesaleFirm.dir/src/LoginDialog.cpp.o: \
  /usr/include/x86_64-linux-gnu/qt5/QtGui/qicon.h \
  /usr/include/x86_64-linux-gnu/qt5/QtWidgets/QMessageBox \
  /usr/include/x86_64-linux-gnu/qt5/QtWidgets/qmessagebox.h \
- /usr/include/x86_64-linux-gnu/qt5/QtWidgets/qdialog.h
+ /usr/include/x86_64-linux-gnu/qt5/QtWidgets/qdialog.h \
+ /usr/include/x86_64-linux-gnu/qt5/QtCore/QCryptographicHash \
+ /usr/include/x86_64-linux-gnu/qt5/QtCore/qcryptographichash.h \
+ /usr/include/x86_64-linux-gnu/qt5/QtCore/QByteArray \
+ /usr/include/x86_64-linux-gnu/qt5/QtCore/qbytearray.h \
+ /usr/include/x86_64-linux-gnu/qt5/QtCore/QDebug \
+ /usr/include/x86_64-linux-gnu/qt5/QtCore/qdebug.h \
+ /usr/include/x86_64-linux-gnu/qt5/QtCore/qtextstream.h \
+ /usr/include/x86_64-linux-gnu/qt5/QtCore/qlocale.h \
+ /usr/include/x86_64-linux-gnu/qt5/QtCore/qset.h \
+ /usr/include/x86_64-linux-gnu/qt5/QtCore/qcontiguouscache.h

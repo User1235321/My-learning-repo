@@ -6,6 +6,9 @@
 #include <QLineEdit>
 #include <QPushButton>
 #include <QMessageBox>
+#include <QCryptographicHash>
+#include <QByteArray>
+#include <QDebug>  // Добавьте эту строку
 
 LoginDialog::LoginDialog(QWidget* parent) : QDialog(parent) {
     setWindowTitle("Авторизация");
@@ -61,12 +64,12 @@ bool LoginDialog::isAdmin() const {
 void LoginDialog::onLoginClicked() {
     QString username = usernameEdit->text();
     QString password = passwordEdit->text();
-    
+
     if (username.isEmpty() || password.isEmpty()) {
         QMessageBox::warning(this, "Ошибка", "Введите логин и пароль");
         return;
     }
-    
+
     if (AuthManager::authenticateUser(username.toStdString(), password.toStdString())) {
         authenticated = true;
         admin = AuthManager::isAdmin(username.toStdString());

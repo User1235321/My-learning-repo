@@ -115,12 +115,47 @@ CMakeFiles/WholesaleFirm.dir/src/AuthManager.cpp.o: \
  /usr/include/asm-generic/errno.h /usr/include/asm-generic/errno-base.h \
  /usr/include/x86_64-linux-gnu/bits/types/error_t.h \
  /usr/include/c++/12/bits/charconv.h \
- /usr/include/c++/12/bits/basic_string.tcc /usr/include/c++/12/iostream \
- /usr/include/c++/12/ostream /usr/include/c++/12/ios \
- /usr/include/c++/12/exception /usr/include/c++/12/bits/exception_ptr.h \
- /usr/include/c++/12/bits/cxxabi_init_exception.h \
- /usr/include/c++/12/typeinfo /usr/include/c++/12/bits/nested_exception.h \
- /usr/include/c++/12/bits/ios_base.h /usr/include/c++/12/ext/atomicity.h \
+ /usr/include/c++/12/bits/basic_string.tcc \
+ /usr/include/x86_64-linux-gnu/qt5/QtCore/QCryptographicHash \
+ /usr/include/x86_64-linux-gnu/qt5/QtCore/qcryptographichash.h \
+ /usr/include/x86_64-linux-gnu/qt5/QtCore/qbytearray.h \
+ /usr/include/x86_64-linux-gnu/qt5/QtCore/qrefcount.h \
+ /usr/include/x86_64-linux-gnu/qt5/QtCore/qatomic.h \
+ /usr/include/x86_64-linux-gnu/qt5/QtCore/qglobal.h \
+ /usr/include/c++/12/cstddef /usr/include/c++/12/utility \
+ /usr/include/c++/12/bits/stl_relops.h /usr/include/assert.h \
+ /usr/include/x86_64-linux-gnu/qt5/QtCore/qconfig.h \
+ /usr/include/x86_64-linux-gnu/qt5/QtCore/qtcore-config.h \
+ /usr/include/x86_64-linux-gnu/qt5/QtCore/qsystemdetection.h \
+ /usr/include/x86_64-linux-gnu/qt5/QtCore/qprocessordetection.h \
+ /usr/include/x86_64-linux-gnu/qt5/QtCore/qcompilerdetection.h \
+ /usr/include/c++/12/algorithm /usr/include/c++/12/bits/stl_algo.h \
+ /usr/include/c++/12/bits/algorithmfwd.h \
+ /usr/include/c++/12/bits/stl_heap.h \
+ /usr/include/c++/12/bits/stl_tempbuf.h \
+ /usr/include/c++/12/bits/uniform_int_dist.h \
+ /usr/include/c++/12/pstl/glue_algorithm_defs.h \
+ /usr/include/c++/12/pstl/execution_defs.h \
+ /usr/include/x86_64-linux-gnu/qt5/QtCore/qtypeinfo.h \
+ /usr/include/x86_64-linux-gnu/qt5/QtCore/qsysinfo.h \
+ /usr/include/x86_64-linux-gnu/qt5/QtCore/qlogging.h \
+ /usr/include/x86_64-linux-gnu/qt5/QtCore/qflags.h \
+ /usr/include/x86_64-linux-gnu/qt5/QtCore/qbasicatomic.h \
+ /usr/include/x86_64-linux-gnu/qt5/QtCore/qatomic_cxx11.h \
+ /usr/include/x86_64-linux-gnu/qt5/QtCore/qgenericatomic.h \
+ /usr/include/c++/12/atomic /usr/include/c++/12/bits/atomic_base.h \
+ /usr/include/c++/12/bits/atomic_lockfree_defines.h \
+ /usr/include/x86_64-linux-gnu/qt5/QtCore/qglobalstatic.h \
+ /usr/include/x86_64-linux-gnu/qt5/QtCore/qnumeric.h \
+ /usr/include/x86_64-linux-gnu/qt5/QtCore/qversiontagging.h \
+ /usr/include/x86_64-linux-gnu/qt5/QtCore/qnamespace.h \
+ /usr/include/x86_64-linux-gnu/qt5/QtCore/qarraydata.h \
+ /usr/include/string.h /usr/include/strings.h \
+ /usr/include/c++/12/stdlib.h /usr/include/c++/12/iterator \
+ /usr/include/c++/12/bits/stream_iterator.h \
+ /usr/include/c++/12/bits/streambuf_iterator.h \
+ /usr/include/c++/12/streambuf /usr/include/c++/12/bits/ios_base.h \
+ /usr/include/c++/12/ext/atomicity.h \
  /usr/include/x86_64-linux-gnu/c++/12/bits/gthr.h \
  /usr/include/x86_64-linux-gnu/c++/12/bits/gthr-default.h \
  /usr/include/pthread.h /usr/include/sched.h \
@@ -140,13 +175,26 @@ CMakeFiles/WholesaleFirm.dir/src/AuthManager.cpp.o: \
  /usr/include/c++/12/bits/locale_classes.tcc \
  /usr/include/c++/12/system_error \
  /usr/include/x86_64-linux-gnu/c++/12/bits/error_constants.h \
- /usr/include/c++/12/stdexcept /usr/include/c++/12/streambuf \
+ /usr/include/c++/12/stdexcept /usr/include/c++/12/exception \
+ /usr/include/c++/12/bits/exception_ptr.h \
+ /usr/include/c++/12/bits/cxxabi_init_exception.h \
+ /usr/include/c++/12/typeinfo /usr/include/c++/12/bits/nested_exception.h \
  /usr/include/c++/12/bits/streambuf.tcc \
- /usr/include/c++/12/bits/basic_ios.h \
+ /usr/include/x86_64-linux-gnu/qt5/QtCore/qobjectdefs.h \
+ /usr/include/x86_64-linux-gnu/qt5/QtCore/qobjectdefs_impl.h \
+ /usr/include/x86_64-linux-gnu/qt5/QtCore/QByteArray \
+ /usr/include/x86_64-linux-gnu/qt5/QtCore/qbytearray.h \
+ /usr/include/x86_64-linux-gnu/qt5/QtCore/QString \
+ /usr/include/x86_64-linux-gnu/qt5/QtCore/qstring.h \
+ /usr/include/x86_64-linux-gnu/qt5/QtCore/qchar.h \
+ /usr/include/x86_64-linux-gnu/qt5/QtCore/qstringliteral.h \
+ /usr/include/x86_64-linux-gnu/qt5/QtCore/qstringalgorithms.h \
+ /usr/include/x86_64-linux-gnu/qt5/QtCore/qstringview.h \
+ /usr/include/c++/12/iostream /usr/include/c++/12/ostream \
+ /usr/include/c++/12/ios /usr/include/c++/12/bits/basic_ios.h \
  /usr/include/c++/12/bits/locale_facets.h /usr/include/c++/12/cwctype \
  /usr/include/wctype.h /usr/include/x86_64-linux-gnu/bits/wctype-wchar.h \
  /usr/include/x86_64-linux-gnu/c++/12/bits/ctype_base.h \
- /usr/include/c++/12/bits/streambuf_iterator.h \
  /usr/include/x86_64-linux-gnu/c++/12/bits/ctype_inline.h \
  /usr/include/c++/12/bits/locale_facets.tcc \
  /usr/include/c++/12/bits/basic_ios.tcc \
