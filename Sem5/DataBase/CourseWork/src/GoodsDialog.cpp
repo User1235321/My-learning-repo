@@ -13,6 +13,7 @@
 #include <QInputDialog>
 #include <QModelIndexList>
 #include <QModelIndex>
+#include <QDebug>
 
 GoodsDialog::GoodsDialog(QWidget* parent) : QDialog(parent) {
     setWindowTitle("Управление товарами");
@@ -85,11 +86,24 @@ void GoodsDialog::loadGoods() {
 }
 
 void GoodsDialog::onAddClicked() {
-    QString name = nameEdit->text();
+    QString name = nameEdit->text().trimmed(); // Добавляем trim для удаления пробелов
     int priority = prioritySpinBox->value();
     
     if (name.isEmpty()) {
         QMessageBox::warning(this, "Ошибка", "Введите наименование товара");
+        return;
+    }
+    
+    // Дополнительная проверка на пустое имя после trim
+    if (name.isEmpty()) {
+        QMessageBox::warning(this, "Ошибка", "Наименование товара не может состоять только из пробелов");
+        return;
+    }
+    
+    // Проверяем, существует ли уже товар с таким именем
+    if (DatabaseManager::getInstance().goodExists(name.toStdString())) {
+        QMessageBox::warning(this, "Ошибка", 
+            QString("Товар с наименованием \"%1\" уже существует!").arg(name));
         return;
     }
     
@@ -99,7 +113,13 @@ void GoodsDialog::onAddClicked() {
         prioritySpinBox->setValue(1);
         loadGoods();
     } else {
-        QMessageBox::critical(this, "Ошибка", "Не удалось добавить товар");
+        // Более информативное сообщение об ошибке
+        if (DatabaseManager::getInstance().goodExists(name.toStdString())) {
+            QMessageBox::warning(this, "Ошибка", 
+                QString("Товар с наименованием \"%1\" уже существует!").arg(name));
+        } else {
+            QMessageBox::critical(this, "Ошибка", "Не удалось добавить товар");
+        }
     }
 }
 
@@ -112,21 +132,56 @@ void GoodsDialog::onEditClicked() {
     
     int row = selected.first().row();
     int id = model->item(row, 0)->text().toInt();
-    QString name = model->item(row, 1)->text();
+    QString currentName = model->item(row, 1)->text();
     int priority = model->item(row, 2)->text().toInt();
     
     bool ok;
-    QString newName = QInputDialog::getText(this, "Редактирование", "Наименование:", QLineEdit::Normal, name, &ok);
-    if (!ok || newName.isEmpty()) return;
+    QString newName = QInputDialog::getText(this, "Редактирование", "Наименование:", 
+                                           QLineEdit::Normal, currentName, &ok);
+    if (!ok) return;
     
-    int newPriority = QInputDialog::getInt(this, "Редактирование", "Приоритет:", priority, 1, 100, 1, &ok);
+    newName = newName.trimmed();
+    if (newName.isEmpty()) {
+        QMessageBox::warning(this, "Ошибка", "Наименование товара не может быть пустым");
+        return;
+    }
+    
+    // Если имя не изменилось, просто обновляем приоритет
+    if (newName.compare(currentName, Qt::CaseInsensitive) == 0) {
+        int newPriority = QInputDialog::getInt(this, "Редактирование", "Приоритет:", 
+                                              priority, 1, 100, 1, &ok);
+        if (!ok) return;
+        
+        if (DatabaseManager::getInstance().updateGood(id, newName.toStdString(), newPriority)) {
+            QMessageBox::information(this, "Успех", "Товар обновлен");
+            loadGoods();
+        } else {
+            QMessageBox::critical(this, "Ошибка", "Не удалось обновить товар");
+        }
+        return;
+    }
+    
+    // Проверяем, существует ли уже товар с новым именем
+    if (DatabaseManager::getInstance().goodExistsWithDifferentId(newName.toStdString(), id)) {
+        QMessageBox::warning(this, "Ошибка", 
+            QString("Товар с наименованием \"%1\" уже существует!").arg(newName));
+        return;
+    }
+    
+    int newPriority = QInputDialog::getInt(this, "Редактирование", "Приоритет:", 
+                                          priority, 1, 100, 1, &ok);
     if (!ok) return;
     
     if (DatabaseManager::getInstance().updateGood(id, newName.toStdString(), newPriority)) {
         QMessageBox::information(this, "Успех", "Товар обновлен");
         loadGoods();
     } else {
-        QMessageBox::critical(this, "Ошибка", "Не удалось обновить товар");
+        if (DatabaseManager::getInstance().goodExistsWithDifferentId(newName.toStdString(), id)) {
+            QMessageBox::warning(this, "Ошибка", 
+                QString("Товар с наименованием \"%1\" уже существует!").arg(newName));
+        } else {
+            QMessageBox::critical(this, "Ошибка", "Не удалось обновить товар");
+        }
     }
 }
 

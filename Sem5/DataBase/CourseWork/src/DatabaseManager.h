@@ -41,6 +41,10 @@ public:
     bool deleteGood(int id);
     std::vector<Good> getAllGoods();
     
+    // Проверка существования товара с таким именем
+    bool goodExists(const std::string& name);
+    bool goodExistsWithDifferentId(const std::string& name, int excludeId);
+    
     // Заявки
     bool addSale(int good_id, int count);
     bool updateSale(int id, int good_id, int count);
@@ -52,6 +56,9 @@ public:
     bool updateWarehouse2(int good_id, int count);
     std::vector<WarehouseStock> getWarehouseData();
     std::pair<int, int> getWarehouseStock(int good_id);
+    
+    // Новый метод: получить общее количество товара на складах
+    int getTotalStockForGood(int good_id);
     
     // Отчеты
     std::vector<std::pair<std::string, int>> getTopGoods(const std::string& start_date, const std::string& end_date);

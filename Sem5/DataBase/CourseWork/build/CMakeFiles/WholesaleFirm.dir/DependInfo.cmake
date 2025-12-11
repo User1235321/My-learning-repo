@@ -16,6 +16,7 @@ set(CMAKE_DEPENDS_DEPENDENCY_FILES
   "/home/pavel/Desktop/PolikekWorks/My-learning-repo/Sem5/DataBase/CourseWork/src/LoginDialog.cpp" "CMakeFiles/WholesaleFirm.dir/src/LoginDialog.cpp.o" "gcc" "CMakeFiles/WholesaleFirm.dir/src/LoginDialog.cpp.o.d"
   "/home/pavel/Desktop/PolikekWorks/My-learning-repo/Sem5/DataBase/CourseWork/src/MainWindow.cpp" "CMakeFiles/WholesaleFirm.dir/src/MainWindow.cpp.o" "gcc" "CMakeFiles/WholesaleFirm.dir/src/MainWindow.cpp.o.d"
   "/home/pavel/Desktop/PolikekWorks/My-learning-repo/Sem5/DataBase/CourseWork/src/ReportGenerator.cpp" "CMakeFiles/WholesaleFirm.dir/src/ReportGenerator.cpp.o" "gcc" "CMakeFiles/WholesaleFirm.dir/src/ReportGenerator.cpp.o.d"
+  "/home/pavel/Desktop/PolikekWorks/My-learning-repo/Sem5/DataBase/CourseWork/src/ReportViewerDialog.cpp" "CMakeFiles/WholesaleFirm.dir/src/ReportViewerDialog.cpp.o" "gcc" "CMakeFiles/WholesaleFirm.dir/src/ReportViewerDialog.cpp.o.d"
   "/home/pavel/Desktop/PolikekWorks/My-learning-repo/Sem5/DataBase/CourseWork/src/SalesDialog.cpp" "CMakeFiles/WholesaleFirm.dir/src/SalesDialog.cpp.o" "gcc" "CMakeFiles/WholesaleFirm.dir/src/SalesDialog.cpp.o.d"
   "/home/pavel/Desktop/PolikekWorks/My-learning-repo/Sem5/DataBase/CourseWork/src/WarehouseDialog.cpp" "CMakeFiles/WholesaleFirm.dir/src/WarehouseDialog.cpp.o" "gcc" "CMakeFiles/WholesaleFirm.dir/src/WarehouseDialog.cpp.o.d"
   "/home/pavel/Desktop/PolikekWorks/My-learning-repo/Sem5/DataBase/CourseWork/src/main.cpp" "CMakeFiles/WholesaleFirm.dir/src/main.cpp.o" "gcc" "CMakeFiles/WholesaleFirm.dir/src/main.cpp.o.d"

@@ -198,10 +198,9 @@
 		"/usr/share/cmake-3.25/Modules/CMakeParseArguments.cmake",
 		"/usr/lib/x86_64-linux-gnu/cmake/Qt5Sql/Qt5SqlConfigVersion.cmake",
 		"/usr/lib/x86_64-linux-gnu/cmake/Qt5Sql/Qt5SqlConfig.cmake",
-		"/usr/share/cmake-3.25/Modules/FindPostgreSQL.cmake",
-		"/usr/share/cmake-3.25/Modules/SelectLibraryConfigurations.cmake",
-		"/usr/share/cmake-3.25/Modules/FindPackageHandleStandardArgs.cmake",
-		"/usr/share/cmake-3.25/Modules/FindPackageMessage.cmake",
+		"/usr/lib/x86_64-linux-gnu/cmake/Qt5PrintSupport/Qt5PrintSupportConfigVersion.cmake",
+		"/usr/lib/x86_64-linux-gnu/cmake/Qt5PrintSupport/Qt5PrintSupportConfig.cmake",
+		"/usr/lib/x86_64-linux-gnu/cmake/Qt5PrintSupport/Qt5PrintSupport_QCupsPrinterSupportPlugin.cmake",
 		"/home/pavel/Desktop/PolikekWorks/My-learning-repo/Sem5/DataBase/CourseWork/config.ini"
 	],
 	"CMAKE_SOURCE_DIR" : "/home/pavel/Desktop/PolikekWorks/My-learning-repo/Sem5/DataBase/CourseWork",
@@ -252,6 +251,12 @@
 			null
 		],
 		[
+			"/home/pavel/Desktop/PolikekWorks/My-learning-repo/Sem5/DataBase/CourseWork/src/ReportViewerDialog.h",
+			"MU",
+			"UVLADIE3JM/moc_ReportViewerDialog.cpp",
+			null
+		],
+		[
 			"/home/pavel/Desktop/PolikekWorks/My-learning-repo/Sem5/DataBase/CourseWork/src/SalesDialog.h",
 			"MU",
 			"UVLADIE3JM/moc_SalesDialog.cpp",
@@ -272,6 +277,7 @@
 		"QT_CORE_LIB",
 		"QT_GUI_LIB",
 		"QT_NO_DEBUG",
+		"QT_PRINTSUPPORT_LIB",
 		"QT_SQL_LIB",
 		"QT_WIDGETS_LIB"
 	],
@@ -291,6 +297,7 @@
 		"/usr/include/x86_64-linux-gnu/qt5/QtWidgets",
 		"/usr/include/x86_64-linux-gnu/qt5/QtGui",
 		"/usr/include/x86_64-linux-gnu/qt5/QtSql",
+		"/usr/include/x86_64-linux-gnu/qt5/QtPrintSupport",
 		"/usr/include/c++/12",
 		"/usr/include/x86_64-linux-gnu/c++/12",
 		"/usr/include/c++/12/backward",
@@ -355,6 +362,11 @@
 		],
 		[
 			"/home/pavel/Desktop/PolikekWorks/My-learning-repo/Sem5/DataBase/CourseWork/src/ReportGenerator.cpp",
+			"MU",
+			null
+		],
+		[
+			"/home/pavel/Desktop/PolikekWorks/My-learning-repo/Sem5/DataBase/CourseWork/src/ReportViewerDialog.cpp",
 			"MU",
 			null
 		],

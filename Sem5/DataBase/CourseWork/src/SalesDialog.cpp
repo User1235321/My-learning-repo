@@ -13,6 +13,7 @@
 #include <QInputDialog>
 #include <QDialog>
 #include <QModelIndexList>
+#include <QDebug>
 
 SalesDialog::SalesDialog(QWidget* parent) : QDialog(parent) {
     setWindowTitle("Управление заявками");
@@ -111,12 +112,46 @@ void SalesDialog::onAddClicked() {
         return;
     }
     
+    // Получаем доступное количество товара
+    int availableStock = DatabaseManager::getInstance().getTotalStockForGood(goodId);
+    
+    if (count > availableStock) {
+        QString goodName = goodsComboBox->currentText();
+        QMessageBox::warning(this, "Ошибка", 
+            QString("Недостаточно товара на складе!\n\n"
+                    "Товар: %1\n"
+                    "Запрошено: %2 шт.\n"
+                    "Доступно на складах: %3 шт.\n"
+                    "Не хватает: %4 шт.")
+                .arg(goodName)
+                .arg(count)
+                .arg(availableStock)
+                .arg(count - availableStock));
+        return;
+    }
+    
     if (DatabaseManager::getInstance().addSale(goodId, count)) {
         QMessageBox::information(this, "Успех", "Заявка добавлена");
         countSpinBox->setValue(1);
         loadSales();
     } else {
-        QMessageBox::critical(this, "Ошибка", "Не удалось добавить заявку");
+        // Проверяем причину ошибки
+        if (count > DatabaseManager::getInstance().getTotalStockForGood(goodId)) {
+            int availableStock = DatabaseManager::getInstance().getTotalStockForGood(goodId);
+            QString goodName = goodsComboBox->currentText();
+            QMessageBox::warning(this, "Ошибка", 
+                QString("Недостаточно товара на складе!\n\n"
+                        "Товар: %1\n"
+                        "Запрошено: %2 шт.\n"
+                        "Доступно на складах: %3 шт.\n"
+                        "Не хватает: %4 шт.")
+                    .arg(goodName)
+                    .arg(count)
+                    .arg(availableStock)
+                    .arg(count - availableStock));
+        } else {
+            QMessageBox::critical(this, "Ошибка", "Не удалось добавить заявку");
+        }
     }
 }
 
@@ -168,6 +203,42 @@ void SalesDialog::onEditClicked() {
     if (editDialog.exec() == QDialog::Accepted) {
         int newGoodId = goodCombo.currentData().toInt();
         int newCount = countSpin.value();
+        
+        // Получаем доступное количество товара для нового количества
+        int availableStock = DatabaseManager::getInstance().getTotalStockForGood(newGoodId);
+        
+        // Для обновления нужно учитывать, сколько уже было в заявке
+        int difference = newCount;
+        if (newGoodId == currentGoodId) {
+            // Если товар тот же, то разница - это новое количество минус старое
+            difference = newCount - currentCount;
+            if (difference > availableStock) {
+                QString goodName = goodCombo.currentText();
+                QMessageBox::warning(&editDialog, "Ошибка", 
+                    QString("Недостаточно товара на складе для увеличения заявки!\n\n"
+                            "Товар: %1\n"
+                            "Требуется дополнительно: %2 шт.\n"
+                            "Доступно на складах: %3 шт.")
+                        .arg(goodName)
+                        .arg(difference)
+                        .arg(availableStock));
+                return;
+            }
+        } else {
+            // Если товар другой, то нужно проверить полное новое количество
+            if (newCount > availableStock) {
+                QString goodName = goodCombo.currentText();
+                QMessageBox::warning(&editDialog, "Ошибка", 
+                    QString("Недостаточно товара на складе!\n\n"
+                            "Товар: %1\n"
+                            "Запрошено: %2 шт.\n"
+                            "Доступно на складах: %3 шт.")
+                        .arg(goodName)
+                        .arg(newCount)
+                        .arg(availableStock));
+                return;
+            }
+        }
         
         if (DatabaseManager::getInstance().updateSale(id, newGoodId, newCount)) {
             QMessageBox::information(this, "Успех", "Заявка обновлена");

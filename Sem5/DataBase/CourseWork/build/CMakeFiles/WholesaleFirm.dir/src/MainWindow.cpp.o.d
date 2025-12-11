@@ -292,6 +292,7 @@ CMakeFiles/WholesaleFirm.dir/src/MainWindow.cpp.o: \
  /home/pavel/Desktop/PolikekWorks/My-learning-repo/Sem5/DataBase/CourseWork/src/SalesDialog.h \
  /home/pavel/Desktop/PolikekWorks/My-learning-repo/Sem5/DataBase/CourseWork/src/WarehouseDialog.h \
  /home/pavel/Desktop/PolikekWorks/My-learning-repo/Sem5/DataBase/CourseWork/src/ReportGenerator.h \
+ /home/pavel/Desktop/PolikekWorks/My-learning-repo/Sem5/DataBase/CourseWork/src/ReportViewerDialog.h \
  /usr/include/x86_64-linux-gnu/qt5/QtWidgets/QMenuBar \
  /usr/include/x86_64-linux-gnu/qt5/QtWidgets/qmenubar.h \
  /usr/include/x86_64-linux-gnu/qt5/QtWidgets/qmenu.h \

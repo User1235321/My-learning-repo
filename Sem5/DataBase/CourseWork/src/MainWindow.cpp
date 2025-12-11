@@ -4,6 +4,7 @@
 #include "SalesDialog.h"
 #include "WarehouseDialog.h"
 #include "ReportGenerator.h"
+#include "ReportViewerDialog.h"
 #include <QMenuBar>
 #include <QMenu>
 #include <QAction>
@@ -38,24 +39,21 @@ void MainWindow::setupUI() {
     // Создаем панель с информацией о пользователе
     QHBoxLayout* infoLayout = new QHBoxLayout();
     
-    // Добавляем метку с именем пользователя
     userLabel = new QLabel();
     userLabel->setText(QString("Пользователь: %1").arg(QString::fromStdString(username)));
     userLabel->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
     userLabel->setStyleSheet("QLabel { padding: 5px; font-weight: bold; }");
     
-    // Добавляем метку с режимом (админ/пользователь)
     QLabel* modeLabel = new QLabel();
     modeLabel->setText(adminMode ? "Режим: Администратор" : "Режим: Пользователь");
     modeLabel->setStyleSheet("QLabel { padding: 5px; font-weight: bold; color: blue; }");
     
     infoLayout->addWidget(modeLabel);
-    infoLayout->addStretch();  // Добавляем растягивающее пространство
+    infoLayout->addStretch();
     infoLayout->addWidget(userLabel);
     
     mainLayout->addLayout(infoLayout);
     
-    // Создаем вкладки
     tabWidget = new QTabWidget(this);
     
     // Вкладка товаров
@@ -96,7 +94,6 @@ void MainWindow::setupUI() {
     
     mainLayout->addWidget(tabWidget);
     
-    // Статус бар
     statusBar()->showMessage("Готово");
 }
 
@@ -104,7 +101,6 @@ void MainWindow::setupMenu() {
     QMenuBar* menuBar = new QMenuBar(this);
     setMenuBar(menuBar);
     
-    // Меню Справочники
     QMenu* referencesMenu = menuBar->addMenu("Справочники");
     QAction* goodsAction = new QAction("Товары", this);
     QAction* warehouseAction = new QAction("Склады", this);
@@ -114,14 +110,12 @@ void MainWindow::setupMenu() {
     connect(goodsAction, &QAction::triggered, this, &MainWindow::showGoods);
     connect(warehouseAction, &QAction::triggered, this, &MainWindow::showWarehouse);
     
-    // Меню Журналы
     QMenu* journalsMenu = menuBar->addMenu("Журналы");
     QAction* salesAction = new QAction("Заявки", this);
     journalsMenu->addAction(salesAction);
     
     connect(salesAction, &QAction::triggered, this, &MainWindow::showSales);
     
-    // Меню Отчеты
     QMenu* reportsMenu = menuBar->addMenu("Отчеты");
     QAction* topGoodsReportAction = new QAction("Топ товаров", this);
     QAction* demandReportAction = new QAction("Анализ спроса", this);
@@ -138,7 +132,6 @@ void MainWindow::setupMenu() {
     connect(salesReportAction, &QAction::triggered, this, &MainWindow::generateSalesReport);
     connect(warehouseReportAction, &QAction::triggered, this, &MainWindow::generateWarehouseReport);
     
-    // Блокировка функций для обычного пользователя
     if (!adminMode) {
         goodsAction->setEnabled(false);
         warehouseAction->setEnabled(false);
@@ -194,6 +187,11 @@ void MainWindow::loadWarehouse() {
     }
 }
 
+void MainWindow::showReport(const QString& title, const QString& content) {
+    ReportViewerDialog dialog(title, content, this);
+    dialog.exec();
+}
+
 void MainWindow::showGoods() {
     GoodsDialog dialog(this);
     dialog.exec();
@@ -213,21 +211,28 @@ void MainWindow::showWarehouse() {
 }
 
 void MainWindow::generateTopGoodsReport() {
+    // Генерируем и сохраняем отчет в файл
     ReportGenerator::generateTopGoodsReport();
-    QMessageBox::information(this, "Отчет", "Отчет по популярным товарам сгенерирован в файле 'top_goods_report.txt'");
+    
+    // Получаем отчет в виде строки для отображения
+    std::string reportStr = ReportGenerator::getTopGoodsReport();
+    showReport("Отчет: 5 самых популярных товаров", QString::fromStdString(reportStr));
 }
 
 void MainWindow::generateDemandReport() {
     ReportGenerator::generateDemandReport();
-    QMessageBox::information(this, "Отчет", "Отчет по спросу сгенерирован в файле 'demand_report.txt'");
+    std::string reportStr = ReportGenerator::getDemandReport();
+    showReport("Отчет: Анализ спроса", QString::fromStdString(reportStr));
 }
 
 void MainWindow::generateSalesReport() {
     ReportGenerator::generateSalesReport();
-    QMessageBox::information(this, "Отчет", "Отчет по продажам сгенерирован в файле 'sales_report.txt'");
+    std::string reportStr = ReportGenerator::getSalesReport();
+    showReport("Отчет по продажам", QString::fromStdString(reportStr));
 }
 
 void MainWindow::generateWarehouseReport() {
     ReportGenerator::generateWarehouseReport();
-    QMessageBox::information(this, "Отчет", "Отчет по складам сгенерирован в файле 'warehouse_report.txt'");
+    std::string reportStr = ReportGenerator::getWarehouseReport();
+    showReport("Отчет по складам", QString::fromStdString(reportStr));
 }

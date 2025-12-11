@@ -18,6 +18,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/WholesaleFirm.dir/src/MainWindow.cpp.o.d"
   "CMakeFiles/WholesaleFirm.dir/src/ReportGenerator.cpp.o"
   "CMakeFiles/WholesaleFirm.dir/src/ReportGenerator.cpp.o.d"
+  "CMakeFiles/WholesaleFirm.dir/src/ReportViewerDialog.cpp.o"
+  "CMakeFiles/WholesaleFirm.dir/src/ReportViewerDialog.cpp.o.d"
   "CMakeFiles/WholesaleFirm.dir/src/SalesDialog.cpp.o"
   "CMakeFiles/WholesaleFirm.dir/src/SalesDialog.cpp.o.d"
   "CMakeFiles/WholesaleFirm.dir/src/WarehouseDialog.cpp.o"

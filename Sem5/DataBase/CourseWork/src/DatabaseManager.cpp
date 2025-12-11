@@ -41,7 +41,39 @@ bool DatabaseManager::executeQuery(const std::string& query) {
     return q.exec(QString::fromStdString(query));
 }
 
+bool DatabaseManager::goodExists(const std::string& name) {
+    if (!connected_) return false;
+    
+    QSqlQuery q;
+    q.prepare("SELECT COUNT(*) FROM goods WHERE LOWER(name) = LOWER(?)");
+    q.addBindValue(QString::fromStdString(name));
+    
+    if (q.exec() && q.next()) {
+        return q.value(0).toInt() > 0;
+    }
+    return false;
+}
+
+bool DatabaseManager::goodExistsWithDifferentId(const std::string& name, int excludeId) {
+    if (!connected_) return false;
+    
+    QSqlQuery q;
+    q.prepare("SELECT COUNT(*) FROM goods WHERE LOWER(name) = LOWER(?) AND id != ?");
+    q.addBindValue(QString::fromStdString(name));
+    q.addBindValue(excludeId);
+    
+    if (q.exec() && q.next()) {
+        return q.value(0).toInt() > 0;
+    }
+    return false;
+}
+
 bool DatabaseManager::addGood(const std::string& name, int priority) {
+    if (goodExists(name)) {
+        std::cerr << "Товар с именем '" << name << "' уже существует!" << std::endl;
+        return false;
+    }
+    
     QSqlQuery q;
     q.prepare("INSERT INTO goods (name, priority) VALUES (?, ?)");
     q.addBindValue(QString::fromStdString(name));
@@ -50,6 +82,11 @@ bool DatabaseManager::addGood(const std::string& name, int priority) {
 }
 
 bool DatabaseManager::updateGood(int id, const std::string& name, int priority) {
+    if (goodExistsWithDifferentId(name, id)) {
+        std::cerr << "Товар с именем '" << name << "' уже существует!" << std::endl;
+        return false;
+    }
+    
     QSqlQuery q;
     q.prepare("UPDATE goods SET name = ?, priority = ? WHERE id = ?");
     q.addBindValue(QString::fromStdString(name));
@@ -81,6 +118,15 @@ std::vector<Good> DatabaseManager::getAllGoods() {
 }
 
 bool DatabaseManager::addSale(int good_id, int count) {
+    // Получаем текущее количество товара на складах
+    int availableStock = getTotalStockForGood(good_id);
+    
+    if (count > availableStock) {
+        std::cerr << "Недостаточно товара на складах. Запрошено: " << count 
+                  << ", доступно: " << availableStock << std::endl;
+        return false;
+    }
+    
     QSqlQuery q;
     q.prepare("INSERT INTO sales (good_id, good_count, create_date) VALUES (?, ?, CURRENT_DATE)");
     q.addBindValue(good_id);
@@ -89,6 +135,27 @@ bool DatabaseManager::addSale(int good_id, int count) {
 }
 
 bool DatabaseManager::updateSale(int id, int good_id, int count) {
+    // Для обновления тоже нужно проверить доступность товара
+    int availableStock = getTotalStockForGood(good_id);
+    
+    // Получаем текущее количество в этой заявке
+    QSqlQuery getCurrentSale;
+    getCurrentSale.prepare("SELECT good_count FROM sales WHERE id = ?");
+    getCurrentSale.addBindValue(id);
+    
+    int currentCount = 0;
+    if (getCurrentSale.exec() && getCurrentSale.next()) {
+        currentCount = getCurrentSale.value(0).toInt();
+    }
+    
+    // Вычисляем изменение количества
+    int difference = count - currentCount;
+    
+    if (difference > availableStock) {
+        std::cerr << "Недостаточно товара на складах для увеличения заявки." << std::endl;
+        return false;
+    }
+    
     QSqlQuery q;
     q.prepare("UPDATE sales SET good_id = ?, good_count = ? WHERE id = ?");
     q.addBindValue(good_id);
@@ -187,6 +254,24 @@ std::pair<int, int> DatabaseManager::getWarehouseStock(int good_id) {
     }
     
     return {count1, count2};
+}
+
+int DatabaseManager::getTotalStockForGood(int good_id) {
+    if (!connected_) return 0;
+    
+    QSqlQuery q;
+    q.prepare("SELECT "
+              "COALESCE(w1.good_count, 0) + COALESCE(w2.good_count, 0) as total_count "
+              "FROM goods g "
+              "LEFT JOIN warehouse1 w1 ON g.id = w1.good_id "
+              "LEFT JOIN warehouse2 w2 ON g.id = w2.good_id "
+              "WHERE g.id = ?");
+    q.addBindValue(good_id);
+    
+    if (q.exec() && q.next()) {
+        return q.value(0).toInt();
+    }
+    return 0;
 }
 
 std::vector<std::pair<std::string, int>> DatabaseManager::getTopGoods(const std::string& start_date, const std::string& end_date) {

@@ -30,6 +30,7 @@ private:
     void loadGoods();
     void loadSales();
     void loadWarehouse();
+    void showReport(const QString& title, const QString& content);
     
     std::string username;
     bool adminMode;
@@ -40,7 +41,7 @@ private:
     QStandardItemModel* goodsModel;
     QStandardItemModel* salesModel;
     QStandardItemModel* warehouseModel;
-    QLabel* userLabel;  // Метка для отображения имени пользователя
+    QLabel* userLabel;
 };
 
 #endif

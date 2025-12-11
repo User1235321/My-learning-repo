@@ -2,5 +2,6 @@
 #include "UVLADIE3JM/moc_GoodsDialog.cpp"
 #include "UVLADIE3JM/moc_LoginDialog.cpp"
 #include "UVLADIE3JM/moc_MainWindow.cpp"
+#include "UVLADIE3JM/moc_ReportViewerDialog.cpp"
 #include "UVLADIE3JM/moc_SalesDialog.cpp"
 #include "UVLADIE3JM/moc_WarehouseDialog.cpp"

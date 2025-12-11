@@ -4,8 +4,25 @@
 #include <iostream>
 #include <iomanip>
 #include <ctime>
+#include <sstream>
 
-void ReportGenerator::generateTopGoodsReport() {
+void ReportGenerator::saveToFile(const std::string& filename, const std::string& content) {
+    try {
+        std::ofstream file(filename);
+        if (file.is_open()) {
+            file << content;
+            file.close();
+            std::cout << "Report saved to: " << filename << std::endl;
+        } else {
+            std::cerr << "Cannot open file for writing: " << filename << std::endl;
+        }
+    } catch (const std::exception& e) {
+        std::cerr << "Error saving file: " << e.what() << std::endl;
+    }
+}
+
+std::string ReportGenerator::generateTopGoodsReportContent() {
+    std::stringstream ss;
     try {
         // Получаем текущую дату для отчета
         time_t now = time(0);
@@ -22,44 +39,38 @@ void ReportGenerator::generateTopGoodsReport() {
         
         auto result = DatabaseManager::getInstance().getTopGoods(start_date, end_date);
         
-        std::ofstream file("top_goods_report.txt");
-        if (!file.is_open()) {
-            std::cerr << "Cannot open file for writing" << std::endl;
-            return;
-        }
-        
-        file << "========================================\n";
-        file << "     ОТЧЕТ: 5 САМЫХ ПОПУЛЯРНЫХ ТОВАРОВ\n";
-        file << "========================================\n";
-        file << "Период: " << start_date << " - " << end_date << "\n";
-        file << "Дата формирования: " << end_date << "\n\n";
+        ss << "========================================\n";
+        ss << "     ОТЧЕТ: 5 САМЫХ ПОПУЛЯРНЫХ ТОВАРОВ\n";
+        ss << "========================================\n";
+        ss << "Период: " << start_date << " - " << end_date << "\n";
+        ss << "Дата формирования: " << end_date << "\n\n";
         
         if (result.empty()) {
-            file << "Нет данных о продажах за указанный период.\n";
+            ss << "Нет данных о продажах за указанный период.\n";
         } else {
-            file << std::left << std::setw(5) << "№" 
-                 << std::setw(30) << "Наименование товара" 
-                 << std::setw(15) << "Количество" << "\n";
-            file << "------------------------------------------------\n";
+            ss << std::left << std::setw(5) << "№" 
+               << std::setw(30) << "Наименование товара" 
+               << std::setw(15) << "Количество" << "\n";
+            ss << "------------------------------------------------\n";
             
             int rank = 1;
             for (const auto& item : result) {
-                file << std::left << std::setw(5) << rank 
-                     << std::setw(30) << item.first 
-                     << std::setw(15) << item.second << "\n";
+                ss << std::left << std::setw(5) << rank 
+                   << std::setw(30) << item.first 
+                   << std::setw(15) << item.second << "\n";
                 rank++;
             }
         }
         
-        file << "\n========================================\n";
-        file.close();
-        std::cout << "Top goods report generated: top_goods_report.txt" << std::endl;
+        ss << "\n========================================\n";
     } catch (const std::exception& e) {
-        std::cerr << "Error generating top goods report: " << e.what() << std::endl;
+        ss << "Ошибка при формировании отчёта: " << e.what() << std::endl;
     }
+    return ss.str();
 }
 
-void ReportGenerator::generateDemandReport() {
+std::string ReportGenerator::generateDemandReportContent() {
+    std::stringstream ss;
     try {
         // Получаем текущую дату для отчета
         time_t now = time(0);
@@ -77,8 +88,8 @@ void ReportGenerator::generateDemandReport() {
         // Получаем список товаров для выбора
         auto goods = DatabaseManager::getInstance().getAllGoods();
         if (goods.empty()) {
-            std::cerr << "No goods found for demand report" << std::endl;
-            return;
+            ss << "Нет товаров для анализа спроса.\n";
+            return ss.str();
         }
         
         // Для примера берем первый товар
@@ -87,52 +98,46 @@ void ReportGenerator::generateDemandReport() {
         
         auto result = DatabaseManager::getInstance().getDemandData(goodId, start_date, end_date);
         
-        std::ofstream file("demand_report.txt");
-        if (!file.is_open()) {
-            std::cerr << "Cannot open file for writing" << std::endl;
-            return;
-        }
-        
-        file << "========================================\n";
-        file << "          ОТЧЕТ: АНАЛИЗ СПРОСА\n";
-        file << "========================================\n";
-        file << "Товар: " << goodName << " (ID: " << goodId << ")\n";
-        file << "Период: " << start_date << " - " << end_date << "\n";
-        file << "Дата формирования: " << end_date << "\n\n";
+        ss << "========================================\n";
+        ss << "          ОТЧЕТ: АНАЛИЗ СПРОСА\n";
+        ss << "========================================\n";
+        ss << "Товар: " << goodName << " (ID: " << goodId << ")\n";
+        ss << "Период: " << start_date << " - " << end_date << "\n";
+        ss << "Дата формирования: " << end_date << "\n\n";
         
         if (result.empty()) {
-            file << "Нет данных о продажах данного товара за указанный период.\n";
+            ss << "Нет данных о продажах данного товара за указанный период.\n";
         } else {
-            file << std::left << std::setw(15) << "Дата" 
-                 << std::setw(15) << "Количество" << "\n";
-            file << "-------------------------------\n";
+            ss << std::left << std::setw(15) << "Дата" 
+               << std::setw(15) << "Количество" << "\n";
+            ss << "-------------------------------\n";
             
             int total = 0;
             for (const auto& item : result) {
-                file << std::left << std::setw(15) << item.first 
-                     << std::setw(15) << item.second << "\n";
+                ss << std::left << std::setw(15) << item.first 
+                   << std::setw(15) << item.second << "\n";
                 total += item.second;
             }
             
-            file << "-------------------------------\n";
-            file << "Итого за период: " << total << " ед.\n";
+            ss << "-------------------------------\n";
+            ss << "Итого за период: " << total << " ед.\n";
             
             // Простая статистика
             if (!result.empty()) {
                 double average = static_cast<double>(total) / result.size();
-                file << "Среднее в день: " << std::fixed << std::setprecision(2) << average << " ед.\n";
+                ss << "Среднее в день: " << std::fixed << std::setprecision(2) << average << " ед.\n";
             }
         }
         
-        file << "\n========================================\n";
-        file.close();
-        std::cout << "Demand report generated: demand_report.txt" << std::endl;
+        ss << "\n========================================\n";
     } catch (const std::exception& e) {
-        std::cerr << "Error generating demand report: " << e.what() << std::endl;
+        ss << "Ошибка при формировании отчёта: " << e.what() << std::endl;
     }
+    return ss.str();
 }
 
-void ReportGenerator::generateSalesReport() {
+std::string ReportGenerator::generateSalesReportContent() {
+    std::stringstream ss;
     try {
         // Получаем текущую дату для отчета
         time_t now = time(0);
@@ -149,61 +154,49 @@ void ReportGenerator::generateSalesReport() {
         
         auto sales = DatabaseManager::getInstance().getAllSales();
         
-        std::ofstream file("sales_report.txt");
-        if (!file.is_open()) {
-            std::cerr << "Cannot open file for writing" << std::endl;
-            return;
-        }
-        
-        file << "========================================\n";
-        file << "          ОТЧЕТ ПО ПРОДАЖАМ\n";
-        file << "========================================\n";
-        file << "Период: " << start_date << " - " << end_date << "\n";
-        file << "Дата формирования: " << end_date << "\n\n";
+        ss << "========================================\n";
+        ss << "          ОТЧЕТ ПО ПРОДАЖАМ\n";
+        ss << "========================================\n";
+        ss << "Период: " << start_date << " - " << end_date << "\n";
+        ss << "Дата формирования: " << end_date << "\n\n";
         
         if (sales.empty()) {
-            file << "Нет данных о продажах за указанный период.\n";
+            ss << "Нет данных о продажах за указанный период.\n";
         } else {
-            file << std::left << std::setw(8) << "ID" 
-                 << std::setw(25) << "Товар" 
-                 << std::setw(12) << "Количество" 
-                 << std::setw(12) << "Дата" << "\n";
-            file << "----------------------------------------------------\n";
+            ss << std::left << std::setw(8) << "ID" 
+               << std::setw(25) << "Товар" 
+               << std::setw(12) << "Количество" 
+               << std::setw(12) << "Дата" << "\n";
+            ss << "----------------------------------------------------\n";
             
             int totalQuantity = 0;
             for (const auto& sale : sales) {
                 // Фильтруем по дате
                 if (sale.create_date >= start_date && sale.create_date <= end_date) {
-                    file << std::left << std::setw(8) << sale.id 
-                         << std::setw(25) << sale.good_name 
-                         << std::setw(12) << sale.good_count 
-                         << std::setw(12) << sale.create_date << "\n";
+                    ss << std::left << std::setw(8) << sale.id 
+                       << std::setw(25) << sale.good_name 
+                       << std::setw(12) << sale.good_count 
+                       << std::setw(12) << sale.create_date << "\n";
                     totalQuantity += sale.good_count;
                 }
             }
             
-            file << "----------------------------------------------------\n";
-            file << "Всего продаж: " << totalQuantity << " ед.\n";
-            file << "Количество транзакций: " << sales.size() << "\n";
+            ss << "----------------------------------------------------\n";
+            ss << "Всего продаж: " << totalQuantity << " ед.\n";
+            ss << "Количество транзакций: " << sales.size() << "\n";
         }
         
-        file << "\n========================================\n";
-        file.close();
-        std::cout << "Sales report generated: sales_report.txt" << std::endl;
+        ss << "\n========================================\n";
     } catch (const std::exception& e) {
-        std::cerr << "Error generating sales report: " << e.what() << std::endl;
+        ss << "Ошибка при формировании отчёта: " << e.what() << std::endl;
     }
+    return ss.str();
 }
 
-void ReportGenerator::generateWarehouseReport() {
+std::string ReportGenerator::generateWarehouseReportContent() {
+    std::stringstream ss;
     try {
         auto stocks = DatabaseManager::getInstance().getWarehouseData();
-        
-        std::ofstream file("warehouse_report.txt");
-        if (!file.is_open()) {
-            std::cerr << "Cannot open file for writing" << std::endl;
-            return;
-        }
         
         // Получаем текущую дату
         time_t now = time(0);
@@ -211,46 +204,83 @@ void ReportGenerator::generateWarehouseReport() {
         char current_date[11];
         strftime(current_date, sizeof(current_date), "%Y-%m-%d", localtm);
         
-        file << "========================================\n";
-        file << "          ОТЧЕТ ПО СКЛАДАМ\n";
-        file << "========================================\n";
-        file << "Дата формирования: " << current_date << "\n\n";
+        ss << "========================================\n";
+        ss << "          ОТЧЕТ ПО СКЛАДАМ\n";
+        ss << "========================================\n";
+        ss << "Дата формирования: " << current_date << "\n\n";
         
         if (stocks.empty()) {
-            file << "Нет данных о складах.\n";
+            ss << "Нет данных о складах.\n";
         } else {
-            file << std::left << std::setw(25) << "Товар" 
-                 << std::setw(12) << "Склад 1" 
-                 << std::setw(12) << "Склад 2" 
-                 << std::setw(18) << "Общее количество" << "\n";
-            file << "------------------------------------------------------------\n";
+            ss << std::left << std::setw(25) << "Товар" 
+               << std::setw(12) << "Склад 1" 
+               << std::setw(12) << "Склад 2" 
+               << std::setw(18) << "Общее количество" << "\n";
+            ss << "------------------------------------------------------------\n";
             
             int totalWarehouse1 = 0;
             int totalWarehouse2 = 0;
             int grandTotal = 0;
             
             for (const auto& stock : stocks) {
-                file << std::left << std::setw(25) << stock.good_name 
-                     << std::setw(12) << stock.warehouse1_count 
-                     << std::setw(12) << stock.warehouse2_count 
-                     << std::setw(18) << stock.total_count << "\n";
+                ss << std::left << std::setw(25) << stock.good_name 
+                   << std::setw(12) << stock.warehouse1_count 
+                   << std::setw(12) << stock.warehouse2_count 
+                   << std::setw(18) << stock.total_count << "\n";
                 
                 totalWarehouse1 += stock.warehouse1_count;
                 totalWarehouse2 += stock.warehouse2_count;
                 grandTotal += stock.total_count;
             }
             
-            file << "------------------------------------------------------------\n";
-            file << "Итого:\n";
-            file << "Склад 1: " << totalWarehouse1 << " ед.\n";
-            file << "Склад 2: " << totalWarehouse2 << " ед.\n";
-            file << "Общее количество: " << grandTotal << " ед.\n";
+            ss << "------------------------------------------------------------\n";
+            ss << "Итого:\n";
+            ss << "Склад 1: " << totalWarehouse1 << " ед.\n";
+            ss << "Склад 2: " << totalWarehouse2 << " ед.\n";
+            ss << "Общее количество: " << grandTotal << " ед.\n";
         }
         
-        file << "\n========================================\n";
-        file.close();
-        std::cout << "Warehouse report generated: warehouse_report.txt" << std::endl;
+        ss << "\n========================================\n";
     } catch (const std::exception& e) {
-        std::cerr << "Error generating warehouse report: " << e.what() << std::endl;
+        ss << "Ошибка при формировании отчёта: " << e.what() << std::endl;
     }
+    return ss.str();
+}
+
+// Старые методы для обратной совместимости
+void ReportGenerator::generateTopGoodsReport() {
+    std::string content = generateTopGoodsReportContent();
+    saveToFile("top_goods_report.txt", content);
+}
+
+void ReportGenerator::generateDemandReport() {
+    std::string content = generateDemandReportContent();
+    saveToFile("demand_report.txt", content);
+}
+
+void ReportGenerator::generateSalesReport() {
+    std::string content = generateSalesReportContent();
+    saveToFile("sales_report.txt", content);
+}
+
+void ReportGenerator::generateWarehouseReport() {
+    std::string content = generateWarehouseReportContent();
+    saveToFile("warehouse_report.txt", content);
+}
+
+// Новые методы для получения отчета в виде строки
+std::string ReportGenerator::getTopGoodsReport() {
+    return generateTopGoodsReportContent();
+}
+
+std::string ReportGenerator::getDemandReport() {
+    return generateDemandReportContent();
+}
+
+std::string ReportGenerator::getSalesReport() {
+    return generateSalesReportContent();
+}
+
+std::string ReportGenerator::getWarehouseReport() {
+    return generateWarehouseReportContent();
 }

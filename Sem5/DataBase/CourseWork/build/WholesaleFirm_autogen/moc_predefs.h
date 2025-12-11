@@ -445,6 +445,7 @@
 #define __UINT_FAST16_MAX__ 0xffffffffffffffffUL
 #define __LDBL_NORM_MAX__ 1.18973149535723176502126385303097021e+4932L
 #define __GCC_ATOMIC_SHORT_LOCK_FREE 2
+#define QT_PRINTSUPPORT_LIB 1
 #define __UINT_FAST8_TYPE__ unsigned char
 #define _GNU_SOURCE 1
 #define __cpp_init_captures 201304L

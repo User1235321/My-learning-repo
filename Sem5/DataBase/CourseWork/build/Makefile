@@ -379,6 +379,30 @@ src/ReportGenerator.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/WholesaleFirm.dir/build.make CMakeFiles/WholesaleFirm.dir/src/ReportGenerator.cpp.s
 .PHONY : src/ReportGenerator.cpp.s
 
+src/ReportViewerDialog.o: src/ReportViewerDialog.cpp.o
+.PHONY : src/ReportViewerDialog.o
+
+# target to build an object file
+src/ReportViewerDialog.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/WholesaleFirm.dir/build.make CMakeFiles/WholesaleFirm.dir/src/ReportViewerDialog.cpp.o
+.PHONY : src/ReportViewerDialog.cpp.o
+
+src/ReportViewerDialog.i: src/ReportViewerDialog.cpp.i
+.PHONY : src/ReportViewerDialog.i
+
+# target to preprocess a source file
+src/ReportViewerDialog.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/WholesaleFirm.dir/build.make CMakeFiles/WholesaleFirm.dir/src/ReportViewerDialog.cpp.i
+.PHONY : src/ReportViewerDialog.cpp.i
+
+src/ReportViewerDialog.s: src/ReportViewerDialog.cpp.s
+.PHONY : src/ReportViewerDialog.s
+
+# target to generate assembly for a file
+src/ReportViewerDialog.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/WholesaleFirm.dir/build.make CMakeFiles/WholesaleFirm.dir/src/ReportViewerDialog.cpp.s
+.PHONY : src/ReportViewerDialog.cpp.s
+
 src/SalesDialog.o: src/SalesDialog.cpp.o
 .PHONY : src/SalesDialog.o
 
@@ -489,6 +513,9 @@ help:
 	@echo "... src/ReportGenerator.o"
 	@echo "... src/ReportGenerator.i"
 	@echo "... src/ReportGenerator.s"
+	@echo "... src/ReportViewerDialog.o"
+	@echo "... src/ReportViewerDialog.i"
+	@echo "... src/ReportViewerDialog.s"
 	@echo "... src/SalesDialog.o"
 	@echo "... src/SalesDialog.i"
 	@echo "... src/SalesDialog.s"
