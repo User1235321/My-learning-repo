@@ -1,0 +1,135 @@
+#include "source.hpp"
+
+#include <cmath>
+
+source::source(const source & src):
+  priority_(src.priority_),
+  sourceName_(src.sourceName_),
+  lambda_(src.lambda_),
+  timeToNextApp_(0),
+  apps_(src.apps_),
+  out_(src.out_)
+  {
+    timeToNextApp_ = -log((rand() % 10000 + 1) / 10001.0) / lambda_;
+  }
+
+source::source(source && src):
+  priority_(src.priority_),
+  sourceName_(src.sourceName_),
+  lambda_(src.lambda_),
+  timeToNextApp_(0),
+  apps_(src.apps_),
+  out_(src.out_)
+  {
+    timeToNextApp_ = -log((rand() % 10000 + 1) / 10001.0) / lambda_;
+  }
+
+source & source::operator=(const source & src)
+{
+  priority_ = src.priority_;
+  sourceName_ = src.sourceName_;
+  lambda_ = src.lambda_;
+  timeToNextApp_ = -log((rand() % 10000 + 1) / 10001.0) / lambda_;
+  apps_ = src.apps_;
+  out_ = src.out_;
+  return *this;
+}
+
+source & source::operator=(source && src)
+{
+  priority_ = src.priority_;
+  sourceName_ = src.sourceName_;
+  lambda_ = src.lambda_;
+  timeToNextApp_ = -log((rand() % 10000 + 1) / 10001.0) / lambda_;
+  apps_ = src.apps_;
+  out_ = src.out_;
+  return *this;
+}
+
+source::~source()
+{
+  stopAutoWork();
+}
+
+source::source(int priority, std::string sourceName, double lambda, std::ostream * out):
+  priority_(priority),
+  sourceName_(sourceName),
+  lambda_(lambda),
+  timeToNextApp_(0),
+  out_(out)
+  {
+    timeToNextApp_ = -log((rand() % 10000 + 1) / 10001.0) / lambda_;
+  }
+
+void source::createNewApp()
+{
+  std::lock_guard< std::mutex > lock(queueMutex_);
+  (*out_) << "\033[1;31mИсточник заявок " << sourceName_ << " создал заявку с id " << ++id_ << " и приоритетом " << priority_ << "\033[0m\n";
+  apps_.push(std::make_unique< application >(application{priority_, id_, 1}));
+}
+
+std::shared_ptr< application > source::returnApp()
+{
+  std::shared_ptr< application > app;
+  if (!apps_.empty())
+  {
+    app = apps_.front();
+    apps_.pop();
+  }
+
+  return app;
+}
+
+void source::stepWork(double stepTime)
+{
+  timeToNextApp_ -= stepTime;
+  if (timeToNextApp_ <= 0)
+  {
+    createNewApp();
+    timeToNextApp_ = -log((rand() % 10000 + 1) / 10001.0) / lambda_;
+  }
+}
+
+void source::autoWorkThread()
+{
+  auto lastUpdate = std::chrono::high_resolution_clock::now();
+  while (isRunning_)
+  {
+    auto now = std::chrono::high_resolution_clock::now();
+    timeToNextApp_ -= std::chrono::duration< double >(now - lastUpdate).count();
+    if (timeToNextApp_ <= 0)
+    {
+      createNewApp();
+      timeToNextApp_ = -log((rand() % 10000 + 1) / 10001.0) / lambda_;
+    }
+    lastUpdate = now;
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+  }
+}
+
+void source::autoWork()
+{
+  if (isRunning_)
+  {
+    return;
+  }
+  isRunning_ = true;
+  workerThread_ = std::thread(&source::autoWorkThread, this);
+}
+
+void source::stopAutoWork()
+{
+  if (isRunning_)
+  {
+    isRunning_ = false;
+    if (workerThread_.joinable())
+    {
+      workerThread_.join();
+    }
+  }
+}
+
+size_t source::size()
+{
+    return apps_.size();
+}
