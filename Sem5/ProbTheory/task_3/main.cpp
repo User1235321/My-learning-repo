@@ -12,7 +12,7 @@ int main()
 {
   setlocale(LC_ALL, "Russian");
 
-  std::vector< int > arr = {
+/*  std::vector< int > arr = {
     43, 49, 25, 22,
     28, 36, 36, 28,
     45, 21, 48, 49,
@@ -24,8 +24,10 @@ int main()
     32, 34, 35, 35,
     44, 21, 31, 37
     };
+*/
+  std::vector< int > arr = {11, 11, 11, 11, 11, 11, 22, 22, 22, 22, 22, 33, 33, 33, 33, 33, 33, 33, 33, 33, 33, 44, 44, 55, 55, 55, 55, 55, 55, 55, 55};
   std::sort(arr.begin(), arr.end());
-  const int numOfInterval = 9;
+  const int numOfInterval = 10;
 
   //Find h
   int h = ((arr[arr.size() - 1] - arr[0]) / numOfInterval);

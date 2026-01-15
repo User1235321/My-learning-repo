@@ -110,7 +110,15 @@ void findNormalCurve(const table & series, table & normalCurve, double sampleAve
 void findHypothesisTable(const table & normalCurve, table & HypothesisTable)
 {
   HypothesisTable[0] = normalCurve[1];
-  HypothesisTable[1] = normalCurve[5];
+  //HypothesisTable[1] = normalCurve[5];
+  for (size_t i = 0; i < HypothesisTable[0].size(); ++i)
+  {
+    HypothesisTable[1].push_back((int)(normalCurve[5][i]));
+    if (((normalCurve[5][i]) * 10) - (((int)(normalCurve[5][i])) * 10) > 5)
+    {
+      ++HypothesisTable[1][i];
+    }
+  }
   for (size_t i = 0; i < HypothesisTable[0].size(); ++i)
   {
     HypothesisTable[2].push_back(HypothesisTable[0][i] - HypothesisTable[1][i]);
