@@ -16,10 +16,10 @@ source::source(const source & src):
 
 source::source(source && src):
   priority_(src.priority_),
-  sourceName_(src.sourceName_),
+  sourceName_(std::move(src.sourceName_)),
   lambda_(src.lambda_),
   timeToNextApp_(0),
-  apps_(src.apps_),
+  apps_(std::move(src.apps_)),
   out_(src.out_),
   sleepTime_(src.sleepTime_)
   {
@@ -41,10 +41,10 @@ source & source::operator=(const source & src)
 source & source::operator=(source && src)
 {
   priority_ = src.priority_;
-  sourceName_ = src.sourceName_;
+  sourceName_ = std::move(src.sourceName_);
   lambda_ = src.lambda_;
   timeToNextApp_ = -log((rand() % 10000 + 1) / 10001.0) / lambda_;
-  apps_ = src.apps_;
+  apps_ = std::move(src.apps_);
   out_ = src.out_;
   sleepTime_ = src.sleepTime_;
   return *this;
@@ -61,16 +61,18 @@ source::source(int priority, std::string sourceName, double lambda, std::ostream
   lambda_(lambda),
   timeToNextApp_(0),
   out_(out),
-  sleepTime_(sleepTime)
+  sleepTime_(sleepTime),
+  appNum_(0)
   {
     timeToNextApp_ = -log((rand() % 10000 + 1) / 10001.0) / lambda_;
   }
 
 void source::createNewApp()
 {
-  std::lock_guard< std::mutex > lock(queueMutex_);
+  std::lock_guard< std::mutex > lock(mutex_);
   (*out_) << "\033[1;31mИсточник заявок " << sourceName_ << " создал заявку с id " << ++id_ << " и приоритетом " << priority_ << "\033[0m\n";
   apps_.push(std::make_unique< application >(application{priority_, id_, 1}));
+  ++appNum_;
 }
 
 std::shared_ptr< application > source::returnApp()
@@ -114,12 +116,11 @@ void source::autoWorkThread()
 
 void source::autoWork()
 {
-  if (isRunning_)
+  if (!isRunning_)
   {
-    return;
+    isRunning_ = true;
+    thread_ = std::thread(&source::autoWorkThread, this);
   }
-  isRunning_ = true;
-  workerThread_ = std::thread(&source::autoWorkThread, this);
 }
 
 void source::stopAutoWork()
@@ -127,14 +128,14 @@ void source::stopAutoWork()
   if (isRunning_)
   {
     isRunning_ = false;
-    if (workerThread_.joinable())
+    if (thread_.joinable())
     {
-      workerThread_.join();
+      thread_.join();
     }
   }
 }
 
-size_t source::size()
+size_t source::getAppNum()
 {
-    return apps_.size();
+    return appNum_;
 }

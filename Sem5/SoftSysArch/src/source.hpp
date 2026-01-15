@@ -29,7 +29,7 @@ class source
     void autoWork();
     void stopAutoWork();
 
-    size_t size();
+    size_t getAppNum();
 
   private:
     int priority_;
@@ -41,14 +41,16 @@ class source
     double lambda_;
     double timeToNextApp_;
 
-    std::thread workerThread_;
+    std::thread thread_;
     std::atomic< bool > isRunning_{false};
-    std::mutex queueMutex_;
+    std::mutex mutex_;
     std::chrono::time_point< std::chrono::high_resolution_clock > lastWorkTime_;
     size_t sleepTime_;
 
     void createNewApp();
     void autoWorkThread();
+
+    size_t appNum_;
 };
 
 #endif

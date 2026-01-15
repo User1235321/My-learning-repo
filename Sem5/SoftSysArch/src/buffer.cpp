@@ -6,7 +6,8 @@ buffer::buffer(std::ostream * out, size_t limit, size_t sleepTime):
   out_(out),
   limit_(limit),
   sleepTime_(sleepTime),
-  numberOfOccupiedCells_(0)
+  numberOfOccupiedCells_(0),
+  numOfDel_(0)
   {
     for(size_t i = 0; i < limit; ++i)
     {
@@ -40,8 +41,10 @@ void buffer::push(std::shared_ptr< application > app)
       }
     }
     (*out_) << "\033[1;34mЗаявка с id " << minId << " удалена из буфера из-за переполнения\033[0m\n";
+    ++numOfDel_;
     apps_[index] = app;
   }
+  (*out_) << "Буфер заполнен на " << numberOfOccupiedCells_ << '\n';
 }
 std::shared_ptr< application > buffer::pop()
 {
@@ -66,5 +69,11 @@ std::shared_ptr< application > buffer::pop()
   std::shared_ptr< application > app = apps_[index];
   apps_[index] = nullptr;
   numberOfOccupiedCells_ -= (app.get() != nullptr);
+  (*out_) << "Буфер заполнен на " << numberOfOccupiedCells_ << '\n';
   return app;
+}
+
+size_t buffer::getDelNum()
+{
+  return numOfDel_;
 }

@@ -27,8 +27,11 @@ void sourceBufferDispatcher::stepWork()
 
 void sourceBufferDispatcher::autoWork()
 {
-  isRunning_ = true;
-  dispatcherThread_ = std::thread(&sourceBufferDispatcher::dispatcherThreadFunc, this);
+  if (!isRunning_)
+  {
+    isRunning_ = true;
+    thread_ = std::thread(&sourceBufferDispatcher::dispatcherThreadFunc, this);
+  }
 }
 
 void sourceBufferDispatcher::stopAutoWork()
@@ -36,9 +39,9 @@ void sourceBufferDispatcher::stopAutoWork()
   if (isRunning_)
   {
     isRunning_ = false;
-    if (dispatcherThread_.joinable())
+    if (thread_.joinable())
     {
-      dispatcherThread_.join();
+      thread_.join();
     }
   }
 }
@@ -47,7 +50,7 @@ void sourceBufferDispatcher::dispatcherThreadFunc()
 {
   while (isRunning_)
   {
-    std::lock_guard< std::mutex > lock(workMutex_);
+    std::lock_guard< std::mutex > lock(mutex_);
     stepWork();
     std::this_thread::sleep_for(std::chrono::milliseconds(sleepTime_));
   }

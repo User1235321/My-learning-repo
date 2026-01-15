@@ -1,28 +1,29 @@
-#ifndef SOURCEBUFFERDISPATCHER_HPP
-#define SOURCEBUFFERDISPATCHER_HPP
+#ifndef BUFFERHANDLERDISPATCHER_HPP
+#define BUFFERHANDLERDISPATCHER_HPP
 
 #include <vector>
 #include <thread>
 #include <atomic>
 #include <mutex>
 
-#include "source.hpp"
 #include "buffer.hpp"
+#include "handler.hpp"
 
-class sourceBufferDispatcher
+class bufferHandlerDispatcher
 {
   public:
-    sourceBufferDispatcher(std::vector< source > & sources, buffer & buff, std::ostream * out, size_t sleepTime);
-    ~sourceBufferDispatcher();
+    bufferHandlerDispatcher(std::vector< handler > & handlers, buffer & buff, std::ostream * out, size_t sleepTime);
+    ~bufferHandlerDispatcher();
 
     void stepWork();
     void autoWork();
     void stopAutoWork();
 
   private:
-    std::vector< source > & sources_;
+    std::vector< handler > & handlers_;
     buffer & buff_;
     std::ostream * out_;
+    size_t handlerNum_;
 
     std::thread thread_;
     std::atomic< bool > isRunning_{false};
