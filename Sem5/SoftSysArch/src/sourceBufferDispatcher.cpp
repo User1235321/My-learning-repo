@@ -1,9 +1,10 @@
 #include "sourceBufferDispatcher.hpp"
 
-sourceBufferDispatcher::sourceBufferDispatcher(std::vector< source > & sources, buffer & buff, std::ostream * out):
+sourceBufferDispatcher::sourceBufferDispatcher(std::vector< source > & sources, buffer & buff, std::ostream * out, size_t sleepTime):
   sources_(sources),
   buff_(buff),
-  out_(out){}
+  out_(out),
+  sleepTime_(sleepTime){}
 
 sourceBufferDispatcher::~sourceBufferDispatcher()
 {
@@ -48,6 +49,6 @@ void sourceBufferDispatcher::dispatcherThreadFunc()
   {
     std::lock_guard< std::mutex > lock(workMutex_);
     stepWork();
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    std::this_thread::sleep_for(std::chrono::milliseconds(sleepTime_));
   }
 }

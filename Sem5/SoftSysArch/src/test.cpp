@@ -11,11 +11,11 @@ int main()
   srand(time(0));
 
   std::vector< source > sources;
-  sources.emplace_back(1, "Мастер спорта", 0.5, &std::cout);
-  sources.emplace_back(2, "Кандидат в мастера спорта", 1.0, &std::cout);
-  sources.emplace_back(3, "Остальные", 2.0, &std::cout);
-  buffer buff;
-  sourceBufferDispatcher firstDisp(sources, buff, &std::cout);
+  sources.emplace_back(1, "Мастер спорта", 0.5, &std::cout, 100);
+  sources.emplace_back(2, "Кандидат в мастера спорта", 1.0, &std::cout, 100);
+  sources.emplace_back(3, "Остальные", 2.0, &std::cout, 100);
+  buffer buff(&std::cout, 10, 100);
+  sourceBufferDispatcher firstDisp(sources, buff, &std::cout, 100);
 
   std::cout << "Автоматический режим (1), пошаговый (2)\n";
   int choice = 0;

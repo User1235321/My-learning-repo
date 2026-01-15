@@ -21,7 +21,7 @@ class source
     source & operator=(const source & src);
     source & operator=(source && src);
     ~source();
-    source(int priority, std::string sourceName, double lambda, std::ostream * out);
+    source(int priority, std::string sourceName, double lambda, std::ostream * out, size_t sleepTime);
 
     std::shared_ptr< application > returnApp();
 
@@ -44,7 +44,8 @@ class source
     std::thread workerThread_;
     std::atomic< bool > isRunning_{false};
     std::mutex queueMutex_;
-    std::chrono::time_point<std::chrono::high_resolution_clock> lastWorkTime_;
+    std::chrono::time_point< std::chrono::high_resolution_clock > lastWorkTime_;
+    size_t sleepTime_;
 
     void createNewApp();
     void autoWorkThread();

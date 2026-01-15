@@ -8,7 +8,8 @@ source::source(const source & src):
   lambda_(src.lambda_),
   timeToNextApp_(0),
   apps_(src.apps_),
-  out_(src.out_)
+  out_(src.out_),
+  sleepTime_(src.sleepTime_)
   {
     timeToNextApp_ = -log((rand() % 10000 + 1) / 10001.0) / lambda_;
   }
@@ -19,7 +20,8 @@ source::source(source && src):
   lambda_(src.lambda_),
   timeToNextApp_(0),
   apps_(src.apps_),
-  out_(src.out_)
+  out_(src.out_),
+  sleepTime_(src.sleepTime_)
   {
     timeToNextApp_ = -log((rand() % 10000 + 1) / 10001.0) / lambda_;
   }
@@ -32,6 +34,7 @@ source & source::operator=(const source & src)
   timeToNextApp_ = -log((rand() % 10000 + 1) / 10001.0) / lambda_;
   apps_ = src.apps_;
   out_ = src.out_;
+  sleepTime_ = src.sleepTime_;
   return *this;
 }
 
@@ -43,6 +46,7 @@ source & source::operator=(source && src)
   timeToNextApp_ = -log((rand() % 10000 + 1) / 10001.0) / lambda_;
   apps_ = src.apps_;
   out_ = src.out_;
+  sleepTime_ = src.sleepTime_;
   return *this;
 }
 
@@ -51,12 +55,13 @@ source::~source()
   stopAutoWork();
 }
 
-source::source(int priority, std::string sourceName, double lambda, std::ostream * out):
+source::source(int priority, std::string sourceName, double lambda, std::ostream * out, size_t sleepTime):
   priority_(priority),
   sourceName_(sourceName),
   lambda_(lambda),
   timeToNextApp_(0),
-  out_(out)
+  out_(out),
+  sleepTime_(sleepTime)
   {
     timeToNextApp_ = -log((rand() % 10000 + 1) / 10001.0) / lambda_;
   }
@@ -103,7 +108,7 @@ void source::autoWorkThread()
       timeToNextApp_ = -log((rand() % 10000 + 1) / 10001.0) / lambda_;
     }
     lastUpdate = now;
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    std::this_thread::sleep_for(std::chrono::milliseconds(sleepTime_));
   }
 }
 

@@ -13,7 +13,7 @@
 class sourceBufferDispatcher
 {
   public:
-    sourceBufferDispatcher(std::vector< source > & sources, buffer & buff, std::ostream * out);
+    sourceBufferDispatcher(std::vector< source > & sources, buffer & buff, std::ostream * out, size_t sleepTime);
     ~sourceBufferDispatcher();
 
     void stepWork();
@@ -28,6 +28,7 @@ class sourceBufferDispatcher
     std::thread dispatcherThread_;
     std::atomic< bool > isRunning_{false};
     std::mutex workMutex_;
+    size_t sleepTime_;
 
     void dispatcherThreadFunc();
 };
