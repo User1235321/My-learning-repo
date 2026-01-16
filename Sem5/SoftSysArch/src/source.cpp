@@ -135,7 +135,17 @@ void source::stopAutoWork()
   }
 }
 
-size_t source::getAppNum()
+size_t source::getAppNum() const noexcept
 {
     return appNum_;
+}
+
+std::string source::getName() const
+{
+  return sourceName_;
+}
+
+void source::replaceOut(std::ostream * out)
+{
+  out_ = out;
 }

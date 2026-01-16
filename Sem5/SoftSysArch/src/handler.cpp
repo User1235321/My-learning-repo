@@ -47,7 +47,7 @@ handler & handler::operator=(handler && hand)
   return *this;
 }
 
-bool handler::free()
+bool handler::free() const noexcept
 {
   return !isWork_;
 }
@@ -58,7 +58,6 @@ void handler::takeApp(std::shared_ptr< application > app)
   isWork_ = true;
   lastWorkTime_ = std::chrono::high_resolution_clock::now();
   timeNow_ = 0.0;
-  (*out_) << "Менеджер начинает работу\n";
 }
 
 void handler::stepWork(double stepTime)
@@ -117,7 +116,12 @@ void handler::autoWorkThread()
   }
 }
 
-size_t handler::getAppNum()
+size_t handler::getAppNum() const noexcept
 {
   return appNum_;
+}
+
+void handler::replaceOut(std::ostream * out)
+{
+  out_ = out;
 }

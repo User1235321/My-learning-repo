@@ -29,7 +29,10 @@ class source
     void autoWork();
     void stopAutoWork();
 
-    size_t getAppNum();
+    size_t getAppNum() const noexcept;
+    std::string getName() const;
+
+    void replaceOut(std::ostream * out);
 
   private:
     int priority_;

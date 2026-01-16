@@ -12,16 +12,23 @@
 class bufferHandlerDispatcher
 {
   public:
-    bufferHandlerDispatcher(std::vector< handler > & handlers, buffer & buff, std::ostream * out, size_t sleepTime);
+    bufferHandlerDispatcher(std::vector< handler > & handlers, std::vector< buffer > & buff, std::ostream * out, size_t sleepTime);
     ~bufferHandlerDispatcher();
+
+    bufferHandlerDispatcher(const bufferHandlerDispatcher & bhd);
+    bufferHandlerDispatcher(bufferHandlerDispatcher && bhd) noexcept;
+    bufferHandlerDispatcher & operator=(const bufferHandlerDispatcher & bhd);
+    bufferHandlerDispatcher & operator=(bufferHandlerDispatcher && bhd) noexcept;
 
     void stepWork();
     void autoWork();
     void stopAutoWork();
 
+    void replaceOut(std::ostream * out);
+
   private:
     std::vector< handler > & handlers_;
-    buffer & buff_;
+    std::vector< buffer > & buff_;
     std::ostream * out_;
     size_t handlerNum_;
 
@@ -29,6 +36,8 @@ class bufferHandlerDispatcher
     std::atomic< bool > isRunning_{false};
     std::mutex mutex_;
     size_t sleepTime_;
+
+    size_t actualBuff_;
 
     void dispatcherThreadFunc();
 };

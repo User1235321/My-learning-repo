@@ -14,38 +14,40 @@
 class handler
 {
   public:
-  ~handler();
-  handler(std::ostream * out, size_t sleepTime, double workTime);
+    ~handler();
+    handler(std::ostream * out, size_t sleepTime, double workTime);
 
-  handler(const handler & hand);
-  handler(handler && hand);
-  handler & operator=(const handler & hand);
-  handler & operator=(handler && hand);
+    handler(const handler & hand);
+    handler(handler && hand);
+    handler & operator=(const handler & hand);
+    handler & operator=(handler && hand);
 
-  bool free();
-  void takeApp(std::shared_ptr< application > app);
+    bool free() const noexcept;
+    void takeApp(std::shared_ptr< application > app);
 
-  void stepWork(double stepTime);
-  void autoWork();
-  void stopAutoWork();
+    void stepWork(double stepTime);
+    void autoWork();
+    void stopAutoWork();
 
-  size_t getAppNum();
+    size_t getAppNum() const noexcept;
+
+    void replaceOut(std::ostream * out);
 
   private:
-  std::shared_ptr< application > appNow_;
-  std::ostream * out_;
-  bool isWork_;
-  size_t sleepTime_;
-  double workTime_, timeNow_;
+    std::shared_ptr< application > appNow_;
+    std::ostream * out_;
+    bool isWork_;
+    size_t sleepTime_;
+    double workTime_, timeNow_;
 
-  std::thread thread_;
-  std::atomic< bool > isRunning_{false};
-  std::mutex mutex_;
-  std::chrono::time_point< std::chrono::high_resolution_clock > lastWorkTime_;
+    std::thread thread_;
+    std::atomic< bool > isRunning_{false};
+    std::mutex mutex_;
+    std::chrono::time_point< std::chrono::high_resolution_clock > lastWorkTime_;
 
-  void autoWorkThread();
+    void autoWorkThread();
 
-  size_t appNum_;
+    size_t appNum_;
 };
 
 #endif
