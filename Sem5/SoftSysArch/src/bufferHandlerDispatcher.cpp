@@ -1,12 +1,13 @@
 #include "bufferHandlerDispatcher.hpp"
 
-bufferHandlerDispatcher::bufferHandlerDispatcher(std::vector< handler > & handlers, std::vector< buffer > & buff, std::ostream * out, size_t sleepTime):
+bufferHandlerDispatcher::bufferHandlerDispatcher(std::vector< handler > & handlers, std::vector< buffer > & buff, std::ostream * out, size_t sleepTime, std::mutex * outMutex):
+  handlerNum_(0),
+  sleepTime_(sleepTime),
+  actualBuff_(0),
   handlers_(handlers),
   buff_(buff),
   out_(out),
-  sleepTime_(sleepTime),
-  handlerNum_(0),
-  actualBuff_(0){}
+  outMutex_(outMutex){}
 
 bufferHandlerDispatcher::~bufferHandlerDispatcher()
 {
@@ -14,35 +15,43 @@ bufferHandlerDispatcher::~bufferHandlerDispatcher()
 }
 
 bufferHandlerDispatcher::bufferHandlerDispatcher(const bufferHandlerDispatcher & bhd):
+  handlerNum_(bhd.handlerNum_),
+  sleepTime_(bhd.sleepTime_),
+  actualBuff_(bhd.actualBuff_),
   handlers_(bhd.handlers_),
   buff_(bhd.buff_),
   out_(bhd.out_),
-  handlerNum_(bhd.handlerNum_),
-  sleepTime_(bhd.sleepTime_){}
+  outMutex_(bhd.outMutex_){}
 
 bufferHandlerDispatcher::bufferHandlerDispatcher(bufferHandlerDispatcher && bhd) noexcept:
+  handlerNum_(bhd.handlerNum_),
+  sleepTime_(bhd.sleepTime_),
+  actualBuff_(bhd.actualBuff_),
   handlers_(bhd.handlers_),
   buff_(bhd.buff_),
   out_(bhd.out_),
-  handlerNum_(bhd.handlerNum_),
-  sleepTime_(bhd.sleepTime_){}
+  outMutex_(bhd.outMutex_){}
 
 bufferHandlerDispatcher & bufferHandlerDispatcher::operator=(const bufferHandlerDispatcher & bhd)
 {
+  handlerNum_ = bhd.handlerNum_;
+  sleepTime_ = bhd.sleepTime_;
+  actualBuff_ = bhd.actualBuff_;
   handlers_ = bhd.handlers_;
   buff_ = bhd.buff_;
   out_ = bhd.out_;
-  handlerNum_ = bhd.handlerNum_;
-  sleepTime_ = bhd.sleepTime_;
+  outMutex_ = bhd.outMutex_;
   return *this;
 }
 bufferHandlerDispatcher & bufferHandlerDispatcher::operator=(bufferHandlerDispatcher && bhd) noexcept
 {
+  handlerNum_ = bhd.handlerNum_;
+  sleepTime_ = bhd.sleepTime_;
+  actualBuff_ = bhd.actualBuff_;
   handlers_ = bhd.handlers_;
   buff_ = bhd.buff_;
   out_ = bhd.out_;
-  handlerNum_ = bhd.handlerNum_;
-  sleepTime_ = bhd.sleepTime_;
+  outMutex_ = bhd.outMutex_;
   return *this;
 }
 
@@ -50,19 +59,21 @@ bufferHandlerDispatcher & bufferHandlerDispatcher::operator=(bufferHandlerDispat
 void bufferHandlerDispatcher::stepWork()
 {
   size_t startNum = handlerNum_, startBuff_ = actualBuff_;
-  auto app = buff_[actualBuff_].pop();
   for (size_t i = 0; i < handlers_.size(); ++i)
   {
     if (handlers_[handlerNum_].free())
     {
+      auto app = buff_[actualBuff_].pop();
       if (app.get() != nullptr)
       {
         (*app).actualStageNum_ = 4;
-        (*out_) << "\033[1;35mЗаявка с id " << (*app).id_ << " обработана диспетчером выбора\033[0m\n";
+        {
+          std::lock_guard< std::mutex > lock(*outMutex_);
+          (*out_) << "\033[1;35mЗаявка с id " << (*app).id_ << " обработана диспетчером выбора\033[0m\n";
+        }
         handlers_[handlerNum_].takeApp(app);
         ++handlerNum_;
         handlerNum_ %= handlers_.size();
-        app = buff_[actualBuff_].pop();
         ++actualBuff_;
         actualBuff_ %= buff_.size();
       }
@@ -99,7 +110,6 @@ void bufferHandlerDispatcher::dispatcherThreadFunc()
 {
   while (isRunning_)
   {
-    std::lock_guard< std::mutex > lock(mutex_);
     stepWork();
     std::this_thread::sleep_for(std::chrono::milliseconds(sleepTime_));
   }

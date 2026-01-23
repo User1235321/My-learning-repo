@@ -2847,3 +2847,998 @@ class sourceBufferDispatcher
 };
 
 #endif
+clear
+[H[2J[3Jcat *.cpp
+#include "buffer.hpp"
+
+#include <limits>
+
+buffer::buffer(std::ostream * out, size_t limit, size_t sleepTime):
+  out_(out),
+  limit_(limit),
+  sleepTime_(sleepTime),
+  numberOfOccupiedCells_(0),
+  numOfDel_(0)
+  {
+    for(size_t i = 0; i < limit; ++i)
+    {
+      apps_.emplace_back(nullptr);
+    }
+  }
+
+void buffer::push(std::shared_ptr< application > app)
+{
+  (*app).actualStageNum_ = 3;
+  (*out_) << "\033[1;33mЗаявка с id " << (*app).id_ << " полжена в буфер\033[0m\n";
+  if(numberOfOccupiedCells_ < limit_)
+  {
+    apps_[numberOfOccupiedCells_] = app;
+    ++numberOfOccupiedCells_;
+  }
+  else
+  {
+    (*out_) << "\033[1;34mЗаявка с id " << (*apps_[0]).id_ << " удалена из буфера из-за переполнения\033[0m\n";
+    for (size_t i = 0; i < (numberOfOccupiedCells_ - 1); ++i)
+    {
+      apps_[i] = apps_[i + 1];
+    }
+    apps_[numberOfOccupiedCells_ - 1] = app;
+    ++numOfDel_;
+  }
+}
+std::shared_ptr< application > buffer::pop()
+{
+  int maxPriority = std::numeric_limits< int >::max(), minId = std::numeric_limits< int >::max(), index = 0;
+  for (size_t i = 0; i < numberOfOccupiedCells_; ++i)
+  {
+    if ((*(apps_[i])).priority_ < maxPriority)
+    {
+      maxPriority = (*(apps_[i])).priority_;
+      minId = (*(apps_[i])).id_;
+      index = i;
+    }
+    else if (((*(apps_[i])).priority_ == maxPriority) && ((*(apps_[i])).id_ < minId))
+    {
+      minId = (*(apps_[i])).id_;
+      index = i;
+    }
+  }
+  std::shared_ptr< application > app = apps_[index];
+  if (app.get() != nullptr)
+  {
+    numberOfOccupiedCells_ -= 1;
+    apps_[index] = nullptr;
+    for (size_t i = index; i < numberOfOccupiedCells_; ++i)
+    {
+      apps_[i] = apps_[i + 1];
+    }
+  }
+  return app;
+}
+
+size_t buffer::getDelNum() const noexcept
+{
+  return numOfDel_;
+}
+
+size_t buffer::getFullness() const noexcept
+{
+  return numberOfOccupiedCells_;
+}
+
+size_t buffer::getLimit() const noexcept
+{
+  return limit_;
+}
+
+void buffer::replaceOut(std::ostream * out)
+{
+  out_ = out;
+}
+#include "bufferHandlerDispatcher.hpp"
+
+bufferHandlerDispatcher::bufferHandlerDispatcher(std::vector< handler > & handlers, std::vector< buffer > & buff, std::ostream * out, size_t sleepTime):
+  handlers_(handlers),
+  buff_(buff),
+  out_(out),
+  sleepTime_(sleepTime),
+  handlerNum_(0),
+  actualBuff_(0){}
+
+bufferHandlerDispatcher::~bufferHandlerDispatcher()
+{
+  stopAutoWork();
+}
+
+bufferHandlerDispatcher::bufferHandlerDispatcher(const bufferHandlerDispatcher & bhd):
+  handlers_(bhd.handlers_),
+  buff_(bhd.buff_),
+  out_(bhd.out_),
+  handlerNum_(bhd.handlerNum_),
+  sleepTime_(bhd.sleepTime_){}
+
+bufferHandlerDispatcher::bufferHandlerDispatcher(bufferHandlerDispatcher && bhd) noexcept:
+  handlers_(bhd.handlers_),
+  buff_(bhd.buff_),
+  out_(bhd.out_),
+  handlerNum_(bhd.handlerNum_),
+  sleepTime_(bhd.sleepTime_){}
+
+bufferHandlerDispatcher & bufferHandlerDispatcher::operator=(const bufferHandlerDispatcher & bhd)
+{
+  handlers_ = bhd.handlers_;
+  buff_ = bhd.buff_;
+  out_ = bhd.out_;
+  handlerNum_ = bhd.handlerNum_;
+  sleepTime_ = bhd.sleepTime_;
+  return *this;
+}
+bufferHandlerDispatcher & bufferHandlerDispatcher::operator=(bufferHandlerDispatcher && bhd) noexcept
+{
+  handlers_ = bhd.handlers_;
+  buff_ = bhd.buff_;
+  out_ = bhd.out_;
+  handlerNum_ = bhd.handlerNum_;
+  sleepTime_ = bhd.sleepTime_;
+  return *this;
+}
+
+
+void bufferHandlerDispatcher::stepWork()
+{
+  size_t startNum = handlerNum_, startBuff_ = actualBuff_;
+  auto app = buff_[actualBuff_].pop();
+  for (size_t i = 0; i < handlers_.size(); ++i)
+  {
+    if (handlers_[handlerNum_].free())
+    {
+      if (app.get() != nullptr)
+      {
+        (*app).actualStageNum_ = 4;
+        (*out_) << "\033[1;35mЗаявка с id " << (*app).id_ << " обработана диспетчером выбора\033[0m\n";
+        handlers_[handlerNum_].takeApp(app);
+        ++handlerNum_;
+        handlerNum_ %= handlers_.size();
+        app = buff_[actualBuff_].pop();
+        ++actualBuff_;
+        actualBuff_ %= buff_.size();
+      }
+      else
+      {
+        i = handlers_.size();
+      }
+    }
+  }
+}
+
+void bufferHandlerDispatcher::autoWork()
+{
+  if (!isRunning_)
+  {
+    isRunning_ = true;
+    thread_ = std::thread(&bufferHandlerDispatcher::dispatcherThreadFunc, this);
+  }
+}
+
+void bufferHandlerDispatcher::stopAutoWork()
+{
+  if (isRunning_)
+  {
+    isRunning_ = false;
+    if (thread_.joinable())
+    {
+      thread_.join();
+    }
+  }
+}
+
+void bufferHandlerDispatcher::dispatcherThreadFunc()
+{
+  while (isRunning_)
+  {
+    std::lock_guard< std::mutex > lock(mutex_);
+    stepWork();
+    std::this_thread::sleep_for(std::chrono::milliseconds(sleepTime_));
+  }
+}
+
+void bufferHandlerDispatcher::replaceOut(std::ostream * out)
+{
+  out_ = out;
+}
+#include "handler.hpp"
+
+handler::~handler()
+{
+  stopAutoWork();
+}
+
+handler::handler(std::ostream * out, size_t sleepTime, double workTime):
+  out_(out),
+  sleepTime_(sleepTime),
+  workTime_(workTime),
+  isWork_(false),
+  timeNow_(0),
+  appNum_(0){}
+
+handler::handler(const handler & hand):
+  appNow_(hand.appNow_),
+  out_(hand.out_),
+  isWork_(hand.isWork_),
+  sleepTime_(hand.sleepTime_),
+  workTime_(hand.workTime_){}
+
+handler::handler(handler && hand):
+  appNow_(hand.appNow_),
+  out_(hand.out_),
+  isWork_(hand.isWork_),
+  sleepTime_(hand.sleepTime_),
+  workTime_(hand.workTime_){}
+
+handler & handler::operator=(const handler & hand)
+{
+  appNow_ = hand.appNow_;
+  out_ = hand.out_;
+  isWork_ = hand.isWork_;
+  sleepTime_ = hand.sleepTime_;
+  workTime_ = hand.workTime_;
+  return *this;
+}
+
+handler & handler::operator=(handler && hand)
+{
+  appNow_ = hand.appNow_;
+  out_ = hand.out_;
+  isWork_ = hand.isWork_;
+  sleepTime_ = hand.sleepTime_;
+  workTime_ = hand.workTime_;
+  return *this;
+}
+
+bool handler::free() const noexcept
+{
+  return !isWork_;
+}
+
+void handler::takeApp(std::shared_ptr< application > app)
+{
+  appNow_ = app;
+  isWork_ = true;
+  lastWorkTime_ = std::chrono::high_resolution_clock::now();
+  timeNow_ = 0.0;
+}
+
+void handler::stepWork(double stepTime)
+{
+  if (isWork_)
+  {
+    timeNow_ += stepTime;
+    if (timeNow_ >= workTime_)
+    {
+      (*out_) << "\033[1;36mЗаявка с id " << (*appNow_).id_ << " обработана менеджером\033[0m\n";
+      appNow_ = nullptr;
+      isWork_ = false;
+      ++appNum_;
+    }
+  }
+}
+
+void handler::autoWork()
+{
+  if (!isRunning_)
+  {
+    isRunning_ = true;
+    thread_ = std::thread(&handler::autoWorkThread, this);
+  }
+}
+
+void handler::stopAutoWork()
+{
+  if (isRunning_)
+  {
+    isRunning_ = false;
+    if (thread_.joinable())
+    {
+      thread_.join();
+    }
+  }
+}
+
+void handler::autoWorkThread()
+{
+  while (isRunning_)
+  {
+    std::lock_guard< std::mutex > lock(mutex_);
+    if (isWork_)
+    {
+      auto now = std::chrono::high_resolution_clock::now();
+      if (std::chrono::duration< double >(now - lastWorkTime_).count() >= workTime_)
+      {
+        (*out_) << "\033[1;36mЗаявка с id " << (*appNow_).id_ << " обработана менеджером\033[0m\n";
+        appNow_ = nullptr;
+        isWork_ = false;
+        ++appNum_;
+      }
+    }
+    std::this_thread::sleep_for(std::chrono::milliseconds(sleepTime_));
+  }
+}
+
+size_t handler::getAppNum() const noexcept
+{
+  return appNum_;
+}
+
+void handler::replaceOut(std::ostream * out)
+{
+  out_ = out;
+}
+#include <iostream>
+#include <chrono>
+#include <vector>
+#include <fstream>
+
+#include "source.hpp"
+#include "sourceBufferDispatcher.hpp"
+#include "buffer.hpp"
+#include "bufferHandlerDispatcher.hpp"
+#include "handler.hpp"
+#include "print.hpp"
+
+int main()
+{
+  srand(time(0));
+  const double delay = 10.0, handWork = 0.5;
+  const double lambda = 0.5;
+  const size_t buffSize = 10;
+  std::ofstream outFile("log.txt");
+
+  std::vector< source > sources;
+  sources.emplace_back(1, "Мастер спорта", lambda, &outFile, delay);
+  sources.emplace_back(2, "Кандидат в мастера спорта", 1.0, &outFile, delay);
+  sources.emplace_back(3, "Остальные", 5.0, &outFile, delay);
+  std::vector< buffer > buff;
+  buff.emplace_back(&outFile, delay, delay);
+  std::vector< sourceBufferDispatcher > firstDisp;
+  firstDisp.emplace_back(sources, buff, &outFile, delay);
+  std::vector< handler > handlers;
+  handlers.emplace_back(&outFile, delay, handWork);
+  handlers.emplace_back(&outFile, delay, handWork);
+  handlers.emplace_back(&outFile, delay, handWork);
+  std::vector< bufferHandlerDispatcher > secondDisp;
+  secondDisp.emplace_back(handlers, buff, &outFile, buffSize);
+
+  std::cout << "Автоматический режим (1), пошаговый (2)\n";
+  int choice = 0;
+  std::cin >> choice;
+
+  if (choice == 2)
+  {
+    double stepTime = 0.25;
+    double totalTime = 0.0;
+    size_t step = 0;
+    while (std::cin.get() != 27)
+    {
+      std::cout << "Время: " << totalTime << '\n';
+      for (auto & src : sources)
+      {
+        src.stepWork(stepTime);
+      }
+      for (auto & fDisp : firstDisp)
+      {
+        fDisp.stepWork();
+      }
+      for (auto & sDisp : secondDisp)
+      {
+        sDisp.stepWork();
+      }
+      for (auto & hand : handlers)
+      {
+        hand.stepWork(stepTime);
+      }
+      printForStep(std::cout, buff, handlers, step);
+      totalTime += stepTime;
+      ++step;
+    }
+  }
+  else
+  {
+    for (auto & fDisp : firstDisp)
+    {
+      fDisp.replaceOut(&std::cout);
+    }
+    for (auto & sDisp : secondDisp)
+    {
+      sDisp.replaceOut(&std::cout);
+    }
+    for (auto & bff : buff)
+    {
+      bff.replaceOut(&std::cout);
+    }
+    for (auto & src : sources)
+    {
+      src.replaceOut(&std::cout);
+    }
+    for (auto & hand : handlers)
+    {
+      hand.replaceOut(&std::cout);
+    }
+    std::cout << "\nНажмите Enter для остановки...\n";
+    for (auto & src : sources)
+    {
+      src.autoWork();
+    }
+    for (auto & fDisp : firstDisp)
+    {
+      fDisp.autoWork();
+    }
+    for (auto & hand : handlers)
+    {
+      hand.autoWork();
+    }
+    for (auto & sDisp : secondDisp)
+    {
+      sDisp.autoWork();
+    }
+    std::atomic< bool > printing{true};
+    std::cin.ignore();
+    std::cin.get();
+    printing = false;
+  }
+  printRes(std::cout, buff, handlers, sources);
+  return 0;
+}
+#include "print.hpp"
+
+void printForStep(std::ostream & out, const std::vector< buffer > & buff, const std::vector< handler > & handlers, size_t step)
+{
+  out << "ШАГ " << step << '\n';
+  for(size_t i = 0; i < buff.size(); ++i)
+  {
+    out << "В буфере " << (i + 1) << " занято " << buff[i].getFullness() << " ячеек из " << buff[i].getLimit() << '\n';
+  }
+  for(size_t i = 0; i < handlers.size(); ++i)
+  {
+    out << "Менеджер №" << (i + 1);
+    if (handlers[i].free())
+    {
+      out << " не";
+    }
+    out << " работает\n";
+  }
+}
+
+void printRes(std::ostream & out, const std::vector< buffer > & buff, const std::vector< handler > & handlers, const std::vector< source > & sources)
+{
+  out << "Итоговая статистика:\n";
+  int sum = 0;
+  out << "Источники:\n";
+  for(size_t i = 0; i < sources.size(); ++i)
+  {
+    out << sources[i].getAppNum() << " - " << sources[i].getName() << '\n';
+    sum += sources[i].getAppNum();
+  }
+  out << "Суммарно было сгенерировано " << sum << " заявок\n";
+  sum = 0;
+  for(size_t i = 0; i < buff.size(); ++i)
+  {
+    sum += buff[i].getDelNum();
+  }
+  out << "Из-за переполнения буферов было удалено " << sum << " заявок\n";
+  sum = 0;
+  out << "Менеджеры:\n";
+  for(size_t i = 0; i < handlers.size(); ++i)
+  {
+    out << (i + 1) << "й менджер обработал " << handlers[i].getAppNum() << " заявок\n";
+    sum += handlers[i].getAppNum();
+  }
+  out << "Суммарно было обработано " << sum << " заявок\n";
+}
+#include "source.hpp"
+
+#include <cmath>
+
+source::source(const source & src):
+  priority_(src.priority_),
+  sourceName_(src.sourceName_),
+  lambda_(src.lambda_),
+  timeToNextApp_(0),
+  apps_(src.apps_),
+  out_(src.out_),
+  sleepTime_(src.sleepTime_)
+  {
+    timeToNextApp_ = -log((rand() % 10000 + 1) / 10001.0) / lambda_;
+  }
+
+source::source(source && src):
+  priority_(src.priority_),
+  sourceName_(std::move(src.sourceName_)),
+  lambda_(src.lambda_),
+  timeToNextApp_(0),
+  apps_(std::move(src.apps_)),
+  out_(src.out_),
+  sleepTime_(src.sleepTime_)
+  {
+    timeToNextApp_ = -log((rand() % 10000 + 1) / 10001.0) / lambda_;
+  }
+
+source & source::operator=(const source & src)
+{
+  priority_ = src.priority_;
+  sourceName_ = src.sourceName_;
+  lambda_ = src.lambda_;
+  timeToNextApp_ = -log((rand() % 10000 + 1) / 10001.0) / lambda_;
+  apps_ = src.apps_;
+  out_ = src.out_;
+  sleepTime_ = src.sleepTime_;
+  return *this;
+}
+
+source & source::operator=(source && src)
+{
+  priority_ = src.priority_;
+  sourceName_ = std::move(src.sourceName_);
+  lambda_ = src.lambda_;
+  timeToNextApp_ = -log((rand() % 10000 + 1) / 10001.0) / lambda_;
+  apps_ = std::move(src.apps_);
+  out_ = src.out_;
+  sleepTime_ = src.sleepTime_;
+  return *this;
+}
+
+source::~source()
+{
+  stopAutoWork();
+}
+
+source::source(int priority, std::string sourceName, double lambda, std::ostream * out, size_t sleepTime):
+  priority_(priority),
+  sourceName_(sourceName),
+  lambda_(lambda),
+  timeToNextApp_(0),
+  out_(out),
+  sleepTime_(sleepTime),
+  appNum_(0)
+  {
+    timeToNextApp_ = -log((rand() % 10000 + 1) / 10001.0) / lambda_;
+  }
+
+void source::createNewApp()
+{
+  std::lock_guard< std::mutex > lock(mutex_);
+  (*out_) << "\033[1;31mИсточник заявок " << sourceName_ << " создал заявку с id " << ++id_ << " и приоритетом " << priority_ << "\033[0m\n";
+  apps_.push(std::make_unique< application >(application{priority_, id_, 1}));
+  ++appNum_;
+}
+
+std::shared_ptr< application > source::returnApp()
+{
+  std::shared_ptr< application > app;
+  if (!apps_.empty())
+  {
+    app = apps_.front();
+    apps_.pop();
+  }
+
+  return app;
+}
+
+void source::stepWork(double stepTime)
+{
+  timeToNextApp_ -= stepTime;
+  if (timeToNextApp_ <= 0)
+  {
+    createNewApp();
+    timeToNextApp_ = -log((rand() % 10000 + 1) / 10001.0) / lambda_;
+  }
+}
+
+void source::autoWorkThread()
+{
+  auto lastUpdate = std::chrono::high_resolution_clock::now();
+  while (isRunning_)
+  {
+    auto now = std::chrono::high_resolution_clock::now();
+    timeToNextApp_ -= std::chrono::duration< double >(now - lastUpdate).count();
+    if (timeToNextApp_ <= 0)
+    {
+      createNewApp();
+      timeToNextApp_ = -log((rand() % 10000 + 1) / 10001.0) / lambda_;
+    }
+    lastUpdate = now;
+    std::this_thread::sleep_for(std::chrono::milliseconds(sleepTime_));
+  }
+}
+
+void source::autoWork()
+{
+  if (!isRunning_)
+  {
+    isRunning_ = true;
+    thread_ = std::thread(&source::autoWorkThread, this);
+  }
+}
+
+void source::stopAutoWork()
+{
+  if (isRunning_)
+  {
+    isRunning_ = false;
+    if (thread_.joinable())
+    {
+      thread_.join();
+    }
+  }
+}
+
+size_t source::getAppNum() const noexcept
+{
+    return appNum_;
+}
+
+std::string source::getName() const
+{
+  return sourceName_;
+}
+
+void source::replaceOut(std::ostream * out)
+{
+  out_ = out;
+}
+#include "sourceBufferDispatcher.hpp"
+
+sourceBufferDispatcher::sourceBufferDispatcher(std::vector< source > & sources, std::vector< buffer > & buff, std::ostream * out, size_t sleepTime):
+  sources_(sources),
+  buff_(buff),
+  out_(out),
+  sleepTime_(sleepTime),
+  actualBuff_(0){}
+
+sourceBufferDispatcher::~sourceBufferDispatcher()
+{
+  stopAutoWork();
+}
+
+sourceBufferDispatcher::sourceBufferDispatcher(const sourceBufferDispatcher & sbd):
+  sources_(sbd.sources_),
+  buff_(sbd.buff_),
+  out_(sbd.out_),
+  sleepTime_(sbd.sleepTime_){}
+
+sourceBufferDispatcher::sourceBufferDispatcher(sourceBufferDispatcher && sbd) noexcept:
+  sources_(sbd.sources_),
+  buff_(sbd.buff_),
+  out_(sbd.out_),
+  sleepTime_(sbd.sleepTime_){}
+
+sourceBufferDispatcher & sourceBufferDispatcher::operator=(const sourceBufferDispatcher & sbd)
+{
+  sources_ = sbd.sources_;
+  buff_ = sbd.buff_;
+  out_ = sbd.out_;
+  sleepTime_ = sbd.sleepTime_;
+  return *this;
+}
+sourceBufferDispatcher & sourceBufferDispatcher::operator=(sourceBufferDispatcher && sbd) noexcept
+{
+  sources_ = sbd.sources_;
+  buff_ = sbd.buff_;
+  out_ = sbd.out_;
+  sleepTime_ = sbd.sleepTime_;
+  return *this;
+}
+
+void sourceBufferDispatcher::stepWork()
+{
+  for(auto & src : sources_)
+  {
+    auto app = src.returnApp();
+    if (app.get() != nullptr)
+    {
+      (*app).actualStageNum_ = 2;
+      (*out_) << "\033[1;32mЗаявка с id " << (*app).id_ << " обработана диспетчером постановки\033[0m\n";
+      buff_[actualBuff_].push(app);
+      ++actualBuff_;
+      actualBuff_ %= buff_.size();
+    }
+  }
+}
+
+void sourceBufferDispatcher::autoWork()
+{
+  if (!isRunning_)
+  {
+    isRunning_ = true;
+    thread_ = std::thread(&sourceBufferDispatcher::dispatcherThreadFunc, this);
+  }
+}
+
+void sourceBufferDispatcher::stopAutoWork()
+{
+  if (isRunning_)
+  {
+    isRunning_ = false;
+    if (thread_.joinable())
+    {
+      thread_.join();
+    }
+  }
+}
+
+void sourceBufferDispatcher::dispatcherThreadFunc()
+{
+  while (isRunning_)
+  {
+    std::lock_guard< std::mutex > lock(mutex_);
+    stepWork();
+    std::this_thread::sleep_for(std::chrono::milliseconds(sleepTime_));
+  }
+}
+
+void sourceBufferDispatcher::replaceOut(std::ostream * out)
+{
+  out_ = out;
+}
+cat *.hpp
+#ifndef APPLICATION_HPP
+#define APPLICATION_HPP
+
+struct application
+{
+    int priority_, id_, actualStageNum_;
+};
+
+#endif
+#ifndef BUFFER_HPP
+#define BUFFER_HPP
+
+#include <iostream>
+#include <memory>
+#include <vector>
+
+#include "application.hpp"
+
+class buffer
+{
+  public:
+    buffer(std::ostream * out, size_t limit, size_t sleepTime);
+
+    buffer(const buffer &) = default;
+    buffer(buffer &&) = default;
+    buffer & operator=(const buffer &) = default;
+    buffer & operator=(buffer &&) = default;
+
+    void push(std::shared_ptr< application > app);
+    std::shared_ptr< application > pop();
+
+    size_t getDelNum() const noexcept;
+    size_t getFullness() const noexcept;
+    size_t getLimit() const noexcept;
+
+    void replaceOut(std::ostream * out);
+
+  private:
+    std::vector< std::shared_ptr< application > > apps_;
+    std::ostream * out_;
+    size_t limit_;
+    size_t numberOfOccupiedCells_;
+    size_t sleepTime_;
+    size_t numOfDel_;
+};
+
+#endif
+#ifndef BUFFERHANDLERDISPATCHER_HPP
+#define BUFFERHANDLERDISPATCHER_HPP
+
+#include <vector>
+#include <thread>
+#include <atomic>
+#include <mutex>
+
+#include "buffer.hpp"
+#include "handler.hpp"
+
+class bufferHandlerDispatcher
+{
+  public:
+    bufferHandlerDispatcher(std::vector< handler > & handlers, std::vector< buffer > & buff, std::ostream * out, size_t sleepTime);
+    ~bufferHandlerDispatcher();
+
+    bufferHandlerDispatcher(const bufferHandlerDispatcher & bhd);
+    bufferHandlerDispatcher(bufferHandlerDispatcher && bhd) noexcept;
+    bufferHandlerDispatcher & operator=(const bufferHandlerDispatcher & bhd);
+    bufferHandlerDispatcher & operator=(bufferHandlerDispatcher && bhd) noexcept;
+
+    void stepWork();
+    void autoWork();
+    void stopAutoWork();
+
+    void replaceOut(std::ostream * out);
+
+  private:
+    std::vector< handler > & handlers_;
+    std::vector< buffer > & buff_;
+    std::ostream * out_;
+    size_t handlerNum_;
+
+    std::thread thread_;
+    std::atomic< bool > isRunning_{false};
+    std::mutex mutex_;
+    size_t sleepTime_;
+
+    size_t actualBuff_;
+
+    void dispatcherThreadFunc();
+};
+
+#endif
+#ifndef HANDLER_HPP
+#define HANDLER_HPP
+
+#include <memory>
+#include <vector>
+#include <atomic>
+#include <mutex>
+#include <thread>
+#include <chrono>
+#include <iostream>
+
+#include "application.hpp"
+
+class handler
+{
+  public:
+    ~handler();
+    handler(std::ostream * out, size_t sleepTime, double workTime);
+
+    handler(const handler & hand);
+    handler(handler && hand);
+    handler & operator=(const handler & hand);
+    handler & operator=(handler && hand);
+
+    bool free() const noexcept;
+    void takeApp(std::shared_ptr< application > app);
+
+    void stepWork(double stepTime);
+    void autoWork();
+    void stopAutoWork();
+
+    size_t getAppNum() const noexcept;
+
+    void replaceOut(std::ostream * out);
+
+  private:
+    std::shared_ptr< application > appNow_;
+    std::ostream * out_;
+    bool isWork_;
+    size_t sleepTime_;
+    double workTime_, timeNow_;
+
+    std::thread thread_;
+    std::atomic< bool > isRunning_{false};
+    std::mutex mutex_;
+    std::chrono::time_point< std::chrono::high_resolution_clock > lastWorkTime_;
+
+    void autoWorkThread();
+
+    size_t appNum_;
+};
+
+#endif
+#ifndef PRINT_HPP
+#define PRINT_HPP
+
+#include <iostream>
+#include <atomic>
+#include <vector>
+
+#include "buffer.hpp"
+#include "handler.hpp"
+#include "source.hpp"
+
+void printForStep(std::ostream & out, const std::vector< buffer > & buff, const std::vector< handler > & handlers, size_t step);
+void printRes(std::ostream & out, const std::vector< buffer > & buff, const std::vector< handler > & handlers, const std::vector< source > & sources);
+
+#endif
+#ifndef SOURCE_HPP
+#define SOURCE_HPP
+
+#include <memory>
+#include <iostream>
+#include <string>
+#include <queue>
+#include <chrono>
+#include <thread>
+#include <atomic>
+#include <mutex>
+
+#include "application.hpp"
+
+class source
+{
+  public:
+    source() = default;
+    source(const source & src);
+    source(source && src);
+    source & operator=(const source & src);
+    source & operator=(source && src);
+    ~source();
+    source(int priority, std::string sourceName, double lambda, std::ostream * out, size_t sleepTime);
+
+    std::shared_ptr< application > returnApp();
+
+    void stepWork(double stepTime);
+    void autoWork();
+    void stopAutoWork();
+
+    size_t getAppNum() const noexcept;
+    std::string getName() const;
+
+    void replaceOut(std::ostream * out);
+
+  private:
+    int priority_;
+    static inline int id_;
+    std::string sourceName_;
+    std::queue< std::shared_ptr< application > > apps_;
+    std::ostream * out_;
+
+    double lambda_;
+    double timeToNextApp_;
+
+    std::thread thread_;
+    std::atomic< bool > isRunning_{false};
+    std::mutex mutex_;
+    std::chrono::time_point< std::chrono::high_resolution_clock > lastWorkTime_;
+    size_t sleepTime_;
+
+    void createNewApp();
+    void autoWorkThread();
+
+    size_t appNum_;
+};
+
+#endif
+#ifndef SOURCEBUFFERDISPATCHER_HPP
+#define SOURCEBUFFERDISPATCHER_HPP
+
+#include <vector>
+#include <thread>
+#include <atomic>
+#include <mutex>
+
+#include "source.hpp"
+#include "buffer.hpp"
+
+class sourceBufferDispatcher
+{
+  public:
+    sourceBufferDispatcher(std::vector< source > & sources, std::vector< buffer > & buff, std::ostream * out, size_t sleepTime);
+    ~sourceBufferDispatcher();
+
+    sourceBufferDispatcher(const sourceBufferDispatcher & sbd);
+    sourceBufferDispatcher(sourceBufferDispatcher && sbd) noexcept;
+    sourceBufferDispatcher & operator=(const sourceBufferDispatcher & sbd);
+    sourceBufferDispatcher & operator=(sourceBufferDispatcher && sbd) noexcept;
+
+    void stepWork();
+    void autoWork();
+    void stopAutoWork();
+
+    void replaceOut(std::ostream * out);
+  private:
+    std::vector< source > & sources_;
+    std::vector< buffer > & buff_;
+    std::ostream * out_;
+
+    std::thread thread_;
+    std::atomic< bool > isRunning_{false};
+    std::mutex mutex_;
+    size_t sleepTime_;
+
+    size_t actualBuff_;
+
+    void dispatcherThreadFunc();
+};
+
+#endif

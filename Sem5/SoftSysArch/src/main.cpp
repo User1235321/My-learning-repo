@@ -2,36 +2,48 @@
 #include <chrono>
 #include <vector>
 #include <fstream>
+#include <mutex>
 
 #include "source.hpp"
 #include "sourceBufferDispatcher.hpp"
 #include "buffer.hpp"
 #include "bufferHandlerDispatcher.hpp"
 #include "handler.hpp"
-#include "print.hpp"
+#include "printer.hpp"
 
 int main()
 {
   srand(time(0));
-  const double delay = 10.0, handWork = 0.5;
+  const double delay = 100.0, handWork = 1;
   const double lambda = 0.5;
   const size_t buffSize = 10;
+  const size_t numOfBuffs = 1, numOfHands = 3, numOfSrc = 3;
   std::ofstream outFile("log.txt");
+  std::mutex outMutex;
 
   std::vector< source > sources;
-  sources.emplace_back(1, "Мастер спорта", lambda, &outFile, delay);
-  sources.emplace_back(2, "Кандидат в мастера спорта", 1.0, &outFile, delay);
-  sources.emplace_back(3, "Остальные", 5.0, &outFile, delay);
+  sources.emplace_back(1, "Мастер спорта", lambda, &outFile, delay, &outMutex);
+  sources.emplace_back(2, "Кандидат в мастера спорта", (lambda / 2.0), &outFile, delay, &outMutex);
+  sources.emplace_back(3, "Остальные", (lambda / 5.0), &outFile, delay, &outMutex);
+  for (size_t i = 0; i < (numOfSrc - 3); ++i)
+  {
+    std::string name = std::to_string(i + 4) + std::string(" источник");
+    sources.emplace_back(i + 4, name, lambda, &outFile, delay, &outMutex);
+  }
   std::vector< buffer > buff;
-  buff.emplace_back(&outFile, delay, delay);
+  for (size_t i = 0; i < numOfBuffs; ++i)
+  {
+    buff.emplace_back(&outFile, buffSize, delay, numOfSrc, &outMutex);
+  }
   std::vector< sourceBufferDispatcher > firstDisp;
-  firstDisp.emplace_back(sources, buff, &outFile, delay);
+  firstDisp.emplace_back(sources, buff, &outFile, delay, &outMutex);
   std::vector< handler > handlers;
-  handlers.emplace_back(&outFile, delay, handWork);
-  handlers.emplace_back(&outFile, delay, handWork);
-  handlers.emplace_back(&outFile, delay, handWork);
+  for (size_t i = 0; i < numOfHands; ++i)
+  {
+    handlers.emplace_back(&outFile, delay, handWork, numOfSrc, &outMutex);
+  }
   std::vector< bufferHandlerDispatcher > secondDisp;
-  secondDisp.emplace_back(handlers, buff, &outFile, buffSize);
+  secondDisp.emplace_back(handlers, buff, &outFile, buffSize, &outMutex);
 
   std::cout << "Автоматический режим (1), пошаговый (2)\n";
   int choice = 0;
@@ -39,8 +51,7 @@ int main()
 
   if (choice == 2)
   {
-    double stepTime = 0.25;
-    double totalTime = 0.0;
+    double stepTime = 0.25, totalTime = 0.0;
     size_t step = 0;
     while (std::cin.get() != 27)
     {
@@ -61,9 +72,8 @@ int main()
       {
         hand.stepWork(stepTime);
       }
-      printForStep(std::cout, buff, handlers, step);
+      printForStep(std::cout, buff, handlers, ++step);
       totalTime += stepTime;
-      ++step;
     }
   }
   else
@@ -105,11 +115,25 @@ int main()
     {
       sDisp.autoWork();
     }
-    std::atomic< bool > printing{true};
     std::cin.ignore();
     std::cin.get();
-    printing = false;
+    for (auto & src : sources)
+    {
+      src.stopAutoWork();
+    }
+    for (auto & fDisp : firstDisp)
+    {
+      fDisp.stopAutoWork();
+    }
+    for (auto & hand : handlers)
+    {
+      hand.stopAutoWork();
+    }
+    for (auto & sDisp : secondDisp)
+    {
+      sDisp.stopAutoWork();
+    }
+    printRes(std::cout, buff, handlers, sources);
   }
-  printRes(std::cout, buff, handlers, sources);
   return 0;
 }

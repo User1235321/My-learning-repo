@@ -4,24 +4,28 @@
 
 source::source(const source & src):
   priority_(src.priority_),
-  sourceName_(src.sourceName_),
   lambda_(src.lambda_),
   timeToNextApp_(0),
+  sleepTime_(src.sleepTime_),
+  appNum_(src.appNum_),
+  sourceName_(src.sourceName_),
   apps_(src.apps_),
   out_(src.out_),
-  sleepTime_(src.sleepTime_)
+  outMutex_(src.outMutex_)
   {
     timeToNextApp_ = -log((rand() % 10000 + 1) / 10001.0) / lambda_;
   }
 
 source::source(source && src):
   priority_(src.priority_),
-  sourceName_(std::move(src.sourceName_)),
   lambda_(src.lambda_),
   timeToNextApp_(0),
+  sleepTime_(src.sleepTime_),
+  appNum_(src.appNum_),
+  sourceName_(std::move(src.sourceName_)),
   apps_(std::move(src.apps_)),
   out_(src.out_),
-  sleepTime_(src.sleepTime_)
+  outMutex_(src.outMutex_)
   {
     timeToNextApp_ = -log((rand() % 10000 + 1) / 10001.0) / lambda_;
   }
@@ -29,24 +33,28 @@ source::source(source && src):
 source & source::operator=(const source & src)
 {
   priority_ = src.priority_;
-  sourceName_ = src.sourceName_;
   lambda_ = src.lambda_;
   timeToNextApp_ = -log((rand() % 10000 + 1) / 10001.0) / lambda_;
+  sleepTime_ = src.sleepTime_;
+  appNum_ = src.appNum_;
+  sourceName_ = src.sourceName_;
   apps_ = src.apps_;
   out_ = src.out_;
-  sleepTime_ = src.sleepTime_;
+  outMutex_ = src.outMutex_;
   return *this;
 }
 
 source & source::operator=(source && src)
 {
   priority_ = src.priority_;
-  sourceName_ = std::move(src.sourceName_);
   lambda_ = src.lambda_;
   timeToNextApp_ = -log((rand() % 10000 + 1) / 10001.0) / lambda_;
+  sleepTime_ = src.sleepTime_;
+  appNum_ = src.appNum_;
+  sourceName_ = std::move(src.sourceName_);
   apps_ = std::move(src.apps_);
   out_ = src.out_;
-  sleepTime_ = src.sleepTime_;
+  outMutex_ = src.outMutex_;
   return *this;
 }
 
@@ -55,23 +63,26 @@ source::~source()
   stopAutoWork();
 }
 
-source::source(int priority, std::string sourceName, double lambda, std::ostream * out, size_t sleepTime):
+source::source(int priority, std::string sourceName, double lambda, std::ostream * out, size_t sleepTime, std::mutex * outMutex):
   priority_(priority),
-  sourceName_(sourceName),
   lambda_(lambda),
   timeToNextApp_(0),
-  out_(out),
   sleepTime_(sleepTime),
-  appNum_(0)
+  appNum_(0),
+  sourceName_(sourceName),
+  out_(out),
+  outMutex_(outMutex)
   {
     timeToNextApp_ = -log((rand() % 10000 + 1) / 10001.0) / lambda_;
   }
 
 void source::createNewApp()
 {
-  std::lock_guard< std::mutex > lock(mutex_);
-  (*out_) << "\033[1;31mИсточник заявок " << sourceName_ << " создал заявку с id " << ++id_ << " и приоритетом " << priority_ << "\033[0m\n";
-  apps_.push(std::make_unique< application >(application{priority_, id_, 1}));
+  {
+    std::lock_guard< std::mutex > lock(*outMutex_);
+    (*out_) << "\033[1;31mИсточник заявок " << sourceName_ << " создал заявку с id " << ++id_ << " и приоритетом " << priority_ << "\033[0m\n";
+  }
+  apps_.push(std::make_unique< application >(application{priority_, id_, 1, std::chrono::high_resolution_clock::now()}));
   ++appNum_;
 }
 

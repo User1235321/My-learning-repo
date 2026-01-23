@@ -12,9 +12,8 @@
 class sourceBufferDispatcher
 {
   public:
-    sourceBufferDispatcher(std::vector< source > & sources, std::vector< buffer > & buff, std::ostream * out, size_t sleepTime);
+    sourceBufferDispatcher(std::vector< source > & sources, std::vector< buffer > & buff, std::ostream * out, size_t sleepTime, std::mutex * outMutex);
     ~sourceBufferDispatcher();
-
     sourceBufferDispatcher(const sourceBufferDispatcher & sbd);
     sourceBufferDispatcher(sourceBufferDispatcher && sbd) noexcept;
     sourceBufferDispatcher & operator=(const sourceBufferDispatcher & sbd);
@@ -23,20 +22,16 @@ class sourceBufferDispatcher
     void stepWork();
     void autoWork();
     void stopAutoWork();
-
     void replaceOut(std::ostream * out);
+
   private:
+    size_t sleepTime_, actualBuff_;
     std::vector< source > & sources_;
     std::vector< buffer > & buff_;
     std::ostream * out_;
-
     std::thread thread_;
     std::atomic< bool > isRunning_{false};
-    std::mutex mutex_;
-    size_t sleepTime_;
-
-    size_t actualBuff_;
-
+    std::mutex * outMutex_;
     void dispatcherThreadFunc();
 };
 
