@@ -5,7 +5,7 @@
 
 struct application
 {
-    int priority_, id_, actualStageNum_;
+    size_t id_, priority_, sourceId_;
     std::chrono::time_point< std::chrono::high_resolution_clock > startTime_;
 };
 

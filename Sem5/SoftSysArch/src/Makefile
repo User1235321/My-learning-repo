@@ -1,15 +1,22 @@
 build:
 	clear
 	grep -n -r "dell"
-	g++ *.cpp -o main
+	g++ *.cpp additionalSystem/*.cpp mainSystem/*.cpp -o main
 run:
 	make build
 	./main
-test:
+valgrind:
 	make build
 	valgrind ./main
-	rm main
+gdb:
+	make build
+	gdb ./main
 print:
-	clear
-	cat *.cpp
-	cat *.hpp
+	cat main.cpp >> main_cpp.txt
+	cat mainSystem/*.cpp >> mainSystem_cpp.txt
+	cat mainSystem/*.hpp >> mainSystem_hpp.txt
+	cat additionalSystem/*.cpp >> additionalSystem_cpp.txt
+	cat additionalSystem/*.hpp >> additionalSystem_hpp.txt
+clear:
+	rm *.txt
+	rm main
