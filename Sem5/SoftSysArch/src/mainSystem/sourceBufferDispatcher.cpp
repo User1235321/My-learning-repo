@@ -51,11 +51,11 @@ void sourceBufferDispatcher::stepWork()
   for(auto & src : (*sources_))
   {
     auto app = src.returnApp();
-    if (app.get() != nullptr)
+    if (app.id_ != 0)
     {
       ((*buff_)[actualBuff_]).push(app);
       ++actualBuff_;
-      actualBuff_ %= buff_ -> size();
+      actualBuff_ %= (buff_->size());
     }
   }
 }

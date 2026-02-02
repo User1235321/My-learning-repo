@@ -1,7 +1,6 @@
 #ifndef PRINTER_HPP
 #define PRINTER_HPP
 
-#include <memory>
 #include <mutex>
 #include <fstream>
 #include <string>
@@ -40,11 +39,11 @@ class printer
     void printRes(double totalTime);
     void endSource(size_t id, double fullTime, double workTime);
     void printSource(size_t id, size_t actualAppId, size_t priority);
-    void printBufferIn(size_t id, std::shared_ptr< application > app);
+    void printBufferIn(size_t id, application app);
     void printBufferOut(size_t id);
-    void printBufferDel(size_t id, std::shared_ptr< application > app);
-    void printHandlerIn(size_t id, std::shared_ptr< application > app);
-    void printHandlerOut(size_t id, std::shared_ptr< application > app);
+    void printBufferDel(size_t id, application app);
+    void printHandlerIn(size_t id, application app);
+    void printHandlerOut(size_t id, application app);
     void endHandler(size_t id, double workTime);
 
   private:
@@ -53,7 +52,7 @@ class printer
     std::vector< sourceStats > srcStats_;
     std::vector< size_t > buffFullness_;
     std::vector< handlerStats > handStats_;
-    std::mutex outMutex_;
+    std::mutex srcMutex_, buffMutex_, handMutex_, outMutex_;
     std::ostream * out_;
 };
 

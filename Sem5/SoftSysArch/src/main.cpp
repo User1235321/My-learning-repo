@@ -12,10 +12,9 @@
 
 int main()
 {
-  auto start = std::chrono::high_resolution_clock::now();
   srand(time(0));
   const size_t buffSize = 10, numOfSrc = 3, numOfBuffs = 1, numOfHands = 3, numOfFDisps = 1, numOfSDisps = 1;
-  const double delay = 10.0, handWork = 0.01, lambdaCONST = 0.5, stepTime = 0.25;
+  const double delay = 0, handWork = 0.01, lambdaCONST = 0.5, stepTime = 0.25;
   std::vector< double > lambda{lambdaCONST, lambdaCONST / 2.0, lambdaCONST / 5.0, lambdaCONST / 5.5, lambdaCONST / 6.0};
   std::vector< std::string > sourcesNames{"МС", "КМС", "I разряд", "II разряд", "III разряд"};
   for (size_t i = sourcesNames.size(); i < numOfSrc; ++i)
@@ -56,6 +55,7 @@ int main()
   }
   else
   {
+    auto start = std::chrono::high_resolution_clock::now();
     for (auto & src : sources)
       src.autoWork();
     for (auto & fDisp : firstDisp)
@@ -66,14 +66,14 @@ int main()
       sDisp.autoWork();
     std::cin.ignore();
     std::cin.get();
-    for (auto & src : sources)
-      src.stopAutoWork();
-    for (auto & fDisp : firstDisp)
-      fDisp.stopAutoWork();
-    for (auto & hand : handlers)
-      hand.stopAutoWork();
     for (auto & sDisp : secondDisp)
-      sDisp.stopAutoWork();
+        sDisp.stopAutoWork();
+    for (auto & hand : handlers)
+        hand.stopAutoWork();
+    for (auto & fDisp : firstDisp)
+        fDisp.stopAutoWork();
+    for (auto & src : sources)
+        src.stopAutoWork();
     print.printRes(std::chrono::duration< double >(std::chrono::high_resolution_clock::now() - start).count());
   }
 

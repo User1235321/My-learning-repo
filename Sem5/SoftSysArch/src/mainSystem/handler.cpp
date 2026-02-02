@@ -72,7 +72,7 @@ bool handler::free() const noexcept
   return !isWork_;
 }
 
-void handler::takeApp(std::shared_ptr< application > app)
+void handler::takeApp(application app)
 {
   appNow_ = app;
   isWork_ = true;
@@ -83,13 +83,13 @@ void handler::takeApp(std::shared_ptr< application > app)
 
 void handler::stepWork(double stepTime)
 {
-  if (isWork_)
+  if (isWork_ && (appNow_.id_ != 0))
   {
     timeNow_ += stepTime;
     if (timeNow_ >= workDuration_)
     {
       print_->printHandlerOut(id_, appNow_);
-      appNow_ = nullptr;
+      appNow_ = application{0, 0, 0, std::chrono::time_point< std::chrono::high_resolution_clock >()};
       isWork_ = false;
     }
   }
@@ -121,14 +121,14 @@ void handler::autoWorkThread()
 {
   while (isRunning_)
   {
-    if (isWork_)
+    if (isWork_ && (appNow_.id_ != 0))
     {
       auto now = std::chrono::high_resolution_clock::now();
       double timePassed = std::chrono::duration< double >(now - lastWorkTime_).count();
       if (timePassed >= workDuration_)
       {
         print_ -> printHandlerOut(id_, appNow_);
-        appNow_ = nullptr;
+        appNow_ = application{0, 0, 0, std::chrono::time_point< std::chrono::high_resolution_clock >()};
         isWork_ = false;
         workTime_ += timePassed;
       }

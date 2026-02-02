@@ -54,21 +54,21 @@ bufferHandlerDispatcher::bufferHandlerDispatcher(size_t sleepTime, std::vector< 
 
 void bufferHandlerDispatcher::stepWork()
 {
-  for (size_t i = 0; i < (handlers_ -> size()); ++i)
+  for (size_t i = 0; i < (handlers_->size()); ++i)
   {
     if (((*handlers_)[handlerNum_]).free())
     {
-      for (size_t j = 0; j < (buff_ -> size()); ++j)
+      for (size_t j = 0; j < (buff_->size()); ++j)
       {
         auto app = ((*buff_)[actualBuff_]).pop();
-        if (app.get() != nullptr)
+        if (app.id_ != 0)
         {
           ((*handlers_)[handlerNum_]).takeApp(app);
           ++handlerNum_;
           handlerNum_ %= handlers_->size();
         }
         ++actualBuff_;
-        actualBuff_ %= buff_->size();
+        actualBuff_ %= (buff_->size());
       }
     }
   }

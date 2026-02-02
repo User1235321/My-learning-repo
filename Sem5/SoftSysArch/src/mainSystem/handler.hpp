@@ -3,7 +3,6 @@
 
 #include <atomic>
 #include <chrono>
-#include <memory>
 #include <thread>
 
 #include "application.hpp"
@@ -21,11 +20,10 @@ class handler
     handler(size_t id, size_t sleepTime, double workDuration, printer * print);
  
     bool free() const noexcept;
-    void takeApp(std::shared_ptr< application > app);
+    void takeApp(application app);
     void stepWork(double stepTime);
     void autoWork();
     void stopAutoWork();
-    void replaceOut(std::ostream * out);
     std::vector< size_t > returnPriorSucNum() const;
     std::vector< double > returnTime() const;
 
@@ -33,7 +31,7 @@ class handler
     size_t id_, sleepTime_;
     double workDuration_, workTime_, timeNow_;
     bool isWork_;
-    std::shared_ptr< application > appNow_;
+    application appNow_;
     std::thread thread_;
     std::atomic< bool > isRunning_{false};
     std::chrono::time_point< std::chrono::high_resolution_clock > lastWorkTime_;

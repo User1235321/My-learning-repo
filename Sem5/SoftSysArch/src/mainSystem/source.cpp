@@ -79,12 +79,11 @@ source::source(size_t id, size_t priority, size_t sleepTime, double lambda, prin
   print_(print)
   {
     timeToNextApp_ = -log((rand() % 10000 + 1) / 10001.0) / lambda_;
-    initTime_ = std::chrono::high_resolution_clock::now();
   }
 
-std::shared_ptr< application > source::returnApp()
+application source::returnApp()
 {
-  std::shared_ptr< application > app;
+  application app;
   if (!apps_.empty())
   {
     app = apps_.front();
@@ -105,6 +104,7 @@ void source::stepWork(double stepTime)
 
 void source::autoWork()
 {
+  initTime_ = std::chrono::high_resolution_clock::now();
   if (!isRunning_)
   {
     isRunning_ = true;
@@ -127,8 +127,9 @@ void source::stopAutoWork()
 
 void source::createNewApp()
 {
-  print_ -> printSource(id_, ++actualAppId_, priority_);
-  apps_.push(std::make_shared< application >(application{actualAppId_, priority_, id_, std::chrono::high_resolution_clock::now()}));
+  size_t newId = actualAppId_.fetch_add(1);
+  print_ -> printSource(id_, newId, priority_);
+  apps_.push(application{newId, priority_, id_, std::chrono::high_resolution_clock::now()});
 }
 
 void source::autoWorkThread()
@@ -138,7 +139,7 @@ void source::autoWorkThread()
   {
     auto now = std::chrono::high_resolution_clock::now();
     double timePassed = std::chrono::duration< double >(now - lastUpdate).count();
-    if (timeToNextApp_ >= timePassed)
+    if (timePassed >= timeToNextApp_) 
     {
       createNewApp();
       timeToNextApp_ = -log((rand() % 10000 + 1) / 10001.0) / lambda_;
