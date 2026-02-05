@@ -14,13 +14,13 @@ int main()
 {
   srand(time(0));
   const size_t buffSize = 10, numOfSrc = 3, numOfBuffs = 1, numOfHands = 3, numOfFDisps = 1, numOfSDisps = 1;
-  const double delay = 0, handWork = 0.01, lambdaCONST = 0.5, stepTime = 0.25;
-  std::vector< double > lambda{lambdaCONST, lambdaCONST / 2.0, lambdaCONST / 5.0, lambdaCONST / 5.5, lambdaCONST / 6.0};
+  const long double delay = 0, handWork = 0.01, lambdaCONST = 50, stepTime = 0.025;
+  std::vector< long double > lambda{lambdaCONST, lambdaCONST * 2.0, lambdaCONST * 5.0, lambdaCONST * 5.5, lambdaCONST * 6.0};
   std::vector< std::string > sourcesNames{"МС", "КМС", "I разряд", "II разряд", "III разряд"};
   for (size_t i = sourcesNames.size(); i < numOfSrc; ++i)
   {
     sourcesNames.emplace_back(std::string("Дополнительная категория №") + std::to_string(i - sourcesNames.size() + 1));
-    lambda.emplace_back(lambdaCONST / 10.0);
+    lambda.emplace_back(lambdaCONST * 10.0);
   }
   printer print(numOfSrc, sourcesNames, numOfBuffs, numOfHands, buffSize, &std::cout);
 
@@ -38,7 +38,7 @@ int main()
   if (choice == 1)
   {
     size_t step = 0;
-    double totalTime = 0.0;
+    long double totalTime = 0.0;
     while (std::cin.get() != 27)
     {
       for (auto & src : sources)
@@ -64,17 +64,19 @@ int main()
       hand.autoWork();
     for (auto & sDisp : secondDisp)
       sDisp.autoWork();
-    std::cin.ignore();
-    std::cin.get();
+
+    while (!(std::chrono::duration< long double >(std::chrono::high_resolution_clock::now() - start).count() >= 10)){}
+    //std::cin.ignore();
+    //std::cin.get();
+    for (auto & src : sources)
+      src.stopAutoWork();
+    for (auto & fDisp : firstDisp)
+        fDisp.stopAutoWork();
     for (auto & sDisp : secondDisp)
         sDisp.stopAutoWork();
     for (auto & hand : handlers)
         hand.stopAutoWork();
-    for (auto & fDisp : firstDisp)
-        fDisp.stopAutoWork();
-    for (auto & src : sources)
-        src.stopAutoWork();
-    print.printRes(std::chrono::duration< double >(std::chrono::high_resolution_clock::now() - start).count());
+    print.printRes(std::chrono::duration< long double >(std::chrono::high_resolution_clock::now() - start).count());
   }
 
   return 0;

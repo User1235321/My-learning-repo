@@ -2,6 +2,7 @@
 
 #include <chrono>
 #include <cmath>
+#include <codecvt>
 #include <iomanip>
 
 printer::printer(size_t numOfSrc, const std::vector< std::string > & sourcesNames, size_t numOfBuffs, size_t numOfHands, size_t buffSize, std::ostream * out):
@@ -11,7 +12,7 @@ printer::printer(size_t numOfSrc, const std::vector< std::string > & sourcesName
   {
     for (size_t i = 0; i < numOfSrc; ++i)
     {
-      srcStats_.push_back(sourceStats{0, 0, 0, 0, 0, sourcesNames[i], std::vector< double >(0)});
+      srcStats_.push_back(sourceStats{0, 0, 0, 0, 0, sourcesNames[i], std::vector< long double >(0)});
     }
     for (size_t i = 0; i < numOfBuffs; ++i)
     {
@@ -28,7 +29,7 @@ void printer::setMod(bool autoMod)
   autoMod_ = autoMod;
 }
 
-void printer::printStep(size_t step, double totalTime)
+void printer::printStep(size_t step, long double totalTime)
 {
   (*out_) << "Время: " << totalTime << '\n';
   (*out_) << "Шаг " << step << '\n';
@@ -47,52 +48,85 @@ void printer::printStep(size_t step, double totalTime)
   }
 }
 
-void printer::printRes(double totalTime)
+void addSpaces(std::vector< std::vector< std::string > > & vec)
 {
-  (*out_) << "Общее время работы системы: " << std::fixed << std::setprecision(4) << totalTime << '\n';
-  std::vector< double > mid(srcStats_.size()), disp(srcStats_.size());
-  for (size_t i = 0; i < srcStats_.size(); ++i)
+  std::wstring_convert< std::codecvt_utf8< wchar_t > > converter;
+  for (size_t i = 0; i < vec[0].size(); ++i)
   {
-    double sum = 0, count = (srcStats_[i].appsTimes_).size();
-    for (double stats : ((srcStats_[i]).appsTimes_))
+    size_t width = 0;
+    for (size_t j = 0; j < vec.size(); ++j)
     {
-      sum += stats;
+      width = std::max(width, (converter.from_bytes(vec[j][i])).length());
     }
-    mid[i] = sum / count;
-    sum = 0;
-    for (double stats : ((srcStats_[i]).appsTimes_))
+    width += 5;
+    for (size_t j = 0; j < vec.size(); ++j)
     {
-      sum += std::pow(stats - mid[i], 2);
+      vec[j][i] += std::string(width - (converter.from_bytes(vec[j][i])).length(), ' ');
     }
-    disp[i] = sum / count;
-  }
-  std::lock_guard< std::mutex > lock(outMutex_);
-  const size_t width = 25;
-  (*out_) << std::setw(width) << "Источник" << std::setw(width) << "Сгенерировано" << std::setw(width) << "Обработано" << std::setw(width) << "Удалено" << std::setw(width) << "В системе" << std::setw(width) << "Время работы" << std::setw(width) << "Время простоя" << std::setw(width) << "Мат. ожидание" << std::setw(width) << "Дисперсия\n";
-
-  for (size_t i = 0; i < srcStats_.size(); ++i)
-  {
-    (*out_) << std::setw(width) << (srcStats_[i]).name_;
-    (*out_) << std::setw(width) << (srcStats_[i]).generates_;
-    (*out_) << std::setw(width) << (srcStats_[i]).sucsessfull_;
-    (*out_) << std::setw(width) << (srcStats_[i]).deleted_;
-    (*out_) << std::setw(width) << (srcStats_[i]).timeInSystem_;
-    (*out_) << std::setw(width) << (srcStats_[i]).workingTime_;
-    (*out_) << std::setw(width) << ((srcStats_[i]).timeInSystem_ - (srcStats_[i]).workingTime_);
-    (*out_) << std::setw(width) << mid[i];
-    (*out_) << std::setw(width) << disp[i] << '\n';
-  }
-  (*out_) << '\n' << std::setw(width) << "Менеджер" << std::setw(width) << "Обработано" << std::setw(width) << "Время работы" << std::setw(width) << "Загруженность\n";
-  for (size_t i = 0; i < handStats_.size(); ++i)
-  {
-    (*out_) << std::setw(width) << i;
-    (*out_) << std::setw(width) << (handStats_[i]).sucsessfull_;
-    (*out_) << std::setw(width) << (handStats_[i]).workingTime_;
-    (*out_) << std::setw(width) << (handStats_[i]).workingTime_ * 100.0 / totalTime << "%\n";
   }
 }
 
-void printer::endSource(size_t id, double fullTime, double workTime)
+void printer::printRes(long double totalTime)
+{
+  long double tt = totalTime;
+  for (auto & src : srcStats_)
+  {
+    tt = std::max(tt, src.timeInSystem_);
+  }
+  for (auto & hand : handStats_)
+  {
+    tt = std::max(tt, hand.workingTime_);
+  }
+  std::lock_guard< std::mutex > lock(outMutex_);
+  (*out_) << "Общее время работы системы: " << std::fixed << std::setprecision(4) << tt << '\n';
+  std::vector< std::vector< std::string > > srcOut;
+  srcOut.push_back(std::vector< std::string >{"Источник", "Сгенерировано", "Обработано", "Удалено", "В системе", "Время работы", "Время простоя", "Мат. ожидание", "Дисперсия"});
+  for (size_t i = 0; i < srcStats_.size(); ++i)
+  {
+    long double sum = 0;
+    for (long double stats : ((srcStats_[i]).appsTimes_))
+    {
+      sum += stats;
+    }
+    long double count = (srcStats_[i].appsTimes_).size();
+    long double mid = sum / count;
+    sum = 0;
+    for (long double stats : ((srcStats_[i]).appsTimes_))
+    {
+      sum += std::pow(stats - mid, 2);
+    }
+    long double disp = sum / count;
+    srcOut.push_back(std::vector< std::string >{srcStats_[i].name_, std::to_string(srcStats_[i].generates_), std::to_string(srcStats_[i].sucsessfull_), std::to_string(srcStats_[i].deleted_), std::to_string(srcStats_[i].timeInSystem_), std::to_string(srcStats_[i].workingTime_), std::to_string(srcStats_[i].timeInSystem_ - srcStats_[i].workingTime_), std::to_string(mid), std::to_string(disp)});
+  }
+  addSpaces(srcOut);
+  (*out_) << '\n';
+  for (auto & str : srcOut)
+  {
+    for (auto & word : str)
+    {
+      (*out_) << word;
+    }
+    (*out_) << '\n';
+  }
+  (*out_) << "\n\n";
+  std::vector< std::vector< std::string > > handOut;
+  handOut.push_back(std::vector< std::string >{"Менеджер", "Обработано", "Время работы", "Загруженность"});
+  for (size_t i = 0; i < handStats_.size(); ++i)
+  {
+    handOut.push_back(std::vector< std::string >{std::to_string(i), std::to_string((handStats_[i]).sucsessfull_), std::to_string((handStats_[i]).workingTime_), std::to_string((handStats_[i]).workingTime_ * 100.0 / tt) + std::string{'%'}});
+  }
+  addSpaces(handOut);
+  for (auto & str : handOut)
+  {
+    for (auto & word : str)
+    {
+      (*out_) << word;
+    }
+    (*out_) << '\n';
+  }
+}
+
+void printer::endSource(size_t id, long double fullTime, long double workTime)
 {
   std::lock_guard< std::mutex > lock(srcMutex_);
   (srcStats_[id]).timeInSystem_ = fullTime;
@@ -140,7 +174,7 @@ void printer::printBufferDel(size_t id, application app)
   {
     std::lock_guard< std::mutex > lock(srcMutex_);
     ++((srcStats_[app.sourceId_]).deleted_);
-    ((srcStats_[app.sourceId_]).appsTimes_).push_back(std::chrono::duration< double >(std::chrono::high_resolution_clock::now() - app.startTime_).count());
+    ((srcStats_[app.sourceId_]).appsTimes_).push_back(std::chrono::duration< long double >(std::chrono::high_resolution_clock::now() - app.startTime_).count());
   }
   if (autoMod_)
   {
@@ -172,7 +206,7 @@ void printer::printHandlerOut(size_t id, application app)
   {
     std::lock_guard< std::mutex > lock(srcMutex_);
     ++((srcStats_[app.sourceId_]).sucsessfull_);
-    ((srcStats_[app.sourceId_]).appsTimes_).push_back(std::chrono::duration< double >(std::chrono::high_resolution_clock::now() - app.startTime_).count());
+    ((srcStats_[app.sourceId_]).appsTimes_).push_back(std::chrono::duration< long double >(std::chrono::high_resolution_clock::now() - app.startTime_).count());
   }
   if (autoMod_)
   {
@@ -181,7 +215,7 @@ void printer::printHandlerOut(size_t id, application app)
   }
 }
 
-void printer::endHandler(size_t id, double workTime)
+void printer::endHandler(size_t id, long double workTime)
 {
   std::lock_guard< std::mutex > lock(handMutex_);
   (handStats_[id]).workingTime_ = workTime;

@@ -58,7 +58,7 @@ handler::~handler()
   stopAutoWork();
 }
 
-handler::handler(size_t id, size_t sleepTime, double workDuration, printer * print):
+handler::handler(size_t id, size_t sleepTime, long double workDuration, printer * print):
   id_(id),
   sleepTime_(sleepTime),
   workDuration_(workDuration),
@@ -81,7 +81,7 @@ void handler::takeApp(application app)
   print_->printHandlerIn(id_, app);
 }
 
-void handler::stepWork(double stepTime)
+void handler::stepWork(long double stepTime)
 {
   if (isWork_ && (appNow_.id_ != 0))
   {
@@ -123,14 +123,13 @@ void handler::autoWorkThread()
   {
     if (isWork_ && (appNow_.id_ != 0))
     {
-      auto now = std::chrono::high_resolution_clock::now();
-      double timePassed = std::chrono::duration< double >(now - lastWorkTime_).count();
+      long double timePassed = std::chrono::duration< long double >(std::chrono::high_resolution_clock::now() - lastWorkTime_).count();
       if (timePassed >= workDuration_)
       {
         print_ -> printHandlerOut(id_, appNow_);
         appNow_ = application{0, 0, 0, std::chrono::time_point< std::chrono::high_resolution_clock >()};
         isWork_ = false;
-        workTime_ += timePassed;
+        workTime_ += workDuration_;
       }
     }
     std::this_thread::sleep_for(std::chrono::milliseconds(sleepTime_));

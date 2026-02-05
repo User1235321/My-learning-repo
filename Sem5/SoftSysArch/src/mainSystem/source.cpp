@@ -39,7 +39,7 @@ source & source::operator=(const source & src)
     sleepTime_ = src.sleepTime_;
     workTime_ = src.workTime_;
     lambda_ = src.lambda_;
-    timeToNextApp_ -log((rand() % 10000 + 1) / 10001.0) / lambda_;
+    timeToNextApp_= -log((rand() % 10000 + 1) / 10001.0) / lambda_;
     initTime_ = src.initTime_;
     apps_ = src.apps_;
     print_ = src.print_;
@@ -56,7 +56,7 @@ source & source::operator=(source && src)
     sleepTime_ = src.sleepTime_;
     workTime_ = src.workTime_;
     lambda_ = src.lambda_;
-    timeToNextApp_ -log((rand() % 10000 + 1) / 10001.0) / lambda_;
+    timeToNextApp_ = -log((rand() % 10000 + 1) / 10001.0) / lambda_;
     initTime_ = src.initTime_;
     apps_ = src.apps_;
     print_ = src.print_;
@@ -69,7 +69,7 @@ source::~source()
   stopAutoWork();
 }
 
-source::source(size_t id, size_t priority, size_t sleepTime, double lambda, printer * print):
+source::source(size_t id, size_t priority, size_t sleepTime, long double lambda, printer * print):
   id_(id),
   priority_(priority),
   sleepTime_(sleepTime),
@@ -83,7 +83,7 @@ source::source(size_t id, size_t priority, size_t sleepTime, double lambda, prin
 
 application source::returnApp()
 {
-  application app;
+  application app{0, 0, 0, std::chrono::time_point< std::chrono::high_resolution_clock >()};
   if (!apps_.empty())
   {
     app = apps_.front();
@@ -92,7 +92,7 @@ application source::returnApp()
   return app;
 }
 
-void source::stepWork(double stepTime)
+void source::stepWork(long double stepTime)
 {
   timeToNextApp_ -= stepTime;
   if (timeToNextApp_ <= 0)
@@ -116,7 +116,7 @@ void source::stopAutoWork()
 {
   if (isRunning_)
   {
-    print_ -> endSource(id_, std::chrono::duration< double >(std::chrono::high_resolution_clock::now() - initTime_).count(), workTime_);
+    print_ -> endSource(id_, std::chrono::duration< long double >(std::chrono::high_resolution_clock::now() - initTime_).count(), workTime_);
     isRunning_ = false;
     if (thread_.joinable())
     {
@@ -138,7 +138,7 @@ void source::autoWorkThread()
   while (isRunning_)
   {
     auto now = std::chrono::high_resolution_clock::now();
-    double timePassed = std::chrono::duration< double >(now - lastUpdate).count();
+    long double timePassed = std::chrono::duration< long double >(now - lastUpdate).count();
     if (timePassed >= timeToNextApp_) 
     {
       createNewApp();

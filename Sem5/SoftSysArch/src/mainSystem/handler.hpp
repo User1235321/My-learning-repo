@@ -17,19 +17,19 @@ class handler
     handler & operator=(const handler & hand);
     handler & operator=(handler && hand);
     ~handler();
-    handler(size_t id, size_t sleepTime, double workDuration, printer * print);
+    handler(size_t id, size_t sleepTime, long double workDuration, printer * print);
  
     bool free() const noexcept;
     void takeApp(application app);
-    void stepWork(double stepTime);
+    void stepWork(long double stepTime);
     void autoWork();
     void stopAutoWork();
     std::vector< size_t > returnPriorSucNum() const;
-    std::vector< double > returnTime() const;
+    std::vector< long double > returnTime() const;
 
   private:
     size_t id_, sleepTime_;
-    double workDuration_, workTime_, timeNow_;
+    long double workDuration_, workTime_, timeNow_;
     bool isWork_;
     application appNow_;
     std::thread thread_;

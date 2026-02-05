@@ -19,16 +19,16 @@ class source
     source & operator=(const source & src);
     source & operator=(source && src);
     ~source();
-    source(size_t id, size_t priority, size_t sleepTime, double lambda, printer * print);
+    source(size_t id, size_t priority, size_t sleepTime, long double lambda, printer * print);
 
     application returnApp();
-    void stepWork(double stepTime);
+    void stepWork(long double stepTime);
     void autoWork();
     void stopAutoWork();
 
   private:
     size_t id_, priority_, sleepTime_;
-    double workTime_, lambda_, timeToNextApp_;
+    long double workTime_, lambda_, timeToNextApp_;
     std::thread thread_;
     static inline std::atomic< size_t > actualAppId_{0};
     std::atomic< bool > isRunning_{false};
