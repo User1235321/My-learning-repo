@@ -5,6 +5,7 @@ build:
 run:
 	make build
 	./main
+	rm main
 valgrind:
 	make build
 	valgrind ./main
@@ -19,4 +20,3 @@ print:
 	cat additionalSystem/*.hpp >> additionalSystem_hpp.txt
 clear:
 	rm *.txt
-	rm main

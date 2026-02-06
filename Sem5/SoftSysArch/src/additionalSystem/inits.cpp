@@ -20,12 +20,12 @@ std::vector< buffer > initBuffers(size_t numOfBuffs, size_t buffSize, printer * 
   return buff;
 }
 
-std::vector< handler > initHandlers(size_t numOfHands, long double delay, long double handWork, printer * print)
+std::vector< handler > initHandlers(size_t numOfHands, long double delay, const std::vector< long double > & handWork, printer * print)
 {
   std::vector< handler > handlers;
   for (size_t i = 0; i < numOfHands; ++i)
   {
-    handlers.emplace_back(i, delay, handWork, print);
+    handlers.emplace_back(i, delay, handWork[i], print);
   }
   return handlers;
 }

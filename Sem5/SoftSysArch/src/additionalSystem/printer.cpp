@@ -81,8 +81,12 @@ void printer::printRes(long double totalTime)
   (*out_) << "Общее время работы системы: " << std::fixed << std::setprecision(4) << tt << '\n';
   std::vector< std::vector< std::string > > srcOut;
   srcOut.push_back(std::vector< std::string >{"Источник", "Сгенерировано", "Обработано", "Удалено", "В системе", "Время работы", "Время простоя", "Мат. ожидание", "Дисперсия"});
+  size_t appsNum = 0, delNum = 0, sucNum = 0;
   for (size_t i = 0; i < srcStats_.size(); ++i)
   {
+    appsNum += srcStats_[i].generates_;
+    delNum += srcStats_[i].deleted_;
+    sucNum += srcStats_[i].sucsessfull_;
     long double sum = 0;
     for (long double stats : ((srcStats_[i]).appsTimes_))
     {
@@ -111,10 +115,13 @@ void printer::printRes(long double totalTime)
   (*out_) << "\n\n";
   std::vector< std::vector< std::string > > handOut;
   handOut.push_back(std::vector< std::string >{"Менеджер", "Обработано", "Время работы", "Загруженность"});
+  long double srZag = 0;
   for (size_t i = 0; i < handStats_.size(); ++i)
   {
     handOut.push_back(std::vector< std::string >{std::to_string(i), std::to_string((handStats_[i]).sucsessfull_), std::to_string((handStats_[i]).workingTime_), std::to_string((handStats_[i]).workingTime_ * 100.0 / tt) + std::string{'%'}});
+    srZag += (handStats_[i]).workingTime_ * 100.0 / tt;
   }
+  srZag /= handStats_.size();
   addSpaces(handOut);
   for (auto & str : handOut)
   {
@@ -124,6 +131,7 @@ void printer::printRes(long double totalTime)
     }
     (*out_) << '\n';
   }
+  (*out_) << "\nВсего сгенерированно: " << appsNum << "; удалено: " << delNum << "; обработанно " << sucNum << "; средняя загруженность: " << srZag << '\n';
 }
 
 void printer::endSource(size_t id, long double fullTime, long double workTime)
