@@ -69,17 +69,21 @@ void addCond(bdd & myBdd, size_t obj, size_t prop, size_t value)
 }
 void firstCond(bdd & myBdd)
 {
-  for (size_t i = 0; i < N; ++i)
-  {
-    for (size_t j = 0; j < 3; ++j)
-    {
-      addCond(myBdd, i, j, i);
-    }
-  }
-  for (size_t i = 0; i < 3; ++i)
-  {
-     addCond(myBdd, i, 3, i);
-  }
+  addCond(myBdd, 0, 0, 0);
+  addCond(myBdd, 1, 0, 1);
+  addCond(myBdd, 2, 0, 2);
+  addCond(myBdd, 3, 0, 3);
+  addCond(myBdd, 4, 0, 4);
+  addCond(myBdd, 5, 0, 5);
+  addCond(myBdd, 6, 0, 6);
+
+  addCond(myBdd, 2, 3, 8);
+  addCond(myBdd, 3, 3, 0);
+  addCond(myBdd, 4, 3, 1);
+  addCond(myBdd, 5, 3, 2);
+  addCond(myBdd, 6, 3, 3);
+  addCond(myBdd, 7, 3, 4);
+  addCond(myBdd, 8, 3, 5);
 }
 void addSecondCond(bdd & myBdd, size_t obj, size_t prop1, size_t value1, size_t prop2, size_t value2)
 {
@@ -93,10 +97,15 @@ void secondCond(bdd & myBdd)
 {
   for (size_t obj = 0; obj < N; ++obj)
   {
-    addSecondCond(myBdd, obj, 0, 4, 3, 4);
-    addSecondCond(myBdd, obj, 0, 5, 3, 5);
-    addSecondCond(myBdd, obj, 0, 6, 3, 6);
-    addSecondCond(myBdd, obj, 0, 7, 3, 7);
+    addSecondCond(myBdd, obj, 0, 0, 2, 7);
+    addSecondCond(myBdd, obj, 0, 1, 2, 8);
+    addSecondCond(myBdd, obj, 0, 2, 2, 0);
+    addSecondCond(myBdd, obj, 0, 3, 2, 1);
+
+    addSecondCond(myBdd, obj, 0, 4, 2, 2);
+    addSecondCond(myBdd, obj, 0, 5, 2, 3);
+    addSecondCond(myBdd, obj, 0, 6, 2, 4);
+    addSecondCond(myBdd, obj, 0, 7, 2, 5);
   }
 }
 void addThirdCond(bdd & myBdd, size_t prop_obj, size_t value_obj, size_t prop_left, size_t value_left)
@@ -113,10 +122,11 @@ void addThirdCond(bdd & myBdd, size_t prop_obj, size_t value_obj, size_t prop_le
 }
 void thirdCond(bdd & myBdd)
 {
-  addThirdCond(myBdd, 0, 8, 0, 7);
-  addThirdCond(myBdd, 0, 5, 0, 4);
-  addThirdCond(myBdd, 0, 2, 0, 1);
-  addThirdCond(myBdd, 0, 7, 0, 6);
+  addThirdCond(myBdd, 0, 1, 3, 6);
+  addThirdCond(myBdd, 0, 2, 3, 7);
+
+  addThirdCond(myBdd, 0, 4, 3, 0);
+  addThirdCond(myBdd, 0, 5, 3, 1);
 }
 void addFourthCond(bdd & myBdd, size_t prop_obj, size_t value_obj, size_t prop_neighbor, size_t value_neighbor, bool vert)
 {
@@ -148,19 +158,14 @@ void addFourthCond(bdd & myBdd, size_t prop_obj, size_t value_obj, size_t prop_n
     myBdd &= !cond_obj | neighbor_condition;
   }
 }
-void fourthCond(bdd & myBdd)
+void fourthCond(bdd & myBdd, bool vert)
 {
-  addFourthCond(myBdd, 0, 8, 0, 7, false);
-  addFourthCond(myBdd, 0, 5, 0, 4, false);
-  addFourthCond(myBdd, 0, 2, 0, 1, false);
-  addFourthCond(myBdd, 0, 7, 0, 6, false);
-}
-void fourthCondwithVert(bdd & myBdd)
-{
-  addFourthCond(myBdd, 0, 8, 0, 7, true);
-  addFourthCond(myBdd, 0, 5, 0, 4, true);
-  addFourthCond(myBdd, 0, 2, 0, 1, true);
-  addFourthCond(myBdd, 0, 7, 0, 6, true);
+  addFourthCond(myBdd, 0, 1, 1, 8, vert);
+  addFourthCond(myBdd, 0, 2, 1, 0, vert);
+  addFourthCond(myBdd, 0, 4, 1, 2, vert);
+  addFourthCond(myBdd, 0, 5, 1, 3, vert);
+  addFourthCond(myBdd, 0, 7, 1, 5, vert);
+  addFourthCond(myBdd, 0, 8, 1, 6, vert);
 }
 void printCombination(bdd & solution)
 {
@@ -193,7 +198,7 @@ int main()
   firstCond(myCoolBDD);
   secondCond(myCoolBDD);
   thirdCond(myCoolBDD);
-  fourthCond(myCoolBDD);
+  fourthCond(myCoolBDD, false);
   makeUnique(myCoolBDD);
   initBDD(myCoolBDD);
   int count = 0;
