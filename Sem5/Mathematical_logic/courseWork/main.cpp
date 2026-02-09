@@ -1,246 +1,211 @@
 #include <iostream>
 #include <cmath>
-#include <fstream>
-
 #include <bdd.h>
 
 constexpr size_t N = 9, M = 4;
 constexpr size_t logN = log2(N) + (log2(N) > (int)log2(N));
-constexpr size_t boolNum = N * M * logN;
-char var[boolNum];
-bdd param[M][N][N];
-
-void initParams()
+size_t getVarIndex(size_t obj, size_t prop, size_t bit)
 {
-  size_t I = 0;
-  for (size_t i = 0; i < N; ++i)
+  return obj * M * logN + prop * logN + bit;
+}
+void initBDD(bdd & myBdd)
+{
+  for (size_t obj = 0; obj < N; ++obj)
   {
-    for (size_t j = 0; j < N; ++j)
+    for (size_t prop = 0; prop < M; ++prop)
     {
-      for (size_t k = 0; k < M; ++k)
+      bdd prop_bdd = bddfalse;
+      for (size_t val = 0; val < N; ++val)
       {
-        param[k][i][j] = bddtrue;
-        for (size_t q = 0; q < logN; ++q)
+        bdd val_bdd = bddtrue;
+        for (size_t bit = 0; bit < logN; ++bit)
         {
-          if((j >> q) & 1)
+          if ((val >> bit) & 1)
           {
-            param[k][i][j] &= bdd_ithvar(I + k * logN + q);
+            val_bdd &= bdd_ithvar(getVarIndex(obj, prop, bit));
           }
           else
           {
-            param[k][i][j] &= bdd_nithvar(I + k * logN + q);
+            val_bdd &= bdd_nithvar(getVarIndex(obj, prop, bit));
           }
         }
+        prop_bdd |= val_bdd;
       }
-    }
-    I += logN * M;
-  }
-}
-
-void applyFirstCond(bdd & myBdd, std::ifstream & in)
-{
-  for (size_t i = 0; i < 7; ++i)
-  {
-    int objecNum, paramNum, paramVal;
-    in >> objecNum >> paramNum >> paramVal;
-    myBdd &= param[paramNum][objecNum][paramVal];
-  }
-}
-
-void applySecondCond(bdd & myBdd, std::ifstream & in)
-{
-  int secondParamCond[4][4];
-  for (size_t i = 0; i < 4; ++i)
-  {
-    for (size_t j = 0; j < 4; ++j)
-    {
-      in >> secondParamCond[i][j];
-    }
-  }
-
-  for (size_t i = 0; i < N; ++i)
-  {
-    for (size_t j = 0; j < 4; ++j)
-    {
-      myBdd &= !(param[secondParamCond[j][0]][i][secondParamCond[j][1]] ^ param[secondParamCond[j][2]][i][secondParamCond[j][3]]);
+      myBdd &= prop_bdd;
     }
   }
 }
-
-void applyThirdCond(bdd & myBdd, std::ifstream & in)
+void makeUnique(bdd & myBdd)
 {
-  int thirdParamCond[2][4];
-  for (size_t i = 0; i < 2; ++i)
+  for (size_t prop = 0; prop < M; ++prop)
   {
-    for (size_t j = 0; j < 4; ++j)
+    for (size_t obj1 = 0; obj1 < N; ++obj1)
     {
-      in >> thirdParamCond[i][j];
-    }
-  }
-
-  constexpr int side = std::sqrt(N);
-  for (int i = 0; i < side; ++i)
-  {
-    for (int j = 0; j < side; ++j)
-    {
-      for (size_t q = 0; q < 2; ++q)
+      for (size_t obj2 = obj1 + 1; obj2 < N; ++obj2)
       {
-        myBdd &= !(param[thirdParamCond[q][0]][i * side + j][thirdParamCond[q][1]] ^ param[thirdParamCond[q][2]][i * side + ((side + j - 1) % side)][thirdParamCond[q][3]]);
-      }
-    }
-  }
-}
-
-void fourthCondTemp(int paramNum1, int paramVal1, int paramNum2, int paramVal2, bdd & myBdd)
-{
-  constexpr int side = std::sqrt(N);
-  for (int i = 0; i < side; ++i)
-  {
-    for (int j = 0; j < side; ++j)
-    {
-      bdd temp = bddfalse;
-      temp |= !(param[paramNum1][i * side + j][paramVal1] ^ param[paramNum2][i * side + ((side + j - 1) % side)][paramVal2]);
-      temp |= !(param[paramNum1][i * side + j][paramVal1] ^ param[paramNum2][((side + i - 1) % side) * side + ((side + j + 1) % side)][paramVal2]);
-      myBdd &= temp;
-    }
-  }
-}
-
-void applyFourthCond(bdd & myBdd, std::ifstream & in)
-{
-  for (size_t i = 0; i < 6; ++i)
-  {
-    int paramNum1, paramVal1, paramNum2, paramVal2;
-    in >> paramNum1 >> paramVal1 >> paramNum2 >> paramVal2;
-    fourthCondTemp(paramNum1, paramVal1, paramNum2, paramVal2, myBdd);
-  }
-}
-
-
-void checkCorrectsValues(bdd & myBdd)
-{
-  for (size_t i = 0; i < N; ++i)
-  {
-    bdd localBdd[M];
-    for (size_t j = 0; j < M; ++j)
-    {
-      localBdd[j] = bddfalse;
-    }
-    for (size_t j = 0; j < N; ++j)
-    {
-      for (size_t q = 0; q < M; ++q)
-      {
-        localBdd[q] |= param[q][i][j];
-      }
-    }
-    for (size_t j = 0; j < M; ++j)
-    {
-      myBdd &= localBdd[j];
-    }
-  }
-}
-
-void checkValuesToUnique(bdd & myBdd)
-{
-  for (size_t i = 0; i < N; ++i)
-  {
-    for (size_t j = 0; j < N - 1; ++j)
-    {
-      for (size_t q = j + 1; q < N; ++q)
-      {
-        for (size_t k = 0; k < M; ++k)
+        bdd diff = bddfalse;
+        for (size_t bit = 0; bit < logN; ++bit)
         {
-          myBdd &= param[k][j][i] >> !param[k][q][i];
+          diff |= (bdd_ithvar(getVarIndex(obj1, prop, bit)) ^ bdd_ithvar(getVarIndex(obj2, prop, bit)));
+        }
+        myBdd &= diff;
+      }
+    }
+  }
+}
+void addCond(bdd & myBdd, size_t obj, size_t prop, size_t value)
+{
+  for (size_t bit = 0; bit < logN; ++bit)
+  {
+    if ((value >> bit) & 1)
+    {
+      myBdd &= bdd_ithvar(getVarIndex(obj, prop, bit));
+    }
+    else
+    {
+      myBdd &= bdd_nithvar(getVarIndex(obj, prop, bit));
+    }
+  }
+}
+void firstCond(bdd & myBdd)
+{
+  for (size_t i = 0; i < N; ++i)
+  {
+    for (size_t j = 0; j < 3; ++j)
+    {
+      addCond(myBdd, i, j, i);
+    }
+  }
+  for (size_t i = 0; i < 3; ++i)
+  {
+     addCond(myBdd, i, 3, i);
+  }
+}
+void addSecondCond(bdd & myBdd, size_t obj, size_t prop1, size_t value1, size_t prop2, size_t value2)
+{
+  bdd cond1 = bddtrue;
+  addCond(cond1, obj, prop1, value1);
+  bdd cond2 = bddtrue;
+  addCond(cond2, obj, prop2, value2);
+  myBdd &= !(cond1 ^ cond2);
+}
+void secondCond(bdd & myBdd)
+{
+  for (size_t obj = 0; obj < N; ++obj)
+  {
+    addSecondCond(myBdd, obj, 0, 4, 3, 4);
+    addSecondCond(myBdd, obj, 0, 5, 3, 5);
+    addSecondCond(myBdd, obj, 0, 6, 3, 6);
+    addSecondCond(myBdd, obj, 0, 7, 3, 7);
+  }
+}
+void addThirdCond(bdd & myBdd, size_t prop_obj, size_t value_obj, size_t prop_left, size_t value_left)
+{
+  for (size_t obj = 0; obj < N; ++obj)
+  {
+    if ((obj % (size_t)(std::sqrt(N))) == 0) continue;
+    bdd cond_obj = bddtrue;
+    addCond(cond_obj, obj, prop_obj, value_obj);
+    bdd cond_left = bddtrue;
+    addCond(cond_left, (obj - 1), prop_left, value_left);
+    myBdd &= !cond_obj | cond_left;
+  }
+}
+void thirdCond(bdd & myBdd)
+{
+  addThirdCond(myBdd, 0, 8, 0, 7);
+  addThirdCond(myBdd, 0, 5, 0, 4);
+  addThirdCond(myBdd, 0, 2, 0, 1);
+  addThirdCond(myBdd, 0, 7, 0, 6);
+}
+void addFourthCond(bdd & myBdd, size_t prop_obj, size_t value_obj, size_t prop_neighbor, size_t value_neighbor, bool vert)
+{
+  for (size_t obj = 0; obj < N; ++obj)
+  {
+    size_t row = obj / 3, col = obj % 3;
+    bool has_left = (col > 0), has_top_right = (((row > 0) || vert) && col < 2);
+    if (!has_left && !has_top_right) continue;
+    bdd cond_obj = bddtrue;
+    addCond(cond_obj, obj, prop_obj, value_obj);
+    bdd neighbor_condition = bddfalse;
+    if (has_left)
+    {
+      bdd cond_left = bddtrue;
+      addCond(cond_left, obj - 1, prop_neighbor, value_neighbor);
+      neighbor_condition |= cond_left;
+    }
+    if (has_top_right)
+    {
+      bdd cond_top_right = bddtrue;
+      size_t top_row = (row - 1);
+      if (vert)
+      {
+        top_row = (row == 0) ? 2 : (row - 1);
+      }
+      addCond(cond_top_right, top_row * 3 + (col + 1), prop_neighbor, value_neighbor);
+      neighbor_condition |= cond_top_right;
+    }
+    myBdd &= !cond_obj | neighbor_condition;
+  }
+}
+void fourthCond(bdd & myBdd)
+{
+  addFourthCond(myBdd, 0, 8, 0, 7, false);
+  addFourthCond(myBdd, 0, 5, 0, 4, false);
+  addFourthCond(myBdd, 0, 2, 0, 1, false);
+  addFourthCond(myBdd, 0, 7, 0, 6, false);
+}
+void fourthCondwithVert(bdd & myBdd)
+{
+  addFourthCond(myBdd, 0, 8, 0, 7, true);
+  addFourthCond(myBdd, 0, 5, 0, 4, true);
+  addFourthCond(myBdd, 0, 2, 0, 1, true);
+  addFourthCond(myBdd, 0, 7, 0, 6, true);
+}
+void printCombination(bdd & solution)
+{
+  for (size_t obj = 0; obj < N; ++obj)
+  {
+    std::cout << "Object " << obj + 1 << ": ";
+    for (size_t prop = 0; prop < M; ++prop)
+    {
+      int val = 0;
+      for (size_t bit = 0; bit < logN; ++bit)
+      {
+        if ((solution & bdd_ithvar(getVarIndex(obj, prop, bit))) != bddfalse)
+        {
+          val += (1 << bit);
         }
       }
+      std::cout << val << " ";
     }
+    std::cout << "\n";
   }
-}
-
-void print()
-{
-  for (size_t i = 0; i < N; ++i)
-  {
-    std::cout << i << ": ";
-    for (size_t j = 0; j < M; ++j)
-    {
-      int J = i * M * logN + j * logN;
-      int num = 0;
-      for (size_t k = 0; k < logN; ++k)
-      {
-        num += (size_t)(var[J + k] << k);
-      }
-      std::cout << num << ' ';
-    }
-    std::cout << '\n';
-  }
-  std::cout << '\n';
-}
-
-
-void build(const char * varset, const size_t n, const size_t I)
-{
-  if (I == (n - 1))
-  {
-    if (varset[I] >= 0)
-    {
-      var[I] = varset[I];
-      print();
-      return;
-    }
-    var[I] = 0;
-    print();
-    var[I] = 1;
-    print();
-    return;
-  }
-  if (varset[I] >= 0)
-  {
-    var[I] = varset[I];
-    build(varset, n, I + 1);
-    return;
-  }
-  var[I] = 0;
-  build(varset, n, I + 1);
-  var[I] = 1;
-  build(varset, n, I + 1);
-}
-
-void fun(char * varset, int size)
-{
-  build(varset, size, 0);
+  std::cout << "\n";
 }
 
 int main()
 {
-  bdd_init(2000000, 200000);
-  bdd_setvarnum(boolNum);
-
-  bdd myBdd = bddtrue;
-
-  initParams();
-
-  std::ifstream paramsBase("params.txt");
-  if (!paramsBase)
+  int size = 5000000;
+  bdd_init(size * 10, size);
+  bdd_setvarnum(N * M * logN);
+  bdd myCoolBDD = bddtrue;
+  firstCond(myCoolBDD);
+  secondCond(myCoolBDD);
+  thirdCond(myCoolBDD);
+  fourthCond(myCoolBDD);
+  makeUnique(myCoolBDD);
+  initBDD(myCoolBDD);
+  int count = 0;
+  bdd current = myCoolBDD;
+  while (current != bddfalse)
   {
-    std::cerr << "Can't open params file\n";
-    return 1;
+    bdd solution = bdd_satone(current);
+    ++count;
+    printCombination(solution);
+    current &= !solution;
   }
-  applyFirstCond(myBdd, paramsBase);
-  applySecondCond(myBdd, paramsBase);
-  applyThirdCond(myBdd, paramsBase);
-  applyFourthCond(myBdd, paramsBase);
-
-  checkCorrectsValues(myBdd);
-  checkValuesToUnique(myBdd);
-
-  size_t satcount = bdd_satcount(myBdd);
-  std::cout << "Found " << satcount << " solution\n";
-  if (satcount)
-  {
-    bdd_allsat(myBdd, fun);
-  }
-
+  std::cout << "Total combinations: " << count << "\n";
   bdd_done();
   return 0;
 }
