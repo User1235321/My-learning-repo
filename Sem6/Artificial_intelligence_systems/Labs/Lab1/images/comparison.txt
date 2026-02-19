@@ -1,0 +1,4 @@
+                     accuracy  f1_score   roc_auc
+Logistic Regression  0.793082  0.293542  0.789977
+Random Forest        0.969775  0.733797  0.940259
+Best model: Random Forest
