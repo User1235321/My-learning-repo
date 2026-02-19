@@ -198,7 +198,7 @@ int main()
   firstCond(myCoolBDD);
   secondCond(myCoolBDD);
   thirdCond(myCoolBDD);
-  fourthCond(myCoolBDD, false);
+  fourthCond(myCoolBDD, 0);
   makeUnique(myCoolBDD);
   initBDD(myCoolBDD);
   int count = 0;
