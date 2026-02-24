@@ -61,6 +61,7 @@ plt.show()
 y_proba = qda.predict_proba(X_test)[:, 1]
 fpr, tpr, thresholds = roc_curve(y_test, y_proba, pos_label=1)
 roc_auc = auc(fpr, tpr)
+print(f"ROC AUC = {roc_auc:.3f}")
 
 plt.figure()
 plt.plot(fpr, tpr, label=f'ROC кривая (AUC = {roc_auc:.3f})')
@@ -75,6 +76,7 @@ plt.show()
 
 precision, recall, _ = precision_recall_curve(y_test, y_proba, pos_label=1)
 pr_auc = average_precision_score(y_test, y_proba)
+print(f"Average Precision = {pr_auc:.3f}")
 
 plt.figure()
 plt.plot(recall, precision, label=f'PR кривая (AP = {pr_auc:.3f})')

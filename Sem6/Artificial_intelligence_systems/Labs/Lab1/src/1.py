@@ -70,3 +70,7 @@ axes[1].grid(True)
 plt.tight_layout()
 plt.savefig('../images/accuracy_vs_testsize.png', dpi=150)
 plt.show()
+
+print("Доля теста\tspam_train\tspam_test\tttt_train\tttt_test")
+for i, ts in enumerate(test_sizes):
+    print(f"{ts:.1f}\t{train_acc_spam[i]:.3f}\t{test_acc_spam[i]:.3f}\t{train_acc_ttt[i]:.3f}\t{test_acc_ttt[i]:.3f}")
