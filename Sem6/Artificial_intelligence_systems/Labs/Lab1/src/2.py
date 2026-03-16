@@ -2,9 +2,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 import os
 from sklearn.model_selection import train_test_split
-from sklearn.discriminant_analysis import QuadraticDiscriminantAnalysis
-from sklearn.metrics import (accuracy_score, confusion_matrix, ConfusionMatrixDisplay,
-                             roc_curve, auc, precision_recall_curve, average_precision_score)
+from sklearn.naive_bayes import GaussianNB
+from sklearn.metrics import accuracy_score, confusion_matrix, ConfusionMatrixDisplay
+from sklearn.metrics import roc_curve, auc, precision_recall_curve, average_precision_score
 import warnings
 warnings.filterwarnings('ignore')
 
@@ -21,7 +21,6 @@ np.random.seed(random_state)
 
 X_minus = np.random.normal(loc=mean_minus, scale=std_minus, size=(n_minus, 2))
 y_minus = -np.ones(n_minus)
-
 X_plus = np.random.normal(loc=mean_plus, scale=std_plus, size=(n_plus, 2))
 y_plus = np.ones(n_plus)
 
@@ -43,11 +42,10 @@ X_train, X_test, y_train, y_test = train_test_split(
     X, y, test_size=0.2, stratify=y, random_state=random_state
 )
 
-qda = QuadraticDiscriminantAnalysis()
-qda.fit(X_train, y_train)
+model = GaussianNB()
+model.fit(X_train, y_train)
 
-y_pred = qda.predict(X_test)
-
+y_pred = model.predict(X_test)
 acc = accuracy_score(y_test, y_pred)
 print(f"Точность на тесте: {acc:.3f}")
 
@@ -58,7 +56,7 @@ plt.title('Матрица ошибок')
 plt.savefig('../images/confusion_matrix.png', dpi=150)
 plt.show()
 
-y_proba = qda.predict_proba(X_test)[:, 1]
+y_proba = model.predict_proba(X_test)[:, 1]
 fpr, tpr, thresholds = roc_curve(y_test, y_proba, pos_label=1)
 roc_auc = auc(fpr, tpr)
 print(f"ROC AUC = {roc_auc:.3f}")
@@ -87,11 +85,3 @@ plt.legend()
 plt.grid(True)
 plt.savefig('../images/pr_curve.png', dpi=150)
 plt.show()
-
-print("\nАнализ:")
-print("Классы хорошо разделяются по признаку X2 (средние 25 и 10 при СКО 3 и 2).")
-print("Поэтому классификатор показывает практически идеальные результаты.")
-if acc > 0.95 and roc_auc > 0.99:
-    print("Классификатор можно считать отличным.")
-else:
-    print("Классификатор хороший, но возможны ошибки из-за случайности.")
