@@ -153,13 +153,16 @@ def plot_combined_elbow_method():
         X = data.values
         inertias = []
         sil_scores = []
-        ks = range(2, 9)
+        ks = range(1, 9)
         
         for k in ks:
             kmeans = KMeans(n_clusters=k, random_state=42, n_init=10)
             labels = kmeans.fit_predict(X)
             inertias.append(kmeans.inertia_)
-            sil_scores.append(silhouette_score(X, labels))
+            if k > 1:
+                sil_scores.append(silhouette_score(X, labels))
+            else:
+                sil_scores.append(0)
         
         ax1 = axes[idx]
         ax1.plot(ks, inertias, 'b-', marker='o', label='Inertia')
@@ -169,7 +172,7 @@ def plot_combined_elbow_method():
         ax1.grid(True, alpha=0.3)
         
         ax2 = ax1.twinx()
-        ax2.plot(ks, sil_scores, 'r-', marker='s', label='Silhouette')
+        ax2.plot(ks[1:], sil_scores[1:], 'r-', marker='s', label='Silhouette')
         ax2.set_ylabel('Silhouette Score', color='r')
         ax2.tick_params(axis='y', labelcolor='r')
         
