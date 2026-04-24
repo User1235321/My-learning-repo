@@ -1,0 +1,10 @@
+begin
+  sum := 0;
+  i := 1;
+  while i <= 10 do
+    i := i + 1;
+    if i = 5 then continue fi;
+    sum := sum + i
+  od;
+  write(sum)
+end

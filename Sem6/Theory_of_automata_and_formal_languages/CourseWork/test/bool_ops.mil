@@ -1,0 +1,9 @@
+begin
+  a := true;
+  b := false;
+  if a && b then write(1) else write(0) fi;
+  if a || b then write(1) else write(0) fi;
+  if a & b then write(1) else write(0) fi;
+  if a | b then write(1) else write(0) fi;
+  if !a then write(1) else write(0) fi
+end

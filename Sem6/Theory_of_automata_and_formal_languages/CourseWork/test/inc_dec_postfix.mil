@@ -1,0 +1,8 @@
+begin
+  i := 3;
+  j := i++ + 2;
+  k := i-- - 1;
+  write(i);
+  write(j);
+  write(k)
+end

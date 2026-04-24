@@ -1,0 +1,15 @@
+begin
+  i := 0;
+  while i < 3 do
+    i := i + 1;
+    j := 0;
+    while j < 2 do
+      j := j + 1;
+      if i * j > 2 then
+        write(i * j)
+      else
+        write(0)
+      fi
+    od
+  od
+end

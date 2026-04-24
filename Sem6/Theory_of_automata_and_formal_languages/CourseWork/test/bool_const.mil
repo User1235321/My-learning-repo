@@ -1,0 +1,6 @@
+begin
+  t := true;
+  f := false;
+  write(t);
+  write(f)
+end

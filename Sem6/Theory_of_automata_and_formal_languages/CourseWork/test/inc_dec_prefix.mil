@@ -1,0 +1,8 @@
+begin
+  a := 5;
+  b := ++a;
+  c := --b;
+  write(a);
+  write(b);
+  write(c)
+end
