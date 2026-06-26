@@ -1,0 +1,34 @@
+3
+# Скопируйте файлы server.cpp и Dockerfile на master-0 (например, через scp)
+scp server.cpp Dockerfile debian@192.168.99.100:~/
+
+# Подключитесь к master-0
+ssh debian@192.168.99.100
+
+# Соберите образ
+docker build -t my-http-server .
+
+# Запустите контейнер
+docker run -d -p 8080:8080 --name my-server my-http-server
+
+# Проверьте логи
+docker logs my-server
+
+# Проверьте работу через curl (с хоста master-0)
+curl http://localhost:8080
+
+# Остановите и удалите контейнер (по желанию)
+docker stop my-server
+docker rm my-server
+
+4
+docker compose up -d --build
+docker compose ps
+# Логи таймера (каждые 5 секунд пишет "Tick: ...")
+docker logs timer
+
+# Логи HTTP-сервера (каждый запрос выводит время)
+docker logs http-server
+
+# Логи в реальном времени для таймера
+docker logs -f timer

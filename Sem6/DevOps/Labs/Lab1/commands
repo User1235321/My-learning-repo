@@ -1,0 +1,16 @@
+1
+virsh -c qemu:///system start devops_course_master_0
+virsh -c qemu:///system start devops_course_worker_0
+virsh -c qemu:///system start devops_course_worker_1
+
+2
+ssh debian@192.168.99.100
+ssh debian@192.168.99.101
+ssh debian@192.168.99.102
+
+3
+ping -c 4 192.168.99.101   # worker0
+ping -c 4 192.168.99.102   # worker1
+
+4
+ping -c 4 8.8.8.8
