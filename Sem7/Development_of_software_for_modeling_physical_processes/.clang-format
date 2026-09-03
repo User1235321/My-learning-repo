@@ -1,0 +1,26 @@
+BasedOnStyle: LLVM
+Language: Cpp
+
+IndentWidth: 2
+TabWidth: 2
+UseTab: Never
+
+IndentAccessModifiers: true
+
+ColumnLimit: 120
+
+BreakBeforeBraces: Allman
+
+DerivePointerAlignment: false
+PointerAlignment: Middle
+ReferenceAlignment: Middle
+
+AllowShortBlocksOnASingleLine: Never
+AllowShortFunctionsOnASingleLine: None
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLoopsOnASingleLine: false
+AllowShortCaseLabelsOnASingleLine: false
+
+IndentCaseLabels: true
+
+SortIncludes: CaseSensitive
