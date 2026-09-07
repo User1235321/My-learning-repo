@@ -1,5 +1,6 @@
 BasedOnStyle: LLVM
 Language: Cpp
+FixNamespaceComments: false
 
 IndentWidth: 2
 TabWidth: 2

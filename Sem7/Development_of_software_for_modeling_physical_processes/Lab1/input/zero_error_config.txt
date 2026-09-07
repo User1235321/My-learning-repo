@@ -1,0 +1,5 @@
+model = zero_error_test
+grid = nonuniform
+nodes = 1, 1.07, 1.2, 1.5, 2
+experiment_intervals = 10, 20, 40
+performance_repeats = 10
